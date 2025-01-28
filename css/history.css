@@ -1,0 +1,57 @@
+.changehistorywrapper,
+.filearea {
+  flex: 1; /* Distribute space evenly between sections */
+  overflow: auto; /* Allow scrolling if content overflows */
+}
+
+.changehistorywrapper {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+    
+.changehistory {
+  flex: 1; /* Ensure the changehistory list takes up remaining space */
+  overflow-y: auto; /* Enable vertical scrolling */
+  padding: 0; /* Remove default padding from list */
+  border:1px solid black;
+}
+    
+.changehistoryheader {
+  padding-left: 8px;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+}
+
+
+.changehistorylistline {
+  font-family: 'Jetbrains mono';
+  cursor: pointer;
+  border-bottom: 2px solid #ffebcd;
+}
+
+.changehistorylistline:hover {
+  border-bottom: 2px solid firebrick;
+}
+
+.firstundonelineandnohistory {
+  border-top: 4px solid dodgerblue !important;
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
+}
+.changehistorylistline.firstundonelineandnohistory {
+  border-top: 4px solid dodgerblue !important;
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
+}
+
+
+.lastHistoryLine {
+  border-bottom: 4px solid dodgerblue !important;
+  border-radius: 2px;
+  cursor: default;
+}
+.changehistorylistline.lastHistoryLine:hover {
+  border-bottom: 4px solid dodgerblue !important;
+}

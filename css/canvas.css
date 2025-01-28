@@ -1,0 +1,177 @@
+
+canvas {
+    width: 100%; /* Ensure canvas takes up all available space */
+    height: 100%; /* Ensure canvas matches container height */
+    display: block; /* Avoid inline-block whitespace issues */
+    position: absolute; /* Make canvas fill the content area */
+    top: 0;
+    left: 0;
+}
+
+
+.toolbaritem {
+    border: 1px solid black;
+    border-radius: 5px;
+    height: 60px;
+    box-sizing: border-box;
+}
+
+
+
+
+.content {
+    width: 80vw;
+    height:100vh;
+    order: 1;
+    position: relative; /* Allows positioning of child elements */
+}
+  
+
+@media (max-width: 768px) {     
+    .content {
+      order: 2;
+      height: 90vh;
+      width: 100vw;
+      position: relative; /* Allows positioning of child elements */
+    }
+}
+
+
+
+
+
+.controlbutton {
+    width: 50px;
+    height: 50px;
+    margin: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid black;
+    border-radius: 5px;
+    background-color: #f5f5f5;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.controlbutton:hover {
+    background-color: #e0e0e0;
+}
+
+.controlbutton:active {
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+
+.controlbutton img {
+    width: 80%; /* Scale icons to fit within buttons */
+    height: 80%;
+}
+
+
+.bottomcontrols {
+    display: flex;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px; /* Fixed width for the control bar */
+    height: calc(100%);
+    justify-content: center;
+    align-items: center;
+    flex-direction: column; /* Stack buttons vertically */
+    align-items: center;
+    padding: 0;
+    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); 
+}
+
+.topcontrols {
+    display: flex;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 70px; /* Fixed width for the control bar */
+    height: calc(100%);
+    flex-direction: column; /* Stack buttons vertically */
+    align-items: center;
+    padding: 0;
+    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for separation */
+    z-index: 11;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* info and error toasts: */
+
+.toast {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    animation: fadein 0.5s, fadeout 0.5s 2.5s; /* Appear for 2.5s */
+    z-index: 1000; /* Ensure it appears above the canvas */
+
+}
+
+@keyframes fadein {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeout {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(20px); }
+}
+
+.errortoast {
+    background-color: #f44336; /* Red for error */
+}
+
+.infotoast {
+    background-color: #007bff;
+}

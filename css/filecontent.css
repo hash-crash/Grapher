@@ -1,0 +1,156 @@
+
+
+
+.file-contents {
+    flex: 1; /* Ensure the changehistory list takes up remaining space */
+    padding: 0; /* Remove default padding from list */
+    border:1px solid black;
+    display: none;
+    height: calc(100% - 60px);
+    font-size: 19px;
+    position: relative;
+    box-sizing: border-box;
+    overflow-y: auto;
+  }
+
+
+  .fileactionbuttonarea {
+    display: flex; /* Use flexbox for proper button alignment */
+    flex-direction: row;
+    z-index: 10; /* Ensure the buttons are above other content */
+    margin: 0; /* Remove any margin */
+    align-items: flex-end; /* Align buttons to the right */
+
+}
+
+.fileactionbutton {
+  width: 40px; /* Set button dimensions */
+  height: 40px;
+  margin: 5px;
+  display: flex; /* Center the icons within the button */
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255); /* Optional background for visibility */
+  border-radius: 5px; /* Rounded corners for the button */
+  cursor: pointer;
+  z-index: 10; /* Ensure buttons are above the scrollable content */
+
+  /* Reset default button styles */
+  border: none; /* Remove the default border */
+  padding: 0; /* Remove default padding */
+  font: inherit; /* Inherit font styles (optional, for consistency) */
+}
+
+.fileactionbutton:focus {
+  outline: none; /* Remove default focus outline */
+}
+
+
+.fileactionbutton img {
+  width: 70%; /* Scale the icons to fit within the button */
+  height: 70%;
+}
+
+.file-contents-list {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  position: relative;
+  box-sizing: border-box;
+  list-style-type: none;
+  padding: 2px;
+  margin: 0;
+  user-select: none;
+}
+  
+  
+  .file-contents--vertices-border {
+    border: 3px solid royalblue;
+    border-radius: 5px;
+    padding: 2px;
+    margin:2px;
+  }
+  
+  .file-contents--edges-border {
+    border: 3px solid firebrick;
+    border-radius: 5px;
+    padding: 2px;
+    margin: 2px;
+    margin-top:6px;
+  }
+  
+  .fileareaheader {
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 5px;
+  }
+
+
+
+  
+  
+  
+  #clearFile {
+    font-family: 'Jetbrains Mono';
+    font-weight: 700;
+    font-size: 14px;
+    padding: 6px 8px;
+    border: 1px solid #FF6666;
+    border-radius: 16px;
+    background-color: #FFbbbb;
+    color: #90421D;
+    cursor: pointer;
+    align-self: center;
+  }
+  
+  .file-present-buttons {
+    display: none;
+  }
+  
+  
+  .fileListHeaderLine {
+    text-align: left;
+    padding-left: 20px;
+    cursor: default;
+  }
+  
+  .edgesListItem {
+    padding-left: 10px;
+  }
+  
+  .verticesListItem {
+    padding-left: 10px;
+  }
+  
+  
+  .edgesListItem:hover {
+    cursor: pointer;
+    background-color: thistle;
+    color: navy;
+  }
+  .verticesListItem:hover {
+    cursor: pointer;
+    background-color: powderblue;
+    color: red;
+  }
+  
+  
+  
+  .fileeditline {
+    display: flex;
+  }
+  
+  .fileeditbox {
+    max-width: 55px;
+    margin-right: 5px;
+    border-radius: 5px;
+    border: 2px solid #4CAF50;
+    margin: 5px;
+  }
+  
