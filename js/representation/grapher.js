@@ -32,19 +32,28 @@ class Grapher {
 
         this.context.clearRect(0, 0, window.Grapher.context.canvas.width, window.Grapher.context.canvas.height);
 
+
+
         this.dims = newdims;
+
+
+        drawBackgroundCoordinateGrid();
+
 
         let i = 0;
 
-        // console.log('here');
-        // console.log(this);
-        // console.log(this.state.edges);
+
+
+
+       
 
 
         this.state.edges.forEach(e => {
             // console.log("e je " + e + " start je " + this.state.vertices[e[0]] + " end je " + this.state.vertices[e[1]]);
 
-            if (highlightedEdge === i) {
+            if (selectedEdge === i) {
+                drawSelectedEdge(e);
+            } else if (highlightedEdge === i) {
                 drawHighlightedEdge(e);
             } else {
                 drawEdge(e);
@@ -52,6 +61,8 @@ class Grapher {
 
             i += 1;
         });
+
+        ctx.restore();
 
 
 

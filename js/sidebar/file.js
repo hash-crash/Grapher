@@ -29,10 +29,10 @@ function handleFiles(files) {
             alert("Please input a plain text file");
             return;
         }
-        const reader = new FileReader();
+        let reader = new FileReader();
         reader.onload = (event) => {
             fcL = event.target.result;
-            const allLines = fcL.split(/\r\n|\n/);
+            let allLines = fcL.split(/\r\n|\n/);
             // Reading line by line
             handleFileLines(allLines);
 
@@ -115,14 +115,16 @@ function handleFileLines(allLines) {
 
     let ng = new Grapher(new State(edgesBuffer, verticesBuffer), null, ctx);
     window.Grapher = ng;
+    wg = window.Grapher;
 
-    window.Grapher.redraw();
+    let dims = resizeAndCenterGraph();
+    window.Grapher.dims = dims;
+
     window.stateHistory = [];
     window.undoneStates = [];
     addToHistory(ng.state.copyConstructor(), IMOPRT_FILE);
 
-    updateFileView();
-    updateHistoryView();
+    stateUpdated();
     
     console.log("File handling completed");
     return;
@@ -201,7 +203,7 @@ dropZone.addEventListener("drop", (event) => {
     event.preventDefault();
     dropZone.classList.remove("dragover");
 
-    const files = event.dataTransfer.files; // Get the files
+    let files = event.dataTransfer.files; // Get the files
     handleFiles(files);
 });
 
@@ -212,7 +214,7 @@ fileInput.addEventListener("click", () => {
 
 // Handle file input change (for selecting files via dialog)
 fileInput.addEventListener("change", () => {
-    const files = fileInput.files; // Get the selected files
+    let files = fileInput.files; // Get the selected files
     if (files.length != 1) {
         alert("Please only input 1 file");
     } else {

@@ -2,6 +2,7 @@ body {
     margin: 0;
     padding: 0; /* Optional: to remove any padding */
     box-sizing: border-box; /* Ensure consistent box model behavior */
+    overflow: hidden;
 }
 
 
@@ -57,24 +58,27 @@ box-shadow: 0 0 5px rgba(76, 175, 80, 0.75);
 
 .tooltipped {
   position: relative;
+  z-index: 900;
 }
 
 .tooltipped-right::after {
   position: absolute;
   left: 100%;
   transform: translateX(5px);
+  z-index: 1000;
 }
 
 .tooltipped-left::after {
   position: absolute;
   right: 100%;
   transform: translateX(-5px);
+  z-index: 1000;
 }
 
 .tooltipped-belowleft::after {
-  position: absolute;
-  top: 100%;
-  transform: translateX(-40px);
+  position: fixed; /* Escape scroll containers */
+  transform: translate(-90%, 80%); /* Center horizontally */
+  z-index: 1000;
 }
 
 .tooltipped::after {
@@ -87,6 +91,8 @@ box-shadow: 0 0 5px rgba(76, 175, 80, 0.75);
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.2s ease-in-out;
+
+  z-index: 1000;
 }
 
 .tooltipped:hover::after {

@@ -13,6 +13,7 @@
 .changehistory {
   flex: 1; /* Ensure the changehistory list takes up remaining space */
   overflow-y: auto; /* Enable vertical scrolling */
+  scrollbar-gutter: stable;
   padding: 0; /* Remove default padding from list */
   border:1px solid black;
 }

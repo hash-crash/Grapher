@@ -14,6 +14,41 @@
   }
 
 
+  
+  .file-contents--vertices-border {
+    border: 3px solid royalblue;
+    border-radius: 5px;
+    padding: 2px;
+    margin:2px;
+  }
+  
+  .file-contents--edges-border {
+    border: 3px solid firebrick;
+    border-radius: 5px;
+    padding: 2px;
+    margin: 2px;
+    margin-top:6px;
+  }
+  
+  .fileareaheader {
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+    align-items: center;
+    justify-content: space-between;
+
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 5px;
+
+
+    overflow-x: scroll;
+    overflow-y: visible;
+    position: relative; /* Create new stacking context */
+    z-index: 900; /* Higher than surrounding content */
+  }
+
+
   .fileactionbuttonarea {
     display: flex; /* Use flexbox for proper button alignment */
     flex-direction: row;
@@ -21,6 +56,11 @@
     margin: 0; /* Remove any margin */
     align-items: flex-end; /* Align buttons to the right */
 
+
+  position: static; /* Disable positioning context */
+  z-index: 901; /* Inherit parent's context */
+  overflow-y: visible;
+    
 }
 
 .fileactionbutton {
@@ -63,33 +103,7 @@
   margin: 0;
   user-select: none;
 }
-  
-  
-  .file-contents--vertices-border {
-    border: 3px solid royalblue;
-    border-radius: 5px;
-    padding: 2px;
-    margin:2px;
-  }
-  
-  .file-contents--edges-border {
-    border: 3px solid firebrick;
-    border-radius: 5px;
-    padding: 2px;
-    margin: 2px;
-    margin-top:6px;
-  }
-  
-  .fileareaheader {
-    display: flex;
-    flex-direction: row;
-    text-align: center;
-    align-items: center;
-    justify-content: space-between;
-    padding-left: 5px;
-    padding-right: 5px;
-    padding-top: 5px;
-  }
+
 
 
 

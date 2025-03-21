@@ -11,6 +11,8 @@ class State {
             this.mode = modeB;
             this.unf = unfB;
         } else {
+
+            // complete should not be set if passing in 'user-visible' i.e. 1-indexed edges
             this.edges = edgesB.map((v) => [v[0] - 1, v[1] - 1]); 
             this.mode = NORMAL;
             
@@ -21,6 +23,8 @@ class State {
                         return e[1];
                     } else if (e[1] == i) {
                         return e[0];
+                    } else {
+                        return -1;
                     }
                 }).filter((n) => n != -1);
                 i+=1;
@@ -48,22 +52,119 @@ class State {
 
     updateAdjList() {
         let i = 0;
-        return this.vertices.map((v) => {
+        let tempmap = this.vertices.map((v) => {
             let eiv = this.edges.map((e) => {
                 if (e[0] == i) {
                     return e[1];
                 } else if (e[1] == i) {
                     return e[0];
+                } else {
+                    return -1;
                 }
             }).filter((n) => n != -1);
             i+=1;
             return {v, eiv}
         });
+        this.unf = tempmap;
     }
 
+    equals(that) {
+        if (!that.edges || !that.vertices ||
+             this.edges.length !== that.edges.length ||
+             this.vertices.length !== that.vertices.length) {
+            return false;
+        }
+
+        for (let index = 0; index < this.vertices.length; index++) {
+            let element = this.vertices[index];
+            let e2 = that.vertices[index];
+            if (element[0] !== e2[0] || element[1] !== e2[1]) {
+                return false;
+            }
+        }
+
+        for (let index = 0; index < this.edges.length; index++) {
+            let element = this.edges[index];
+            let e2 =  that.edges[index];
+            if (element[0] !== e2[0] || element[1] !== e2[1]) {
+                return false;
+            }
+        }
+
+        // this will do the trick for now. 🙉🙉
+        return true;
+    }
+
+    saveState() {
+        const stateData = {
+            vertices: wg.state.vertices,
+            edges: wg.state.edges,
+            mode: wg.state.mode,
+            unf: wg.state.unf
+        };
+        try {
+
+            localStorage.setItem('wgState', JSON.stringify(stateData));
+            console.log(`Saved to localstorage: ${stateData.vertices.length}, ${stateData.edges.length}`);
+        } catch (e) {
+            console.error('Error saving state:', e);
+            toast("Failed to save the graph to LocalStorage", true);
+        }
+    }
 
 }
 
+function restoreFromLocalStorage() {
+    const savedData = localStorage.getItem('wgState');
+    if (!wg) {
+        wg = window.Grapher;
+    }
+
+    if (!savedData) {
+        wg.state = EMPTY_STATE;
+        wg.redraw();
+        return;
+    }
+
+
+    if (!confirm('Found previous state. Restore?')) {
+        localStorage.removeItem('wgState');
+        wg.state = EMPTY_STATE;
+        wg.redraw();
+        return;
+    }
+
+
+
+    try {
+        const parsed = JSON.parse(savedData);
+        
+        // Reconstruct using complete=true constructor
+        wg.state = new State(
+            parsed.edges,
+            parsed.vertices,
+            true,       // complete flag
+            parsed.mode,
+            parsed.unf
+        );
+
+        stateUpdated();
+    } catch (e) {
+        console.error('Restoration failed:', e);
+        localStorage.removeItem('wgState');
+    }
+    
+}
+
+
+function stateUpdated(saveToLocalStorage=true) {
+    updateFileView();
+    updateHistoryView();
+    wg.redraw();
+    if (saveToLocalStorage) {
+        wg.state.saveState();
+    }
+}
 
 const EMPTY_STATE = new State([], []);
 
@@ -106,9 +207,7 @@ function addVx(coords) {
     addToHistory(wg.state.copyConstructor(), ADD_VERTEX, coords);
 
 
-    updateFileView();
-    updateHistoryView();
-    wg.redraw();
+    stateUpdated();
 
 }
 
@@ -130,7 +229,7 @@ function moveVertex(oldCoords, newCoords) {
 
 
     // TODO check if i should check for minmax coords, maybe -50 +50
-    for (const vx of wg.state.vertices) {
+    for (let vx of wg.state.vertices) {
         if (vx[0] === newCoords[0] && vx[1] === newCoords[1]) {
             toast("There already exists a vertex there.", true);
             return false;
@@ -150,9 +249,8 @@ function moveVertex(oldCoords, newCoords) {
 
         addToHistory(wg.state.copyConstructor(), MOVE_VERTEX, oldCoords, newCoords);
 
-        updateFileView();
-        updateHistoryView();
-        wg.redraw();
+        stateUpdated();
+
         return true;
     }
 
@@ -172,11 +270,11 @@ function moveVertex(oldCoords, newCoords) {
 
 /**
  * 
- * @param {*} indices in the state.vertices list
- * @param {*} userPresentation if set to true, the provided indices should be 
+ * @param {[Number, Number]} indices in the state.vertices list
+ * @param {boolean} userPresentation if set to true, the provided indices should be 
  *                              reduced by 1 since user presentation is 1-based
  *                              and software representation is 0-based
- * @returns 
+ * @returns {boolean} true on success, false on failure
  */
 function addEdge(indices, userPresentation=false) {
     if (wg !== window.Grapher) {
@@ -204,9 +302,8 @@ function addEdge(indices, userPresentation=false) {
 
     addToHistory(wg.state.copyConstructor(), ADD_EDGE, indices);
 
-    updateFileView();
-    updateHistoryView();
-    wg.redraw();
+    stateUpdated();
+
     return true;
 
 }
@@ -238,9 +335,8 @@ function editEdge(orignalEdge, indices) {
 
             addToHistory(wg.state.copyConstructor(), MODIFY_EDGE, orignalEdge, indices);
 
-            updateFileView();
-            updateHistoryView();
-            wg.redraw();
+            stateUpdated();
+
             return true;
         }
     }
@@ -249,6 +345,11 @@ function editEdge(orignalEdge, indices) {
 }
 
 function checkEdgeBounds(indices) {
+
+    if (!wg || !wg.state) {
+        return false;
+    }
+
     if (indices[0] === indices[1]) {
         console.log("Edge needs to have different start and end indices");
         toast("Edge needs to connect different vertices", true);
@@ -279,3 +380,87 @@ function checkEdgeBounds(indices) {
     return true;
 }
 
+
+
+function removeEdge(edge) {
+    console.log("removeedge called for" + edge);
+
+    for (let index = 0; index < wg.state.edges.length; index++) {
+        let element = wg.state.edges[index];
+        if (element[0] === edge[0] && element[1] === edge[1]
+            || element[0] === edge[1] && element[1] === edge[0]) {
+
+            wg.state.edges.splice(index, 1);
+
+            return;
+        }
+    }
+    console.log(`Could not find edge ${edge} to delete :(`);
+}
+
+
+/**
+ * BIIIG problem with this:
+ *  once you drop the indices of all the higher vxs in the vxs list,
+ * you need to go through the edges and edit those as well 
+ * cos they are all now going to be pointing at the wrong things..
+ * 
+ * todo TODO todotodotodo
+ */
+function removeVx(vxIndex) {
+    wg.state.vertices.splice(vxIndex, 1);
+
+
+
+
+    stateUpdated();
+
+
+
+}
+
+
+function deleteItem() {
+    console.log("trying to delete");
+
+    if (selectedVx !== -1) {
+        console.log("deleting a vx");
+
+        let adjacencyObject = wg.state.unf[selectedVx];
+        let v = adjacencyObject.v;
+        let eiv = adjacencyObject.eiv;
+
+        // we need to delete all edges that were connected to this vx
+        for (const element of eiv) {
+            console.log("eiv: " + element)
+            removeEdge([selectedVx, element]);
+        }
+
+        removeVx(selectedVx);
+        wg.state.updateAdjList();
+
+        addToHistory(wg.state.copyConstructor(), REMOVE_VERTEX, v);
+
+        stateUpdated();
+
+        selectedVx = -1;
+    } else if (selectedEdge !== -1) {
+        console.log("deleting an edge");
+
+        let edgeToDelete = wg.state.edges[selectedEdge];
+
+        // if we delete an edge, it's fine to leave the vertices.
+        removeEdge(edgeToDelete);
+
+        wg.state.updateAdjList();
+
+        selectedEdge = -1;
+        addToHistory(wg.state.copyConstructor(), REMOVE_EDGE, edgeToDelete);
+
+
+        stateUpdated();
+
+    } else {
+        toast("Nothing selected for deletion");
+    }
+}

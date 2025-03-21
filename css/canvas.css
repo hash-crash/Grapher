@@ -116,6 +116,8 @@ canvas {
 
 
 
+/* Here go the configurations for displaying the index of vertices (toggleable off) 
+    - because edges are defined in terms of which index vertices they connect. */
 
 
 
@@ -131,6 +133,44 @@ canvas {
 
 
 
+
+
+
+
+
+
+
+/* this is how we do the context menu stuff: */
+.custom-context-menu {
+    position: absolute;
+    background-color: #2d2d2d;  /* Dark background for modern look */
+    color: #f8f8f2;             /* Light text color */
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    z-index: 1000;
+    display: none; /* Hidden by default */
+    min-width: 200px;
+  }
+
+  /* Remove list styling and spacing */
+  .custom-context-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Each menu item */
+  .custom-context-menu li {
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  /* Hover effect for menu items */
+  .custom-context-menu li:hover {
+    background-color: #444;
+  }
 
 
 

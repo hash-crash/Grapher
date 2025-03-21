@@ -22,8 +22,8 @@ function updateFileView() {
     var edgelist = document.getElementById("edgelist");
     var vertexlist = document.getElementById("vertexlist");
 
-    console.log(edgelist);
-    console.log(vertexlist);
+    // console.log(edgelist);
+    // console.log(vertexlist);
 
 
     edgelist.addEventListener('click', selectEdgeLine);
@@ -53,7 +53,9 @@ function updateFileView() {
 
 function covnertToLines(things, vertices=true) {
     if (vertices) {
-        return things.map(([x, y]) => 
+        return things.map(([x,y]) => [Math.round((x + Number.EPSILON) * 100) / 100, Math.round((y + Number.EPSILON) * 100) / 100
+
+        ]).map(([x, y]) => 
             `<li class="verticesListItem">${pad(x)},${pad(y)}</li>`
           ).join('');
     } else {
@@ -87,7 +89,7 @@ function selectEdgeLine(event) {
 
     console.log(`You clicked on edge ${index + 1}: ${event.target.textContent}`);
 
-    selectEdge = index;
+    selectedEdge = index;
     window.Grapher.redraw();
     
 }    

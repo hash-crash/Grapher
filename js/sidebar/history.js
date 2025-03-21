@@ -6,7 +6,7 @@
  * 
  * It is quite important that each history item stores the state of the graph 
  * that happens AFTER the change in its description is applied. 
- * This is also how the highlighting in the 
+ * This is also how the highlighting in the sidebar functions.
  */
 
 
@@ -16,16 +16,57 @@ let historyList = document.getElementById('changehistorylistid');
 
 
 
-
+/**
+ * Just run through the html elements and adjust them as necessary. Also handles the regular case for adding a new item to the list, keeping it
+ * within the visible area by scrolling to the bottom
+ */
 function updateHistoryView() {
+
+    
+    // Update content
     historyList.innerHTML = convertToHistoryLines();
+    
+    requestAnimationFrame(scrollHistoryItemIntoView);
+
 
     historyList.addEventListener('click', jumpToLine);
+
+    // this one is currently not doing anything
+    // I don't know if i want to make it redraw the whole thing into that state on hover, 
+    // make a new miniaturized canvas showing that graph,
+    // or do nothing.... difficult usability decisions
     historyList.addEventListener('mouseover', redrawIntoState);
-    historyList.addEventListener('mouseleave', doaredraw);
+    // historyList.addEventListener('mouseleave', doaredraw);
+}
+
+function scrollHistoryItemIntoView() {
+
+    let scrollContainer = historyList.parentElement;
+    let currentChangeElement = historyList.querySelector('.lastHistoryLine');
+    if (!currentChangeElement) {
+        console.log("No last history line found");
+        return;
+    } 
+
+    // Calculate element's position relative to container
+    let containerRect = scrollContainer.getBoundingClientRect();
+    let elementRect = currentChangeElement.getBoundingClientRect();
+    let relativeTop = elementRect.bottom - containerRect.top;
+
+
+    // Only scroll if the element isn't already fully visible
+    if (relativeTop < 0 || relativeTop > containerRect.height) {
+        let targetTop = currentChangeElement.offsetTop - scrollContainer.offsetHeight / 2;
+        scrollContainer.scrollTop = targetTop;
+    }
 
 }
 
+/**
+ * Converts the window.stateHistory and window.UndoneStates into html elements for the ordered list.
+ * 
+ * @returns the inner HTML of the <ol> for the history.
+ */
 function convertToHistoryLines() {
 
     let i = 0;
@@ -76,21 +117,30 @@ function jumpToLine(event) {
         // its actually an 'undone state'
         let j = index - window.stateHistory.length;
 
-        for (let i = 0; i < j; i++) {
-            const element = window.undoneStates[i];
+        let maxind = window.undoneStates.length - 1;
+        let compind = maxind - j;
+        
+        console.log(`the 'computed' index is ${j}, maxind ${maxind}, compind ${compind}`);
+
+        for (let i = maxind; i >= compind; i--) {
+
+            let element = window.undoneStates.pop();
             window.stateHistory.push(element);
-
-            
         }
-
-
+    } else if (index === window.stateHistory.length - 1) {
+        console.log("Nothing to do, this is the current state");
     } else {
         // it's actually a state from history
 
-        
+        let diff = (window.stateHistory.length - 1) - index;
 
-
+        for (let i = 0; i < diff; i++) {
+            let element = window.stateHistory.pop();
+            window.undoneStates.push(element);
+        }
     }
+
+    wg.state = window.stateHistory[window.stateHistory.length - 1].state.copyConstructor();
 
     wg.redraw();
 
@@ -106,6 +156,9 @@ function redrawIntoState(event) {
         return;
     }
 
+    /* This is all paused for now since i don't really know if I want it.
+    
+    
     // Get the clicked <li> index
     const index = Array.from(historyList.children).indexOf(event.target);
 
@@ -126,7 +179,7 @@ function redrawIntoState(event) {
 
 
     }
-
+    */
 }
 
 
@@ -227,11 +280,25 @@ function undo() {
 
 
 
-
+/**
+ * @param {State} state must be the state of the graph AFTER the change that is being described by action is applied
+ * @param {Enum} action one of ADD_VERTEX, MOVE_VERTEX, etc
+ * @param {String | Number} item1 1st item of formatting, formatting depends on action
+ * @param {String | Number} item2 2nd -||-
+ * @param {String | Number} item3 3rd -||-
+ */
 function addToHistory(state, action, item1 = null, item2 = null, item3 = null) {
     let description = getDescription(action, item1, item2);
     let newHistoryItem = new HistoryItem(state, action, description);
 
+
+    // make sure to drop the 'unone' stuff if we're doding new stuff
+    if (window.undoneStates.length > 0) {
+        if (!state.equals(window.undoneStates[window.undoneStates.length - 1])) {
+            window.undoneStates = [];
+        }
+    }
+ 
     window.stateHistory.push(newHistoryItem);
 }
 

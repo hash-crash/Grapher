@@ -15,7 +15,7 @@
           <div class="sidebaritems">
             <div class="changehistorywrapper">
               <div class ="changehistoryheader">
-                <img id="historyiconid" src="assets/history.svg" alt="Clock icon" style="height: 24px; width: 24px;">
+                <img id="historyiconid" src="assets/icons/history.svg" alt="Clock icon" style="height: 24px; width: 24px;">
                 Change history
               </div>
               <div class="changehistory">
@@ -26,15 +26,15 @@
             </div>
             <div class="filearea">
                 <div class="fileareaheader">
-                  <img id="fileiconid" src="assets/file.svg" alt="File icon" style="height: 24px; width: 24px;">
+                  <img id="fileiconid" src="assets/icons/file.svg" alt="File icon" style="height: 24px; width: 24px;">
                   Graph file
                   <div class="fileactionbuttonarea">
                     <button id="clearFile" class="file-present-buttons clearButton">Clear</button>
                     <button id="copyfilebuttonid" class="file-present-buttons fileactionbutton tooltipped tooltipped-belowleft" data-tooltip="Copy content">
-                      <img id="copyfileid" src="assets/copy.svg" alt="Copy file content">
+                      <img id="copyfileid" src="assets/icons/copy.svg" alt="Copy file content">
                     </button>
                     <button id="downloadfilebuttonid" class="file-present-buttons fileactionbutton tooltipped tooltipped-belowleft" data-tooltip="Download">
-                      <img id="downloadfileid" src="assets/download.svg" alt="Download file">
+                      <img id="downloadfileid" src="assets/icons/download.svg" alt="Download file">
                     </button>
                   </div>
                 </div>
@@ -59,13 +59,13 @@
           <div id="topcontrolsid" class="controls topcontrols">
             <!-- add tools here later -->
              <div id="undobtnid" class="controlbutton tooltipped tooltipped-left" data-tooltip="Undo">
-              <img id="undoicon" src="assets/undo.svg" alt="Undo"/>
+              <img id="undoicon" src="assets/icons/undo.svg" alt="Undo"/>
              </div>
              <div id="redobtnid" class="controlbutton tooltipped tooltipped-left" data-tooltip="Redo">
-              <img id="redoicon" src="assets/redo.svg" alt="Redo"/>
+              <img id="redoicon" src="assets/icons/redo.svg" alt="Redo"/>
              </div>
              <div id="resizecanvasid" class="controlbutton tooltipped tooltipped-left" data-tooltip="Resize canvas coordinates">
-              <img id="resizecanvasicon" src="assets/resizecanvas.svg" alt="Resize canvas coordinates">
+              <img id="resizecanvasicon" src="assets/icons/resizecanvas.svg" alt="Resize canvas coordinates">
             </div>
           </div>
           <canvas id="canvas" alt="Canvas on which the graph is displayed">
@@ -73,22 +73,33 @@
           </canvas>
           <div id="bottomcontrolsid" class="controls bottomcontrols">
             <div id="movemodeid" class="controlbutton tooltipped tooltipped-right" data-tooltip="Move vertex">
-              <img id="moveicon" src="assets/move.svg" alt="Move vertex mode">
+              <img id="moveicon" src="assets/icons/move.svg" alt="Move vertex mode">
             </div>
             <div id="addmodeid" class="controlbutton tooltipped tooltipped-right" data-tooltip="Add vertex">
-              <img id="addicon" src="assets/addvertex.svg" alt="Add vertex mode">
+              <img id="addicon" src="assets/icons/addvertex.svg" alt="Add vertex mode">
             </div>
             <div id="removemodeid" class="controlbutton tooltipped tooltipped-right" data-tooltip="Remove vertex">
-              <img id="removevertexicon" src="assets/removevertex.svg" alt="Remove vertex mode">
+              <img id="removevertexicon" src="assets/icons/removevertex.svg" alt="Remove vertex mode">
             </div>
             <div id="addedgeid" class="controlbutton tooltipped tooltipped-right" data-tooltip="Add edge">
-              <img id="addedgeicon" src="assets/addedge.svg" alt="Add edge mode">
+              <img id="addedgeicon" src="assets/icons/addedge.svg" alt="Add edge mode">
             </div>
             <!-- this one below should be in the other side bar, probably, maybe, i don't know -->
             <div id="graphmodeid" class="controlbutton tooltipped tooltipped-right" data-tooltip="Change target graph type">
-              <img id="graphmodeicon" src="assets/graphmode.svg" alt="Change target graph type">
+              <img id="graphmodeicon" src="assets/icons/graphmode.svg" alt="Change target graph type">
             </div>
           </div>
+        </div>
+
+        <div id="custom-menu" class="custom-context-menu">
+          <ul>
+            <li id="add-vertex-contextmenu">Add vertex here</li>
+            <li id="add-vertex-draw-edge-contextmenu">Add vertex and draw edge here</li>
+            <li id="draw-edge-contextmenu">Draw edge to here</li>
+            <li id="remove-vertex-contextmenu">Remove vertex</li>
+            <li id="remove-edge-contextmenu">Remove edge</li>
+            <li id="remove-edge-to-here-contextmenu">Remove edge to here</li>
+          </ul>
         </div>
 
     </div>

@@ -1,67 +1,181 @@
 /**
- * 
+ * Responsible for conversions between the virtual graph coordinates and the 'physical' canvas coordinates.
+ * Handles y-axis inversion
  */
 class Dims {
-    constructor(minpx, maxpx, minc, maxc, difc, ratio) {
-        this.minpx = minpx;
-        this.maxpx = maxpx;
-        this.minc = minc;
-        this.maxc = maxc;
-        this.difc = difc;
-        this.ratio = ratio;
-    };
-    toCoords (canvasPosition) {
-        return [
-            Math.round(((canvasPosition[0] - this.minpx[0]) / this.ratio[0]) + this.minc[0]),
-            Math.round(
-                (
-                    (this.maxpx[1] - canvasPosition[1]) 
-                    /
-                    this.ratio[1]
-                )
-                 +
-                  this.minc[1]
-            ) 
-        ]
+    /**
+     * 
+     * @param {Number} canvasWidth 
+     * @param {Number} canvasHeight 
+     * @param {Number} zoom 
+     * @param {[Number, Number]} offset the canvas coordinates of graph origin (0,0) would be (even if it's outside the renderable canvas)
+     */
+    constructor(canvasWidth, canvasHeight, zoom, offset) {
+        this.canvasWidth = canvasWidth;
+        this.canvasHeight = canvasHeight;
+        this.zoom = zoom;         // pixels per graph unit (e.g., 50 means 1 graph unit = 50 pixels)
+        this.offset = offset;     // [offsetX, offsetY] in canvas pixels
     }
-    toCanvas (coords) {
+
+    /**
+     * Converts graph coordinates to canvas coordinates.
+     * For example, if offset is [100, 100] and zoom = 50,
+     * then graph coordinate [2,3] becomes [100 + 2*50, 100 + 3*50] = [200, 250].
+     * @param {[Number, Number]} coords to be converted to canvas pixel position
+     */
+    toCanvas(coords) {
+        if (!coords) {
+            return [this.canvasWidth / 2, this.canvasHeight / 2];
+        }
         return [
-            this.minpx[0] +
-            (
-                (coords[0] - this.minc[0])
-                 *
-                this.ratio[0]
-            ),
-            this.maxpx[1] -
-            (
-                (coords[1] - this.minc[1]) 
-                *
-                this.ratio[1]
-            )
+            this.offset[0] + coords[0] * this.zoom,
+            this.offset[1] - coords[1] * this.zoom
         ];
     }
-    
+
+    /**
+     * Converts canvas coordinates to graph coordinates.
+     * 
+     * @param {[Number, Number]} canvasPos to be converted to graph coordinates. WIll not perform any rounding.
+     */
+    toCoords(canvasPos) {
+        if (!canvasPos) {
+            return [0,0];
+        }
+        return [
+            (canvasPos[0] - this.offset[0]) / this.zoom,
+            (this.offset[1] - canvasPos[1]) / this.zoom
+        ];
+    }
+
+    /**
+     * Update the stored canvas dimensions.
+     */
+    updateCanvasSize(width, height, zoom = null, offset = null) {
+        this.canvasWidth = width;
+        this.canvasHeight = height;
+        if (zoom != null) {
+            this.zoom = zoom;
+        }
+        if (offset != null) {
+            this.offset = offset;
+        }
+    }
 }
 
-
+/**
+ * Resize the canvas according to window dimensions.
+ * Adjust this logic as needed.
+ */
 function resizeCanvas() {
-
-
+    let width, height;
     if (window.innerWidth > 768) {
+        // For desktops, use 80% of window width.
+
         s.mobileScreen = false;
-        canvas.height=window.innerHeight;
-        canvas.width=window.innerWidth*0.8;
-    }
-    else {
+        height = window.innerHeight;
+        width = Math.round(window.innerWidth * 0.8);
+    } else {
+        // For smaller screens (if ever needed)
+
         s.mobileScreen = true;
-        canvas.height = window.innerHeight * 0.8;
-        canvas.width = window.innerWidth;
+        height = Math.round(window.innerHeight * 0.8);
+        width = window.innerWidth;
     }
-    return [canvas.width, canvas.height];
+    canvas.width = width;
+    canvas.height = height;
+    return [width, height];
 }
 
-// util function for creating new dimensions from current window and graph state
-function refreshDims() {
+/**
+ * Refresh the camera dims.
+ * This function should be called whenever the canvas is resized.
+ *
+ * In this version, we don’t compute min/max coordinates based on your graph;
+ * instead, we just update the canvas dimensions.
+ *
+ * The camera offset and zoom remain unchanged so that the “view” stays consistent.
+ *
+ * @returns {Dims} representing the new, updated view. 
+ */
+function refreshDims(zoom = null, offset = null) {
+    let [w, h] = resizeCanvas();
+    // Assume we already have a global dims (or set defaults if not)
+    if (!window.Grapher.dims) {
+        // Initialize with a default zoom and center the origin roughly in the middle.
+        window.Grapher.dims = new Dims(w, h, 20, [w / 2, h / 2]);
+    } else {
+        window.Grapher.dims.updateCanvasSize(w, h, zoom, offset);
+    }
+    return window.Grapher.dims;
+}
+
+
+
+
+
+
+
+canvas.addEventListener('wheel', (event) => {
+    if (!wg || !wg.state || !wg.dims) {
+        return;
+    }
+
+    event.preventDefault();
+    let zoomIntensity = 0.002; // Adjust sensitivity here
+    // Compute the new zoom level.
+    let delta = event.deltaY;
+    let zoomFactor = Math.exp(-delta * zoomIntensity);
+    
+    let oldZoom = wg.dims.zoom;
+    let zoom = (oldZoom == null ? 
+        20 :
+        oldZoom * zoomFactor);
+
+    // Get mouse position relative to canvas
+    let mousePos = getMousePos(event);
+    let mouseCoords = wg.dims.toCoords(mousePos);
+
+
+    /* The new offset calculation comes from the following
+     canvasPosX = offsetX + zoom * graphcoordX
+    
+     mouseCoords are the graph coords of the mouse
+
+     to have the mouse coords translate to the same canvas pos (zooming into the mouse)
+     requires that 
+     oldOffsetX + oldzoom * mousecoordsX = newOffsetX + newZoom * mousecoordsX
+     oldOffsetX + oldzoom * mouscoordsX - newzoom * mousecoordsX = newOffsetX
+     newOffsetX = oldOffsetX + mouseCoordsX * (oldzoom - newzoom)
+
+     for the y axis, the sign in the brackets needs to be inverted
+    */
+
+    let oldOffset = wg.dims.offset;
+    let newOffset = [
+        oldOffset[0] + mouseCoords[0] * (oldZoom - zoom),
+        oldOffset[1] + mouseCoords[1] * (zoom - oldZoom)
+    ];
+
+
+    refreshDims(zoom, newOffset);
+    wg.redraw();
+});
+
+
+
+
+
+
+
+/**
+ * Util function for creating new dimensions from current window and graph state
+ * this is the old way of doing it, which would re-center the whole graph, and calling it too often would fuck up the user experience
+ * basically, this should only be called when the user clicks a 're-center' button in one of the canvas sidebars
+ * 
+ * @returns {Dims} new dims obj
+ */
+function resizeAndCenterGraph() {
     let pixelsizes = resizeCanvas();
     let minpxL = [];
     let maxpxL = [];
@@ -80,90 +194,23 @@ function refreshDims() {
 
     let difpL = [maxpxL[0] - minpxL[0], maxpxL[1] - minpxL[1]]
     let difcL = [maxcoordsL[0] - mincoordsL[0], maxcoordsL[1] - mincoordsL[1]];
+    let avgcL = [(mincoordsL[0] + maxcoordsL[0]) / 2, (mincoordsL[1] + maxcoordsL[1]) / 2]
 
+
+    let newZoom = Math.round(Math.min(difpL[0] / difcL[0], difpL[1] / difcL[1]));
+    zoom = newZoom;
+
+    console.log(avgcL);
+
+    console.log(newZoom);
+
+    let newOffset =  [(pixelsizes[0] / 2) - (newZoom * avgcL[0]), (pixelsizes[1] / 2) + newZoom * avgcL[1]]; 
     
-    let ratioL = [(0.8 * pixelsizes[0]) / difcL[0], (0.8 * pixelsizes[1]) / difcL[1]];
+    console.log(pixelsizes);
+    console.log(newOffset);
 
-
-    let minratio = [];
-    let actdifcL = [];
-    let actualMaxC = [];
-    let actualMinC = [];
-
-
-    if (ratioL[0] < ratioL[1]) {
-        // the actual graph is 'wide' in the screen?
-        // x ratio is smaller, so 'utilize space' rectangles are tall
-
-
-        // we take the x ratio as the universal ratio
-        minratio = [ratioL[0], ratioL[0]];
-
-        let ydif = Math.round(difpL[1] / ratioL[0]);
-
-        actdifcL = [difcL[0], ydif];
-
-
-
-        // now to center the image within actual coordinate difference
-        let bonusy = actdifcL[1] - difcL[1];
-        let topbonusy = -1;
-        if (bonusy % 2 === 1) {
-            topbonusy = Math.floor(bonusy / 2);
-        } else {
-            topbonusy = bonusy / 2;
-        }
-        let bottombonusy = bonusy - topbonusy;
-
-        actualMinC = [mincoordsL[0], mincoordsL[1] - topbonusy];
-        actualMaxC = [maxcoordsL[0], maxcoordsL[1] + bottombonusy];
-
-
-        
-    } else {
-        //TODO: this section is untested
-
-        // the actual graph is 'tall' in the screen?
-        // x ratio is bigger so 'utilize space' rectangles are wide 
-
-
-
-        // we take the y ratio as the universal ratio
-        minratio = [ratioL[1], ratioL[1]];
-
-
-        let xdif = Math.round(difpL[0] / ratioL[1]);
-
-        actdifcL = [xdif, difcL[1]];
-
-
-        // now to center the image within actdifcl
-        let bonusx = actdifcL[0] - difcL[0];
-        let lbonusx = -1;
-        if (bonusx % 2 === 1) {
-            lbonusx = Math.floor(bonusx / 2);
-        } else {
-            lbonusx = bonusx / 2;
-        }
-        let rbonusx = bonusx - lbonusx;
-
-        actualMinC = [mincoordsL[0] - lbonusx, mincoordsL[1]];
-        actualMaxC = [maxcoordsL[0] + rbonusx, maxcoordsL[1]];
-
-    }
-
-
-
-
-
-
-
-
-
-
-    let r =  new Dims(minpxL, maxpxL, actualMinC, actualMaxC, actdifcL, minratio);
-
-
+    // let r =  new Dims(minpxL, maxpxL, actualMinC, actualMaxC, actdifcL, minratio);
+    let r = new Dims(pixelsizes[0], pixelsizes[1], newZoom, newOffset);
 
     // log outs:
     {
@@ -183,8 +230,9 @@ function refreshDims() {
     }
 
 
-
-
-
     return r;
 } 
+
+
+
+

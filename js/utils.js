@@ -2,6 +2,7 @@
  * string definitions:
  */
 const CATASTROPHIC_ERROR_RESTART_APP = "Something went catastrophically wrong. Application has lost state, please try restarting it.";
+const DEFAULT_VERTEX_CLICK_PROXIMITY_RADIUS = 12;
 
 const NORMAL = 0;
 const MOVE = 1;
@@ -13,7 +14,9 @@ const ADD = 4;
 
 
 
-
+/**
+ * find the x coordinate of the right-most vertex and the y coordinate of the highest vertex
+ */
 function getMaxCoords() {
     xmax = Number.NEGATIVE_INFINITY;
     ymax = Number.NEGATIVE_INFINITY;
@@ -32,6 +35,9 @@ function getMaxCoords() {
     return [xmax + 1, ymax + 1];
 }
 
+/**
+ * find the x coordinate of the left-most vertex and the y coordinate of the lowest vertex
+ */
 function getMinCoords() {
     xmin = Number.POSITIVE_INFINITY;
     ymin = Number.POSITIVE_INFINITY;
@@ -51,19 +57,79 @@ function getMinCoords() {
 }
 
 
+function distance(a, b) {
+    let x = (a[0] - b[0]) ** 2;
+    let y = (a[1] - b[1]) ** 2;
+    return Math.sqrt(x + y);
+}
+
+
+
+function getMousePos(event) {
+    let rect = canvas.getBoundingClientRect();
+    if (!event.clientX || !event.clientY) {
+        console.log("Error: tried to get mouse position from event which doesn't have clientX/Y defined" );
+        console.log(event);
+        return null;
+    }
+    return [event.clientX - rect.left, event.clientY - rect.top];
+}
+
+
+function isNearVertex(mousePos, vertex, radius = DEFAULT_VERTEX_CLICK_PROXIMITY_RADIUS) {
+    if (!wg || !wg.dims || !mousePos || !vertex) {
+        return false;
+    }
+
+    let canvasPos = wg.dims.toCanvas(vertex);
+
+    return Math.hypot(canvasPos[0] - mousePos[0], canvasPos[1] - mousePos[1]) < radius;
+}
+
+
+
+
+
+
+
+function toast(message, error = false) {
+	const cont = document.getElementById("contentId");
+    const toast = document.createElement("div");
+    if (error) {
+        toast.className = "toast errortoast";
+    } else {
+        toast.className = "toast infotoast";
+    }
+    toast.textContent = message;
+
+    cont.append(toast);
+
+    // Automatically remove toast after 3 seconds
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
+
+
+
+
+
+
+
 
 
 
 
 function showModal(content) {
     // Create the modal elements
-    const modal = document.createElement('div');
+    let modal = document.createElement('div');
     modal.className = 'modal';
   
-    const modalContent = document.createElement('div');
+    let modalContent = document.createElement('div');
     modalContent.className = 'modal-content';
   
-    const closeButton = document.createElement('span');
+    let closeButton = document.createElement('span');
     closeButton.className = 'closemodal';
     closeButton.innerHTML = '&times;';
     closeButton.addEventListener('click', () => document.body.removeChild(modal));
@@ -93,19 +159,15 @@ function showModal(content) {
 
 
 function resizeCanvcasModal() {
-    let tr = [1,1];
-    let bl = [1,1];
-
-    let content = `
-        Bottom left: x = <input id="resizebottomleftx" type="number" style="width: 50px" value="${bl[0]}">  y = <input id="resizebottomlefty" type="number" style="width: 50px" value="${bl[1]}"> 
-        <br>
-        Top right: x = <input id="resizetoprightx" type="number" style="width: 50px" value="${tr[0]}">  y = <input id="resizetoprighty" type="number" style="width: 50px" value="${tr[1]}"> 
-        <br>
-        <br>
-        <button id="resizeapply" class="applyBtn">Apply</button>
-    `;
-
-    showModal(content);
+    if (!wg || !wg.dims) {
+        console.log("ResizeCanvasModal called but now wg or dims");
+        return;
+    }
+    
+    let newDims = resizeAndCenterGraph();
+    wg.dims = newDims;
+    wg.redraw();
+    
 }
 
 
@@ -130,6 +192,10 @@ function initializeButtons() {
 
 
 function doaredraw() {
+    if (!window.Grapher) {
+        alert(CATASTROPHIC_ERROR_RESTART_APP);
+        return;
+    }
     window.Grapher.redraw();
 }
 

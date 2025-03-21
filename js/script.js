@@ -17,7 +17,26 @@
 
 
 // Boot up the javascript:
+
+
 {
+    const scripts = document.getElementsByTagName("script");
+    src = scripts[scripts.length-1].src;
+    let foundPath = "";
+    // if being hosted from just a simple file, we need to give the OS thefull path 
+    // - thankfully we can get it on hopefully all browsers.
+    if (src.startsWith("file://")) {
+        // extract the actual FS-path all the way up to and including  "script.js"
+        foundPath = src.split("file://")[1];
+        // we remove 12 because we want to leave everything from / until grapher/ which means removing "js/script.js" - which is 12 characters
+        foundPath = foundPath.substring(0, foundPath.length - 12);
+
+        console.log(foundPath);
+    }
+     
+
+
+
 /**
  * This enables adding new JS files to the project without editing any HTML,
  * just call this loader function on the new files as the path below.
@@ -32,7 +51,7 @@ function scriptLoader(path, callback)
     var script = document.createElement('script');
     script.type = "text/javascript";
     script.async = true;
-    script.src = path;
+    script.src = `${foundPath}${path}`;
     script.onload = function(){
         if(typeof(callback) == "function")
         {
@@ -51,33 +70,55 @@ function scriptLoader(path, callback)
 }
 
 
-scriptLoader('/js/utils.js');
 scriptLoader('js/sidebar/filecontent.js');
 scriptLoader('js/sidebar/history.js');
-scriptLoader('/js/representation/state.js');
-scriptLoader('/js/representation/dims.js');
-scriptLoader('/js/representation/grapher.js', function() {
+scriptLoader('js/utils.js');
+scriptLoader('js/representation/state.js');
+scriptLoader('js/representation/dims.js');
+scriptLoader('js/representation/grapher.js', function() {
     // the main grapher object representing the state, dimensions of the image.
     // please don't remove this
     window.Grapher = new Grapher(null, null, ctx);
 });
-scriptLoader('/js/canvas.js', initCanvas);
+scriptLoader('js/canvas.js', initCanvas);
 scriptLoader('js/sidebar/file.js', runTimeout);
 
+
 /**
+ * Enables checking with the user if they want to re-esablish the state that
+ * was put into localstorage the previous time that the program was ran. TODO before giving this to the professor, i should actually enable this feature
+ * 
+ * For development purposes, this function will perform a
  * 100ms pause and then run the automatic loading of data/filename
  * 
  * This is here to speed up development, when it is needed,
  *  simply add runTimeout as the callback argument for the file.js scriptloader.
  */
 function runTimeout() {
+    // setTimeout(() => {
+    //     restoreFromLocalStorage();
+    // }, 80)
+
     setTimeout(() => {
         autoLoadInputFile("in.txt");
-    }, 100);
+    }, 150);
+
+    // current experimental area:
+
+    // for now just add a vertex after 2 seconds;
+    setTimeout(() => {
+        console.log('called addvX');
+        addVx([12,12]);
+        addVx([-25,20]);
+        addEdge([10, 9], true);
+        addEdge([9,10]);
+    }, 250);
 }
 
 function initCanvas() {
-    initializeButtons();
+    setTimeout(() => {
+        initializeButtons();
+    }, 50)
 }
 }
 
@@ -192,13 +233,3 @@ s = {
 }
 
 
-// current experimental area:
-
-// for now just add a vertex after 2 seconds;
-setTimeout(() => {
-    console.log('called addvX');
-    addVx([12,12]);
-    addVx([-25,20]);
-    addEdge([10, 9], true);
-    addEdge([9,10]);
-}, 1000);
