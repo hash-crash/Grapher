@@ -381,7 +381,10 @@ function checkEdgeBounds(indices) {
 }
 
 
-
+/**
+ * 
+ * @param {[Number, Number]} edge 
+ */
 function removeEdge(edge) {
     console.log("removeedge called for" + edge);
 
@@ -392,31 +395,62 @@ function removeEdge(edge) {
 
             wg.state.edges.splice(index, 1);
 
+            addToHistory(wg.state.copyConstructor(), REMOVE_EDGE, edge);
+
+            stateUpdated();
+
             return;
         }
     }
     console.log(`Could not find edge ${edge} to delete :(`);
+    toast(`Could not find edge between ${edge[0] + 1} and ${edge[1] + 1}`);
 }
 
 
 /**
- * BIIIG problem with this:
- *  once you drop the indices of all the higher vxs in the vxs list,
- * you need to go through the edges and edit those as well 
- * cos they are all now going to be pointing at the wrong things..
+ * Remove the vertex and all the edges that used to connect to it.
+ * Also, update all edges pointing to vertices that came after this one,
+ * since the indices in all of them need to be decremented as this vertex leaving means that 
+ * all of them drop by 1.
  * 
- * todo TODO todotodotodo
+ * @param {Number} vxIndex 0-based in wg.state.vertices array
  */
 function removeVx(vxIndex) {
+    if (vxIndex >= wg.state.vertices.length) {
+        const error = `Cannot delete vertex ${vxIndex + 1} because there aren't that many in total`;
+        console.error(error);
+        toast(error, true);
+        return;
+    }
+
+    let vertexCoords = wg.state.vertices[vxIndex];
+
+    console.log(`Deleting ${vertexCoords} which is at index ${vxIndex} UR ${vxIndex + 1}`);
+    for(let i = 0; i < wg.state.edges.length; i++) {
+        let e = wg.state.edges[i];
+        if (e[0] == vxIndex || e[1] == vxIndex) {
+            console.log(`removing edge ${e[0]}, ${e[1]} which is UR ${e[0] + 1}, ${e[1] + 1}`)
+            removeEdge(e);
+            i--;
+        }
+    }
+
     wg.state.vertices.splice(vxIndex, 1);
 
+    wg.state.edges.forEach((e) => {
+
+        if (e[0] > vxIndex) {
+            e[0] -= 1;
+        }
+        if (e[1] > vxIndex) {
+            e[1] -= 1;
+        }
+    });
 
 
+    addToHistory(wg.state.copyConstructor(), REMOVE_VERTEX, vertexCoords);
 
     stateUpdated();
-
-
-
 }
 
 

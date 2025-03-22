@@ -1,0 +1,43 @@
+.mode-selector {
+    max-width: 500px;
+    padding: 2rem;
+}
+
+.mode-group {
+    margin-bottom: 1.5rem;
+    border-left: 3px solid #eee;
+    padding-left: 1rem;
+}
+
+.mode-group h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+    color: #666;
+}
+
+.submode-container {
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.submode-btn {
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+}
+
+.submode-btn:hover {
+    background: #f8f9fa;
+    border-color: #007bff;
+}
+
+.submode-btn.active {
+    background: #e3f2fd;
+    border-color: #007bff;
+    font-weight: bold;
+}

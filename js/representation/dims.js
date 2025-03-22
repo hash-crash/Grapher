@@ -200,20 +200,16 @@ function resizeAndCenterGraph() {
     let newZoom = Math.round(Math.min(difpL[0] / difcL[0], difpL[1] / difcL[1]));
     zoom = newZoom;
 
-    console.log(avgcL);
-
-    console.log(newZoom);
-
     let newOffset =  [(pixelsizes[0] / 2) - (newZoom * avgcL[0]), (pixelsizes[1] / 2) + newZoom * avgcL[1]]; 
-    
-    console.log(pixelsizes);
-    console.log(newOffset);
 
-    // let r =  new Dims(minpxL, maxpxL, actualMinC, actualMaxC, actdifcL, minratio);
     let r = new Dims(pixelsizes[0], pixelsizes[1], newZoom, newOffset);
 
     // log outs:
     {
+        // console.log(avgcL);
+        // console.log(newZoom);
+        // console.log(pixelsizes);
+        // console.log(newOffset);
         // console.log(pixelsizes);
         // console.log(minpxL);
         // console.log(maxpxL);
@@ -228,7 +224,6 @@ function resizeAndCenterGraph() {
         // console.log(actdifcL);
         // console.log(r);
     }
-
 
     return r;
 } 

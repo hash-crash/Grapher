@@ -138,11 +138,11 @@ box-shadow: 0 0 5px rgba(76, 175, 80, 0.75);
   background: white;
   padding: 20px;
   border-radius: 5px;
-  max-width: 500px;
+  max-width: 700px;
   width: 90%;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   position: relative;
-  text-align: right;
+  text-align: center;
 }
 
 /* Close button */
@@ -152,4 +152,27 @@ box-shadow: 0 0 5px rgba(76, 175, 80, 0.75);
   right: 15px;
   font-size: 20px;
   cursor: pointer;
+}
+
+
+
+
+
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  16%, 50%, 83% { transform: translate(-7px, -2px); }
+  33%, 67% { transform: translate(7px, 2px); }
+}
+
+.shake-element {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Optional: Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .shake-element {
+    animation: shake 0.5s ease-in-out;
+    animation-iteration-count: 1;
+  }
 }

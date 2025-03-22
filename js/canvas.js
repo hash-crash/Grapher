@@ -226,7 +226,13 @@ document.addEventListener('contextmenu', (e) => {
         } else {
             removeEdgeToHereBtn.style.display = 'none';
         }
+        if ( highlightedVx === selectedVx) {
+            drawEdgeBtn.style.display = 'none';
+            removeEdgeToHereBtn.style.display = 'none';
+        }
     }
+
+    // i feel like this should all be doable much much cleaner but i really dk how to do that atm
 
     
    
@@ -246,10 +252,14 @@ document.addEventListener('click', (e) => {
 
 document.getElementById('draw-edge-contextmenu').addEventListener('click', () => {
     console.log("Drawing edge here");
-    let a = [customMenu.style.left, customMenu.style.top];
-    console.log(a);
-    console.log(wg.dims.toCoords(a));
-    addEdge([1, 2]);
+
+    if (highlightedVx === -1 || selectedVx === -1) {
+        console.log("Draw edge clicked but selected or highlighted edge is missing");
+        return;
+    }
+
+
+    addEdge([highlightedVx, selectedVx]);
     hideCustomMenu();
 });
 
@@ -265,10 +275,19 @@ document.getElementById('remove-edge-contextmenu').addEventListener('click', () 
 
 document.getElementById('remove-edge-to-here-contextmenu').addEventListener('click', () => {
     console.log("Drawing edge here");
-    let a = [customMenu.style.left, customMenu.style.top];
-    console.log(a);
-    console.log(wg.dims.toCoords(a));
-    removeEdge([1, 2]);
+    
+    if (highlightedVx === -1 || selectedVx === -1) {
+        console.log("Draw edge clicked but selected or highlighted edge is missing");
+        return;
+    }
+
+    if (!wg.state.unf[highlightedVx].eiv.includes(selectedVx)) {
+        console.log("Remove edge to here button clicked in context menu but there isn't an edge between selected and highlighted");
+        return;
+    }
+
+    removeEdge([selectedVx, highlightedVx]);
+
     hideCustomMenu();
 });
 
@@ -306,9 +325,20 @@ document.getElementById('add-vertex-draw-edge-contextmenu').addEventListener('cl
 
 document.getElementById('remove-vertex-contextmenu').addEventListener('click', () => {
     console.log('Removing vertex');
-    if (selectedVx !== -1) {
-        console.log("kaljsdfh");
+    if (highlightedVx === -1) {
+        console.log("Remove Vx was clicked but no vertex is highlighted");
+        return;
     }
+
+    if (selectedVx === highlightedVx) {
+        selectedVx = -1;
+    }
+
+    removeVx(highlightedVx);
+
+    highlightedVx = -1;
+
+
     hideCustomMenu();  
 });
 
@@ -378,7 +408,6 @@ canvas.addEventListener('mousemove', (event) => {
         // Update the camera offset based on mouse movement.
         dims.offset[0] = mousePos[0] - dragStart.x;
         dims.offset[1] = mousePos[1] - dragStart.y;
-        wg.redraw();
     } else if (isDraggingVertex && draggedVertexIndex !== -1) {
         // Adjust mouse position by the vertex drag offset.
         let adjustedX = mousePos[0] + vertexDragOffset.x;
@@ -435,6 +464,11 @@ canvas.addEventListener('mouseup', (event) => {
 
 // Non-dragging logic for correct drawing is handled here:
 function handleHover(event) {
+    // don't do anything if the user is dealing with the context menu or modal
+    if (customMenu.style.display === 'block' || document.querySelector('.modal.visible')) {
+        return;
+    }
+
     if (!window.Grapher?.state?.vertices) {
         console.log("no state while handling hover");
         return;
@@ -468,8 +502,6 @@ function handleHover(event) {
 
 
     window.Grapher.redraw();
-
-
 
 
     // console.log("drawing coordintate");
@@ -673,7 +705,10 @@ const HORIZONTAL_OFFSET_FOR_MARKINGS = 15;
 
 
 
-document.addEventListener('keydown', function (event) {
+
+
+
+function keydownHandler(event) {
     let tagName = event.target.tagName.toLowerCase();
     if (tagName === 'form' || tagName === 'input' || tagName === 'textarea' || event.target.isContentEditable) {
         return;
@@ -705,6 +740,17 @@ document.addEventListener('keydown', function (event) {
         console.log("state.mode is now move");
         window.Grapher.state.mode = MOVE;
     } else if (event.key === 'n' || event.key === 'Escape' || event.key === 'Esc') {
+        // First check if any modal is open
+        const openModal = document.querySelector('.modal.visible');
+        if (openModal) {
+            openModal.remove();
+            return; // Stop further processing
+        }
+
+        if (customMenu.style.display === 'block') {
+            hideCustomMenu();
+            return;
+        }
         console.log("escape or n clicked, now normal mode")
         if (window.Grapher.state.mode === NORMAL) {
             selectedVx = -1;
@@ -718,16 +764,7 @@ document.addEventListener('keydown', function (event) {
         //delete
         deleteItem();
     }
-})
-
-
-
-
-
-
-
-
-
+}
 
 
 
@@ -743,9 +780,9 @@ moveIcon.src = "assets/icons/move.svg";
 
 
 canvas.addEventListener('mousemove', handleHover);
+document.addEventListener('keydown', keydownHandler);
 
 
-// canvas.addEventListener('contextmenu', rightclick)
 // canvas.addEventListener('click', handleClick);
 
 

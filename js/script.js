@@ -17,8 +17,6 @@
 
 
 // Boot up the javascript:
-
-
 {
     const scripts = document.getElementsByTagName("script");
     src = scripts[scripts.length-1].src;
@@ -33,7 +31,6 @@
 
         console.log(foundPath);
     }
-     
 
 
 
@@ -43,8 +40,8 @@
  * 
  * taken from: https://stackoverflow.com/questions/43485888/include-multiple-javascript-files-in-a-js-file
  * 
- * @param {*} path in this project, starts with 'js/...'
- * @param {*} callback function to call after loading the script
+ * @param {String} path in this project, the relative path of all javascript files starts with 'js/...'
+ * @param {Function} callback to call after loading the script
  */
 function scriptLoader(path, callback)
 {
@@ -73,6 +70,7 @@ function scriptLoader(path, callback)
 scriptLoader('js/sidebar/filecontent.js');
 scriptLoader('js/sidebar/history.js');
 scriptLoader('js/utils.js');
+scriptLoader('js/modeinteractivity.js');
 scriptLoader('js/representation/state.js');
 scriptLoader('js/representation/dims.js');
 scriptLoader('js/representation/grapher.js', function() {
@@ -118,7 +116,7 @@ function runTimeout() {
 function initCanvas() {
     setTimeout(() => {
         initializeButtons();
-    }, 50)
+    }, 100)
 }
 }
 
@@ -161,6 +159,7 @@ cssLoader('css/fonts.css');
 cssLoader('css/style.css');
 cssLoader('css/sidebar.css');
 cssLoader('css/canvas.css');
+cssLoader('css/modeineractivity.css');
 cssLoader('css/history.css');
 cssLoader('css/filecontent.css');
 }
@@ -225,10 +224,6 @@ window.undoneStates = [];
 
 // settings object
 s = {
-    // when true, the x and y coordinates are represented with the same number of pixels 
-    // (i.e. on a typical widescreen, there will be more x coordinates shown than y)
-    // otherwise, the graph is stretched to fill the available screen space
-    ONE_TO_ONE : true,
     mobileScreen: false,
 }
 

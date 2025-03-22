@@ -86,9 +86,9 @@ class Grapher {
         // todo replace this with the div items list
         //ctx.drawImage(moveIcon, 0.8 * this.dims.maxpx[0], 0.05 * this.dims.minpx[1], 50, 50);
 
-        if (this.state?.mode === MOVE || this.state?.mode === ADD) {
-            // todo figure out what to do here
-        }
+        // if (this.state?.mode === MOVE || this.state?.mode === ADD) {
+        //     // todo figure out what to do here
+        // }
 
     }
 }
