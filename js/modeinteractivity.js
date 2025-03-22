@@ -1,10 +1,16 @@
-function setApplicationMode(mode, submode) {
+
+
+
+
+
+function setApplicationMode(mode, submodeL) {
     // Cleanup previous state
     window.Grapher.selectedEdges = [];
     
     // Update global state
-    window.Grapher.currentMode = mode;
-    window.Grapher.currentSubmode = submode;
+    window.Grapher.state.mode = mode;
+    submode = submodeL;
+
     
     // Update UI indicators
     document.querySelectorAll('.submode-btn').forEach(btn => {
@@ -90,7 +96,6 @@ function createModeSelector(currentMode, currentSubmode) {
 }
 
 function modalMouseDown(event)  {
-    console.log("SHEEE");
     let modalList = document.getElementsByClassName('modal-content');
     let openModal = document.querySelector('.modal.visible');
     console.l

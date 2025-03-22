@@ -14,7 +14,7 @@ class State {
 
             // complete should not be set if passing in 'user-visible' i.e. 1-indexed edges
             this.edges = edgesB.map((v) => [v[0] - 1, v[1] - 1]); 
-            this.mode = NORMAL;
+            this.mode = EDIT_MODE;
             
             let i = 0;
             this.unf = this.vertices.map((v) => {
@@ -105,7 +105,6 @@ class State {
         try {
 
             localStorage.setItem('wgState', JSON.stringify(stateData));
-            console.log(`Saved to localstorage: ${stateData.vertices.length}, ${stateData.edges.length}`);
         } catch (e) {
             console.error('Error saving state:', e);
             toast("Failed to save the graph to LocalStorage", true);
@@ -300,7 +299,7 @@ function addEdge(indices, userPresentation=false) {
     wg.state.edges.push(indices);
     wg.state.updateAdjList();
 
-    addToHistory(wg.state.copyConstructor(), ADD_EDGE, indices);
+    addToHistory(wg.state.copyConstructor(), ADD_EDGE, indices.map((e) => e + 1));
 
     stateUpdated();
 
@@ -395,7 +394,7 @@ function removeEdge(edge) {
 
             wg.state.edges.splice(index, 1);
 
-            addToHistory(wg.state.copyConstructor(), REMOVE_EDGE, edge);
+            addToHistory(wg.state.copyConstructor(), REMOVE_EDGE, edge.map((i) => i+1));
 
             stateUpdated();
 

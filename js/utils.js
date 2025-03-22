@@ -3,6 +3,8 @@
  */
 const CATASTROPHIC_ERROR_RESTART_APP = "Something went catastrophically wrong. Application has lost state, please try restarting it.";
 const DEFAULT_VERTEX_CLICK_PROXIMITY_RADIUS = 12;
+const MAX_DRAG_DISTANCE_FOR_CLICK = 4;
+const DEFAULT_EDGE_HOVER_PROXIMITY = 5;
 
 const NORMAL = 'normal';
 const DELETE = 'delete';
@@ -19,6 +21,7 @@ const CFSP_RECONFIGURATION_MODE = 'd';
 const CFST_RECONFIGURATION_MODE = 'e';
 const TRIANGULATION_RECONFIGURATION_MODE = 'f';
 
+var submode = DEFAULT_EDIT_MODE;
 
 
 
@@ -123,6 +126,32 @@ function toast(message, error = false) {
 
 
 
+
+
+function distanceToSegment(mouse, p1, p2) {
+    const dx = p2[0] - p1[0];
+    const dy = p2[1] - p1[1];
+    const lengthSquared = dx*dx + dy*dy;
+    
+    if (lengthSquared === 0) {
+        return Math.hypot(mouse[0] - p1[0], mouse[1] - p1[1]);
+    }
+
+    const t = ((mouse[0] - p1[0]) * dx + (mouse[1] - p1[1]) * dy) / lengthSquared;
+    const tClamped = Math.max(0, Math.min(1, t));
+    const projX = p1[0] + tClamped * dx;
+    const projY = p1[1] + tClamped * dy;
+    
+    return Math.hypot(mouse[0] - projX, mouse[1] - projY);
+}
+
+
+
+
+
+
+
+
 /**
  * Determinant given by:
  * ```
@@ -150,18 +179,15 @@ function det(p1, p2, q) {
  * @returns true if intersection found, false if no intersection
  */
 function intersects(p1, p2, q1, q2) {
-    console.log(`p1 ${p1}, p2 ${p2}, q1 ${q1}, q2 ${q2}`);
     let d1 = det(p1, p2, q1);
     let d2 = det(p1, p2, q2);
     let d3 = det(q1, q2, p1);
     let d4 = det(q1, q2, p2);
-    
-    console.log(`d1 ${d1}, d2 ${d2}, d3 ${d3}, d4 ${d4}`);
+
 
     if (d1 === 0 && isOnSegment(p1, p2, q1)) {
         return true;
     }
-
     if (d2 === 0 && isOnSegment(p1, p2, q2)) {
         return true;
     }

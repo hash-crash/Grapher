@@ -266,9 +266,15 @@ document.getElementById('draw-edge-contextmenu').addEventListener('click', () =>
 document.getElementById('remove-edge-contextmenu').addEventListener('click', () => {
     console.log("Drawing edge here");
     let a = [customMenu.style.left, customMenu.style.top];
-    console.log(a);
-    console.log(wg.dims.toCoords(a));
-    removeEdge([1, 2]);
+    if (highlightedEdge === -1) {
+        console.log("Draw edge clicked but highlighted edge is missing");
+        return;
+    }
+
+    const oldEdge = highlightedEdge;
+    highlightedEdge = -1;
+    removeEdge(wg.state.edges[oldEdge]);
+
     hideCustomMenu();
 });
 
@@ -277,7 +283,7 @@ document.getElementById('remove-edge-to-here-contextmenu').addEventListener('cli
     console.log("Drawing edge here");
     
     if (highlightedVx === -1 || selectedVx === -1) {
-        console.log("Draw edge clicked but selected or highlighted edge is missing");
+        console.log("Draw edge clicked but selected or highlighted vertex is missing");
         return;
     }
 
@@ -317,7 +323,12 @@ document.getElementById('add-vertex-draw-edge-contextmenu').addEventListener('cl
     addVx(coords);
     console.log(`${selectedVx}, ${wg.state.vertices.length}, ${coords}, ${wg.state.vertices[wg.state.vertices.length - 1]}`)
 
-    addEdge([selectedVx, wg.state.vertices.length - 1]);
+    let oldSelected = selectedVx;
+    selectedVx = wg.state.vertices.length - 1;
+    addEdge([oldSelected, selectedVx]);
+
+    console.log(`${selectedVx}, ${wg.state.vertices.length - 1}`);
+
 
 
     hideCustomMenu();
@@ -369,6 +380,7 @@ let draggedVertexIndex = -1;
 let originalState = null;
 let vertexDragOffset = { x: 0, y: 0 };
 let dragStart = { x: 0, y: 0 };
+let initialClickPosition = {x: 0, y: 0};
 
 
 canvas.addEventListener('mousedown', (event) => {
@@ -378,9 +390,15 @@ canvas.addEventListener('mousedown', (event) => {
     }
     let mousePos = getMousePos(event);
 
+    initialClickPosition.x = mousePos[0];
+    initialClickPosition.y = mousePos[1];
+
+    if (wg.state.mode === EDIT_MODE) {
     // Check if the click is near any vertex.
     for (let i = 0; i < window.Grapher.state.vertices.length; i++) {
-        if (isNearVertex(mousePos, wg.state.vertices[i])) {
+            if (!isNearVertex(mousePos, wg.state.vertices[i])) {
+                continue;
+            }
             let canvasPos = wg.dims.toCanvas(wg.state.vertices[i]);
             isDraggingVertex = true;
             draggedVertexIndex = i;
@@ -391,6 +409,7 @@ canvas.addEventListener('mousedown', (event) => {
             return;
         }
     }
+
   
     // If no vertex was clicked, start dragging the canvas.
     isDraggingCanvas = true;
@@ -421,10 +440,19 @@ canvas.addEventListener('mousemove', (event) => {
     }
 });
 
+
 canvas.addEventListener('mouseup', (event) => {
     if (event.button !== 0) {
         return;
     }
+
+
+    let mousePos = getMousePos(event);
+    if (Math.hypot(initialClickPosition.x - mousePos[0], initialClickPosition.y - mousePos[1]) < MAX_DRAG_DISTANCE_FOR_CLICK) {
+        handleClick(event);
+    }
+
+
     if (isDraggingVertex && draggedVertexIndex !== -1 && originalState !== null) {
         let currentCoords = wg.state.vertices[draggedVertexIndex];
         let snappedCoords = currentCoords.map(Math.round);
@@ -477,6 +505,7 @@ function handleHover(event) {
     mousePos = getMousePos(event);
 
     let found = false;
+    highlightedEdge = -1;
 
     // Check proximity to all vertices
     window.Grapher.state.vertices.forEach((v, i) => {
@@ -493,8 +522,30 @@ function handleHover(event) {
 
     if (!found) {
         highlightedVx = -1;
+        let closestDistance = Infinity;
+
+        window.Grapher.state.edges.forEach((edge, i) => {
+            
+            const v1 = window.Grapher.dims.toCanvas(window.Grapher.state.vertices[edge[0]]);
+            const v2 = window.Grapher.dims.toCanvas(window.Grapher.state.vertices[edge[1]]);
+            
+            // Skip if near either endpoint - todo test if this is actually redundant, i think it is
+            if (isNearVertex(mousePos, window.Grapher.state.vertices[edge[0]]) || 
+                isNearVertex(mousePos, window.Grapher.state.vertices[edge[1]])) {
+                return;
+            }
+
+            const dist = distanceToSegment(mousePos, v1, v2);
+            if (dist < DEFAULT_EDGE_HOVER_PROXIMITY && dist < closestDistance) {
+                closestDistance = dist;
+                highlightedEdge = i;
+            }
+        });
+
         if (isDraggingCanvas) {
             canvas.style.cursor = 'move';
+        } else if (highlightedEdge !== -1) {
+            canvas.style.cursor = 'pointer';
         } else {
             canvas.style.cursor = 'default';
         }
@@ -522,14 +573,13 @@ function handleClick(event) {
 
     const mousePos = getMousePos(event);
 
-    console.log("onclick handler called at " + mousePos.x + " and " + mousePos.y);
+    console.log("onclick handler called at " + mousePos[0] + " and " + mousePos[1]);
     
     let i = 0;
 
-    if (window.Grapher.state.mode == NORMAL) {
+    if (window.Grapher.state.mode == EDIT_MODE) {
         // Check each object for a click
         for (let obj of window.Grapher.state.vertices) {
-            console.log(obj);
             // for now doing nothing here
             if (isNearVertex(mousePos, obj)) {
                 selectedVx = i;
@@ -539,8 +589,27 @@ function handleClick(event) {
             }
             i += 1;
         }
+
+        closestDistance = Number.POSITIVE_INFINITY;
+        window.Grapher.state.edges.forEach((edge, j) => {
+            
+            const v1 = window.Grapher.dims.toCanvas(window.Grapher.state.vertices[edge[0]]);
+            const v2 = window.Grapher.dims.toCanvas(window.Grapher.state.vertices[edge[1]]);
+            
+            // Skip if near either endpoint - todo test if this is actually redundant, i think it is
+            if (isNearVertex(mousePos, window.Grapher.state.vertices[edge[0]]) || 
+                isNearVertex(mousePos, window.Grapher.state.vertices[edge[1]])) {
+                return;
+            }
+
+            const dist = distanceToSegment(mousePos, v1, v2);
+            if (dist < DEFAULT_EDGE_HOVER_PROXIMITY && dist < closestDistance) {
+                closestDistance = dist;
+                selectedEdge = j;
+            }
+        });
         selectedVx = -1;
-    } else if (window.Grapher.state.mode == MOVE) {
+    } else if (window.Grapher.state.mode == RECONFIGURATION_MODE) {
         if (selectedVx === -1 ) {
 
         } else {
@@ -548,8 +617,9 @@ function handleClick(event) {
         }
         
 
-    } else if (window.Grapher.state.mode == ADD) {
-
+    } else {
+        console.error(`Main state.mode is something it shouldn't be: ${window.Grapher.state.mode}`);
+        toast("Problem with tool mode, please try to set a mode in the sidebar", true);
     }
 }
 
@@ -736,10 +806,7 @@ function keydownHandler(event) {
         return;
     }
     
-    if (event.key === 'm') {
-        console.log("state.mode is now move");
-        window.Grapher.state.mode = MOVE;
-    } else if (event.key === 'n' || event.key === 'Escape' || event.key === 'Esc') {
+    if (event.key === 'n' || event.key === 'Escape' || event.key === 'Esc') {
         // First check if any modal is open
         const openModal = document.querySelector('.modal.visible');
         if (openModal) {
@@ -752,17 +819,20 @@ function keydownHandler(event) {
             return;
         }
         console.log("escape or n clicked, now normal mode")
-        if (window.Grapher.state.mode === NORMAL) {
+        if (window.Grapher.state.mode === EDIT_MODE) {
             selectedVx = -1;
-        } else {
-            window.Grapher.state.mode = NORMAL;
+            submode = DEFAULT_EDIT_MODE;
+        } else if (window.Grapher.state.mode === RECONFIGURATION_MODE) {
+            // figure out what needs to be done here, probably need to deselect everything that is currently being reconfigured
         }
     } else if (event.key === 'e' || event.key === 'j') {
-        
-        window.Grapher.state.mode = EDGE;
+        // todo figure out what to do with this guy here - it used to be 'edge' but idk what im gonna do now
+        // maybe still 'edge' as the 'actionMode' / 'actionType'
     } else if (event.key === 'Delete' || event.key == 'Backspace') {
-        //delete
-        deleteItem();
+        if (window.Grapher.state.mode === EDIT_MODE) {
+            //delete
+            deleteItem();
+        }
     }
 }
 
@@ -781,8 +851,3 @@ moveIcon.src = "assets/icons/move.svg";
 
 canvas.addEventListener('mousemove', handleHover);
 document.addEventListener('keydown', keydownHandler);
-
-
-// canvas.addEventListener('click', handleClick);
-
-

@@ -66,20 +66,30 @@ function scriptLoader(path, callback)
     }
 }
 
+const utilsLoaded = {done: false};
 
-scriptLoader('js/sidebar/filecontent.js');
-scriptLoader('js/sidebar/history.js');
-scriptLoader('js/utils.js');
-scriptLoader('js/modeinteractivity.js');
-scriptLoader('js/representation/state.js');
-scriptLoader('js/representation/dims.js');
-scriptLoader('js/representation/grapher.js', function() {
-    // the main grapher object representing the state, dimensions of the image.
-    // please don't remove this
-    window.Grapher = new Grapher(null, null, ctx);
-});
-scriptLoader('js/canvas.js', initCanvas);
-scriptLoader('js/sidebar/file.js', runTimeout);
+async function loadAllScripts() {
+    scriptLoader('js/sidebar/filecontent.js');
+    scriptLoader('js/sidebar/history.js');
+    scriptLoader('js/utils.js', loadedUtils());
+    while (!utilsLoaded.done) {
+        // keep waiting a few miliseconds until utils is loaded. 
+        // only then do we continue, because of all the global variables delcared in utils.
+        await new Promise(r => setTimeout(r, 50));
+    }   
+    scriptLoader('js/modeinteractivity.js');
+    scriptLoader('js/representation/state.js');
+    scriptLoader('js/representation/dims.js');
+    scriptLoader('js/representation/grapher.js', function() {
+        // the main grapher object representing the state, dimensions of the image.
+        // please don't remove this
+        window.Grapher = new Grapher(null, null, ctx);
+    });
+    scriptLoader('js/canvas.js', initCanvas);
+    scriptLoader('js/sidebar/file.js', runTimeout);
+}
+
+loadAllScripts();
 
 
 /**
@@ -105,7 +115,6 @@ function runTimeout() {
 
     // for now just add a vertex after 2 seconds;
     setTimeout(() => {
-        console.log('called addvX');
         addVx([12,12]);
         addVx([-25,20]);
         addEdge([10, 9], true);
@@ -117,6 +126,11 @@ function initCanvas() {
     setTimeout(() => {
         initializeButtons();
     }, 100)
+}
+
+
+function loadedUtils() {
+    utilsLoaded.done = true;
 }
 }
 
@@ -195,7 +209,6 @@ var selectedVx = -1;
 var selectedEdge = -1;
 var highlightedEdge = -1;
 var highlightedVx = -1;
-var mousePos = null;
 
 
 
