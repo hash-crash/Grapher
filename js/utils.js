@@ -152,6 +152,12 @@ function distanceToSegment(mouse, p1, p2) {
 
 
 
+
+
+
+
+
+
 /**
  * Determinant given by:
  * ```
@@ -167,7 +173,9 @@ function distanceToSegment(mouse, p1, p2) {
  * @returns result of the described determinant
  */
 function det(p1, p2, q) {
-    return (p1[0] * (p2[1] - q[1])) - (p2[0] * (p1[1] - q[1])) +(q[0] * (p1[1]-p2[1]));
+    return (p1[0] * (p2[1] - q[1]))
+         - (p2[0] * (p1[1] - q[1]))
+         + (q[0] * (p1[1] - p2[1]));
 }
 
 /**
@@ -179,11 +187,26 @@ function det(p1, p2, q) {
  * @returns true if intersection found, false if no intersection
  */
 function intersects(p1, p2, q1, q2) {
+
+    if (pequals(p1, q1)) {
+        return isOnSegment(q1, q2, p2);
+    }
+    if (pequals(p1, q2)) {
+        return isOnSegment(q1, q2, p2);
+    }
+    if (pequals(p2, q1)) {
+        return isOnSegment(q1, q2, p1);  
+    }
+    if (pequals(p2, q2)) {
+        return isOnSegment(q1, p2, p1);
+    }
+
     let d1 = det(p1, p2, q1);
     let d2 = det(p1, p2, q2);
     let d3 = det(q1, q2, p1);
     let d4 = det(q1, q2, p2);
 
+    // console.log(`${d1}, ${d2}, ${d3}, ${d4}`);
 
     if (d1 === 0 && isOnSegment(p1, p2, q1)) {
         return true;
@@ -211,7 +234,7 @@ function intersects(p1, p2, q1, q2) {
 
 function isOnSegment(a, b, p) {
     const d = det(a,b,p);
-    console.log(`re-det ${d}, a, b, p su ${a}, ${b}, ${p}`);
+    //  console.log(`re-det ${d}, a, b, p su ${a}, ${b}, ${p}`);
     return d === 0 &&
             p[0] <= Math.max(a[0], b[0]) && 
             p[0] >= Math.min(a[0], b[0]) && 
@@ -229,7 +252,7 @@ function edgeIntersect(e1, e2) {
         return false;
     }
 
-    console.log(`e1 ${e1}, e2 ${e2}`);
+    //  console.log(`e1 ${e1}, e2 ${e2}`);
 
     let p1 = wg.state.vertices[e1[0]];
     let p2 = wg.state.vertices[e1[1]];
@@ -270,7 +293,9 @@ function showModal(contentElement) {
 
 
 
-
+function pequals(a, b) {
+    return a[0] === b[0] && a[1] === b[1];
+}
 
 
 

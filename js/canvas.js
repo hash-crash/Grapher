@@ -274,6 +274,9 @@ document.getElementById('remove-edge-contextmenu').addEventListener('click', () 
     const oldEdge = highlightedEdge;
     highlightedEdge = -1;
     removeEdge(wg.state.edges[oldEdge]);
+    if (selectedEdge === oldEdge) {
+        selectedEdge = -1;
+    }
 
     hideCustomMenu();
 });
@@ -304,6 +307,7 @@ document.getElementById('add-vertex-contextmenu').addEventListener('click', () =
         //now get rid of the "px" at the end
         .map(e => e.substring(0, e.length-2))
         .map(e => Number(e));
+    selectedVx = wg.state.vertices.length;
     addVx(wg.dims.toCoords(a).map(Math.round));
     hideCustomMenu();
 });
@@ -406,6 +410,7 @@ canvas.addEventListener('mousedown', (event) => {
             vertexDragOffset.x = canvasPos[0] - mousePos[0];
             vertexDragOffset.y = canvasPos[1] - mousePos[1];
             originalState = wg.state.copyConstructor();
+            handleHover(event);
             return;
         }
     }
@@ -416,7 +421,9 @@ canvas.addEventListener('mousedown', (event) => {
     // Record the starting offset relative to the mouse position.
     dragStart.x = mousePos[0] - wg.dims.offset[0];
     dragStart.y = mousePos[1] - wg.dims.offset[1];
-    
+
+
+    handleHover(event);
 });
 
 // Only dragging is handled in this listener:
@@ -450,6 +457,7 @@ canvas.addEventListener('mouseup', (event) => {
     let mousePos = getMousePos(event);
     if (Math.hypot(initialClickPosition.x - mousePos[0], initialClickPosition.y - mousePos[1]) < MAX_DRAG_DISTANCE_FOR_CLICK) {
         handleClick(event);
+
     }
 
 
@@ -578,6 +586,10 @@ function handleClick(event) {
     let i = 0;
 
     if (window.Grapher.state.mode == EDIT_MODE) {
+
+        selectedVx = -1;
+        selectedEdge = -1;
+
         // Check each object for a click
         for (let obj of window.Grapher.state.vertices) {
             // for now doing nothing here
@@ -608,7 +620,6 @@ function handleClick(event) {
                 selectedEdge = j;
             }
         });
-        selectedVx = -1;
     } else if (window.Grapher.state.mode == RECONFIGURATION_MODE) {
         if (selectedVx === -1 ) {
 

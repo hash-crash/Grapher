@@ -159,6 +159,7 @@ function restoreFromLocalStorage() {
 function stateUpdated(saveToLocalStorage=true) {
     updateFileView();
     updateHistoryView();
+    wg.state.updateAdjList();
     wg.redraw();
     if (saveToLocalStorage) {
         wg.state.saveState();
@@ -496,4 +497,213 @@ function deleteItem() {
     } else {
         toast("Nothing selected for deletion");
     }
+}
+
+
+
+
+
+
+
+
+
+
+/**
+ * Checks if the graph is connected using BFS
+ * @returns {boolean} True if connected
+ */
+function isConnected() {
+    const adjList = wg.state.unf;
+    const n = adjList.length;
+    if (n < 2) {
+        // Empty graph or only 1 node
+        return true; 
+    }
+
+    
+    const visited = new Array(n).fill(false);
+    const queue = [0];
+
+    visited[0] = true;
+    let visitedCount = 1;
+    
+    while (queue.length > 0) {
+        const current = queue.shift();
+        for (const neighbor of adjList[current].eiv) {
+            if (!visited[neighbor]) {
+                visited[neighbor] = true;
+                visitedCount++;
+                queue.push(neighbor);
+            }
+        }
+    }
+    return visitedCount === n;
+}
+
+function isCrossingFree() {
+    const n = wg.state.vertices.length;
+    //non-planar graph must have crossings
+    if (n > 4 && wg.state.edges.length > 3 * n - 6) {
+        return false;
+    }
+
+    // Now edges.length is bound to be O(n), so worst case is O(n²)
+    let isGood = true;
+    wg.state.edges.forEach((edge, i) => {
+        for (let j = i + 1; j < wg.state.edges.length; j++) {
+            const otherEdge = wg.state.edges[j];
+            if (edgeIntersect(edge, otherEdge)) {
+                console.log(`${edge}, ${otherEdge}, {[${wg.state.vertices[edge[0]]}, ${wg.state.vertices[edge[1]]}]} and {[${wg.state.vertices[otherEdge[0]]}, ${wg.state.vertices[otherEdge[1]]}]}`)
+                isGood = false;
+            }
+        }
+    }); 
+    return isGood;
+}
+
+
+/**
+ * Checks if the graph is a spanning tree (connected with exactly n-1 edges)
+ * @returns {boolean} True if spanning tree
+ */
+function isSpanningTree() {
+    const n = wg.state.vertices.length;
+    return isConnected() && wg.state.edges.length === n - 1;
+}
+
+/**
+ * Checks if the graph is a spanning path (tree with exactly 2 leaves and others degree 2)
+ * @returns {boolean} True if spanning path
+ */
+function isSpanningPath() {
+    if (!isSpanningTree()) {
+        return false;
+    }
+
+    const n = wg.state.vertices.length;
+    if (n === 1) {
+        // Single node is trivial path
+        return true;
+    }
+    
+    const degrees = wg.state.unf.map(entry => entry.eiv.length);
+    let leafCount = 0;
+    
+    for (const deg of degrees) {
+        if (deg === 1){
+            leafCount++;
+        }
+        else if (deg !== 2) {
+            return false;
+        }
+    }
+    return leafCount === 2;
+}
+
+
+var perfectMatching = false;
+var almostPerfectMatching = false;
+function isMatching() {
+
+    perfectMatching = false;
+    almostPerfectMatching = false;
+
+    const adjList = wg.state.unf;
+    const n = adjList.length;
+    
+    let degreeZeroCount = 0;
+    let degreeOneCount = 0;
+    
+    // Check all vertices' degrees
+    for (const vertex of adjList) {
+        const degree = vertex.eiv.length;
+        
+        if (degree > 1) {
+            // Immediate disqualification
+            return false;
+        }
+        if (degree === 0){
+            degreeZeroCount++;
+        }
+        else {
+            degreeOneCount++;
+        }
+    }
+    
+    // Check matching conditions
+    if (n % 2 === 0) { 
+        // Even number of vertices
+        const result = (degreeZeroCount === 0 && degreeOneCount === n);
+        if (result) {
+            perfectMatching = true;
+        }
+        return result; 
+    } else {  
+        // Odd number of vertices
+        const result = (degreeZeroCount === 1 && degreeOneCount === n - 1);
+        if (result) {
+            almostPerfectMatching = true;
+        }
+        return result;
+    }
+}
+
+function isGeometricTriangulation() {
+
+    // O(n² worst-case)
+    if (!isCrossingFree()) {
+        return false;
+    }
+
+    const n =  wg.state.vertices.length;
+    const adjList = wg.state.unf;
+
+    // O(non-edge*edges) = O(n³) worst-case since there can be n(n-1)/2 possible new edges worst case (O(n²)), and O(n) edges. 
+    // Check all non-edges for possible addition
+    for (let i = 0; i < n; i++) {
+        for (let j = i+1; j < n; j++) {
+            if (adjList[i].eiv.includes(j)){
+                // Skip existing edges
+                continue; 
+            }
+            
+            // Proposed edge between i and j
+            const newEdge = [i, j];
+            
+            // Check against all existing edges
+            let canAdd = true;
+            for (const e of wg.state.edges) {
+                if (edgeIntersect(newEdge, e)) {
+                    canAdd = false;
+                    // Early exit for this non-edge
+                    break; 
+                }
+            }
+            
+            if (canAdd) {
+                // Not maximal -> not triangulated
+                return false; 
+            }
+        }
+    }
+    return true;
+}
+
+
+function isCFST() {
+    return isSpanningTree() && isCrossingFree();
+}
+
+function isCFSP() {
+    return isSpanningPath() && isCrossingFree();
+}
+
+
+
+/**
+ * Checks if the graph is a valid pairing/matching
+ * @returns {boolean} True if valid matching
+ */
+function isCFMatching() {
+    return isCrossingFree() && isMatching();
 }

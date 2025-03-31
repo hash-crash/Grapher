@@ -32,6 +32,8 @@
         console.log(foundPath);
     }
 
+    const fileLoaded = {done: false};
+
 
 
 /**
@@ -66,17 +68,17 @@ function scriptLoader(path, callback)
     }
 }
 
-const utilsLoaded = {done: false};
 
 async function loadAllScripts() {
     scriptLoader('js/sidebar/filecontent.js');
     scriptLoader('js/sidebar/history.js');
     scriptLoader('js/utils.js', loadedUtils());
-    while (!utilsLoaded.done) {
+    while (!fileLoaded.done) {
         // keep waiting a few miliseconds until utils is loaded. 
         // only then do we continue, because of all the global variables delcared in utils.
         await new Promise(r => setTimeout(r, 50));
-    }   
+    }
+    
     scriptLoader('js/modeinteractivity.js');
     scriptLoader('js/representation/state.js');
     scriptLoader('js/representation/dims.js');
@@ -107,11 +109,11 @@ function runTimeout() {
     //     restoreFromLocalStorage();
     // }, 80)
 
-    setTimeout(() => {
-        autoLoadInputFile("in.txt");
-    }, 150);
-
+    
     // current experimental area:
+
+    autoLoadInputFile("in.txt");
+
 
     // for now just add a vertex after 2 seconds;
     setTimeout(() => {
@@ -129,9 +131,9 @@ function initCanvas() {
 }
 
 
-function loadedUtils() {
-    utilsLoaded.done = true;
-}
+    function loadedUtils() {
+        fileLoaded.done = true;
+    }
 }
 
 
