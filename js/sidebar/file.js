@@ -272,10 +272,13 @@ function showFileInput() {
 
 /**
  * allows the bootup to automatically import a file. specify the filename in script.js
+ * 
+ * @returns {Promise} promise which will resolve once the file is handled
  */
 function autoLoadInputFile(filename) {
-    console.log(`handling automated file import of data/${filename}`);
-    fetch("data/" + filename).then(response => {
+    
+    return fetch("data/" + filename)
+    .then(response => {
         if (!response.ok) {
             throw new Error(`Failed to load file: ${response.statusText}`);
         }
@@ -291,10 +294,8 @@ function autoLoadInputFile(filename) {
             window.Grapher = null;
             console.log("aborted in fetching of data file");
         }
-    })
-    .catch(error => {
-        console.error("Error reading file:", error);
     });
+
 }
 
 

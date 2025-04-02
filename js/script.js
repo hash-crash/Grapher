@@ -32,7 +32,7 @@
         console.log(foundPath);
     }
 
-    const fileLoaded = {done: false};
+    let timestampStart = performance.now();
 
 
 
@@ -45,52 +45,63 @@
  * @param {String} path in this project, the relative path of all javascript files starts with 'js/...'
  * @param {Function} callback to call after loading the script
  */
-function scriptLoader(path, callback)
-{
+function scriptLoader(path, callback) {
+return new Promise((resolve, reject) => {
     var script = document.createElement('script');
     script.type = "text/javascript";
     script.async = true;
     script.src = `${foundPath}${path}`;
     script.onload = function(){
-        if(typeof(callback) == "function")
-        {
+        if(typeof(callback) == "function"){
             callback();
+            resolve();
+        }
+        else {
+            resolve();
         }
     }
     try
     {
         var scriptOne = document.getElementsByTagName('script')[0];
         scriptOne.parentNode.insertBefore(script, scriptOne);
+        
     }
     catch(e)
     {
         document.getElementsByTagName("head")[0].appendChild(script);
+        reject();
     }
+});
 }
 
 
 async function loadAllScripts() {
-    scriptLoader('js/sidebar/filecontent.js');
-    scriptLoader('js/sidebar/history.js');
-    scriptLoader('js/utils.js', loadedUtils());
-    while (!fileLoaded.done) {
-        // keep waiting a few miliseconds until utils is loaded. 
-        // only then do we continue, because of all the global variables delcared in utils.
-        await new Promise(r => setTimeout(r, 50));
-    }
-    
-    scriptLoader('js/modeinteractivity.js');
-    scriptLoader('js/representation/state.js');
-    scriptLoader('js/representation/dims.js');
-    scriptLoader('js/representation/grapher.js', function() {
-        // the main grapher object representing the state, dimensions of the image.
-        // please don't remove this
-        window.Grapher = new Grapher(null, null, ctx);
-    });
-    scriptLoader('js/canvas.js', initCanvas);
-    scriptLoader('js/sidebar/file.js', runTimeout);
-}
+    let fcPromise = scriptLoader('js/sidebar/filecontent.js');
+    let historyPromise = scriptLoader('js/sidebar/history.js');
+    let utilsPromise =  scriptLoader('js/utils.js');
+    await fcPromise;
+    await historyPromise;
+    await utilsPromise;
 
+    // the rest depend on some stuff defined in utils
+    let miPromise = scriptLoader('js/modeinteractivity.js');
+    let statePromise = scriptLoader('js/representation/state.js');
+    let dimsPromise = scriptLoader('js/representation/dims.js');
+    let grapherPromise =  scriptLoader('js/representation/grapher.js'); 
+    await miPromise;
+    await statePromise;
+    await dimsPromise;
+    await grapherPromise;
+    // the main grapher object representing the state, dimensions of the image.
+    // please don't remove this
+    window.Grapher = new Grapher(null, null, ctx);
+
+    await scriptLoader('js/canvas.js');
+    initializeButtons();
+
+    await scriptLoader('js/sidebar/file.js');
+    runAutoInit();
+}
 loadAllScripts();
 
 
@@ -104,7 +115,7 @@ loadAllScripts();
  * This is here to speed up development, when it is needed,
  *  simply add runTimeout as the callback argument for the file.js scriptloader.
  */
-function runTimeout() {
+async function runAutoInit() {
     // setTimeout(() => {
     //     restoreFromLocalStorage();
     // }, 80)
@@ -112,28 +123,23 @@ function runTimeout() {
     
     // current experimental area:
 
-    autoLoadInputFile("in.txt");
+    try {
+        console.log(`Miliseconds needed for init: ${performance.now() - timestampStart}`);
 
+        await autoLoadInputFile("in.txt"); // Now waits for completion
 
-    // for now just add a vertex after 2 seconds;
-    setTimeout(() => {
+        // for now just add vertices and edges;
         addVx([12,12]);
         addVx([-25,20]);
         addEdge([10, 9], true);
         addEdge([9,10]);
-    }, 250);
-}
+        console.log(`Miliseconds needed for including file: ${performance.now() - timestampStart}`);
 
-function initCanvas() {
-    setTimeout(() => {
-        initializeButtons();
-    }, 100)
-}
-
-
-    function loadedUtils() {
-        fileLoaded.done = true;
+    } catch (error) {
+        console.error("Error:", error);
     }
+}
+
 }
 
 
