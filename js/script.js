@@ -44,6 +44,7 @@
  * 
  * @param {String} path in this project, the relative path of all javascript files starts with 'js/...'
  * @param {Function} callback to call after loading the script
+ * @returns {Promise} promise that resolves once the file is fully loaded
  */
 function scriptLoader(path, callback) {
 return new Promise((resolve, reject) => {
@@ -76,11 +77,13 @@ return new Promise((resolve, reject) => {
 
 
 async function loadAllScripts() {
+    // these files are indepedent and can be loaded whenever
     let fcPromise = scriptLoader('js/sidebar/filecontent.js');
     let historyPromise = scriptLoader('js/sidebar/history.js');
+    let geometryPromise = scriptLoader('js/geometry.js');
+
     let utilsPromise =  scriptLoader('js/utils.js');
-    await fcPromise;
-    await historyPromise;
+
     await utilsPromise;
 
     // the rest depend on some stuff defined in utils
@@ -88,6 +91,10 @@ async function loadAllScripts() {
     let statePromise = scriptLoader('js/representation/state.js');
     let dimsPromise = scriptLoader('js/representation/dims.js');
     let grapherPromise =  scriptLoader('js/representation/grapher.js'); 
+    await fcPromise;
+    await historyPromise;
+    await geometryPromise;
+
     await miPromise;
     await statePromise;
     await dimsPromise;
@@ -126,13 +133,13 @@ async function runAutoInit() {
     try {
         console.log(`Miliseconds needed for init: ${performance.now() - timestampStart}`);
 
-        await autoLoadInputFile("in.txt"); // Now waits for completion
+        await autoLoadInputFile("in 2.txt"); // Now waits for completion
 
         // for now just add vertices and edges;
-        addVx([12,12]);
-        addVx([-25,20]);
-        addEdge([10, 9], true);
-        addEdge([9,10]);
+        // addVx([12,12]);
+        // addVx([-25,20]);
+        // addEdge([10, 9], true);
+        // addEdge([9,10]);
         console.log(`Miliseconds needed for including file: ${performance.now() - timestampStart}`);
 
     } catch (error) {
@@ -217,6 +224,7 @@ var selectedVx = -1;
 var selectedEdge = -1;
 var highlightedEdge = -1;
 var highlightedVx = -1;
+var selectedEdges = [];
 
 
 
@@ -237,7 +245,6 @@ const beforeUnloadHandler = (event) => {
 
 
 // more shortcut utils
-var wg = window.Grapher;
 window.stateHistory = [];
 window.undoneStates = [];
 

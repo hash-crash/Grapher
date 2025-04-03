@@ -93,6 +93,16 @@ You can start with a graph in two ways:
         1. To pan, simply use the mouse to drag the canvas. Grab anywhere except a vertex, the mouse pointer will change to a 'move' icon.
         2. To zoom, use the use the scroll wheel. The tool will always zoom towards where the mouse is positioned. The vertices will always be rendered the same size, allowing you to have an easier time adjusting graphs where vertices are close to each other.
 
+## 5. Performing Recombinations
+
+This is the core feature for exploring graph transformations while maintaining specific structural properties.
+
+* **5.1. Pre-requisite: Valid Graph:** Ensure the graph currently displayed in the canvas conforms to the desired graph type (e.g., is a valid Crossing-Free Spanning Tree) *before* attempting recombination for that type.
+* **5.2. Select Graph Type:** Choose the graph type you want to work with (toolbar, ![Graph icon](assets/icons/graphmode.svg) graph-mode icon, then click on the desired type). The tool will verify if the current graph matches the selected type. If not, an error message will appear.
+* **5.3. Initiate Recombination:** The method depends on the selected graph type:
+    * **For  Almost-Perfect Matchings:**
+        * **Option A (Edge-based):** Select **one** existing edge. The tool will highlight potential alternative edges that could replace the selected one while maintaining the graph type.
+        * **Option B (Vertex-pair-based):** Select **two** vertices that do *not* currently have an edge between them (representing a *candidate* edge). The tool will highlight existing edges that could be removed if this candidate edge were added, maintaining the graph type.
 
 
 ## 6. File Handling

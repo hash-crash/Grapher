@@ -2,6 +2,12 @@
  * 
  */
 class Grapher {
+    /**
+     * 
+     * @param {State} state 
+     * @param {Dims} dims 
+     * @param {CanvasRenderingContext2D} contextL 
+     */
     constructor(state, dims, contextL) {
         this.context = contextL;
         this.state = state;
@@ -35,10 +41,7 @@ class Grapher {
 
 
         this.dims = newdims;
-
-
         drawBackgroundCoordinateGrid();
-
 
         let i = 0;
 
@@ -55,6 +58,8 @@ class Grapher {
                 drawSelectedEdge(e);
             } else if (highlightedEdge === i) {
                 drawHighlightedEdge(e);
+            } else if (edgeForRemoval === i) {
+                drawEdgeForRemoval(e);
             } else {
                 drawEdge(e);
             }

@@ -63,6 +63,55 @@ class Dims {
     }
 }
 
+
+/**
+ * find the x coordinate of the right-most vertex and the y coordinate of the highest vertex
+ */
+function getMaxCoords() {
+    xmax = Number.NEGATIVE_INFINITY;
+    ymax = Number.NEGATIVE_INFINITY;
+    if (!wg.state?.vertices) {
+        alert(CATASTROPHIC_ERROR_RESTART_APP);
+        return;
+    }
+    wg.state.vertices.forEach(v => {
+        if (v[0] > xmax) {
+            xmax = v[0];
+        }
+        if (v[1] > ymax) {
+            ymax = v[1];
+        }
+    });
+    return [xmax + 1, ymax + 1];
+}
+
+/**
+ * find the x coordinate of the left-most vertex and the y coordinate of the lowest vertex
+ */
+function getMinCoords() {
+    xmin = Number.POSITIVE_INFINITY;
+    ymin = Number.POSITIVE_INFINITY;
+    if (!wg.state?.vertices) {
+        alert(CATASTROPHIC_ERROR_RESTART_APP);
+        return;
+    }
+    wg.state.vertices.forEach(v => {
+        if (v[0] < xmin) {
+            xmin = v[0];
+        }
+        if (v[1] < ymin) {
+            ymin = v[1];
+        }
+    });
+    return [xmin - 1, ymin - 1];
+}
+
+
+
+
+
+
+
 /**
  * Resize the canvas according to window dimensions.
  * Adjust this logic as needed.

@@ -3,12 +3,46 @@
 
 
 
-function setApplicationMode(mode, submodeL) {
+function setApplicationMode(modeL, submodeL) {
+
+
+    if (modeL === EDIT_MODE) {
+        if (submodeL === CROSSING_FREE_EDIT_MODE && !isCrossingFree()) {
+            return "Trying to do crossing-free edit mode but graph has crossings";
+        }
+    } else if (modeL === RECONFIGURATION_MODE) {
+        if (submodeL === MATCHINGS_RECONFIGURATION_MODE) {
+            if (!isCFMatching()) {
+                return "Not a cf matching";
+            }
+        } else if (submodeL === CFSP_RECONFIGURATION_MODE) {
+            if (!isCFSP()) {
+                return "Not a cfsp";
+            }
+        } else if (submodeL === CFST_RECONFIGURATION_MODE) {
+            if (!isCFST()) {
+                return "Not a cfst";
+            }
+        }else if (submodeL === TRIANGULATION_RECONFIGURATION_MODE) {
+            if (!isGeometricTriangulation()) {
+                return "Not a geometric triangulation";
+            } 
+        } else {
+            return "Uknown submode";
+        }
+    } else {
+        return "Unknown mode";
+    }
+
+
+
     // Cleanup previous state
-    window.Grapher.selectedEdges = [];
+    selectedEdges = [];
+    selectedEdge = -1;
+    selectedVx = -1;
     
     // Update global state
-    window.Grapher.state.mode = mode;
+    mode = modeL;
     submode = submodeL;
 
     
@@ -21,47 +55,47 @@ function setApplicationMode(mode, submodeL) {
     });
     
     // Update cursor and other visual feedback
-    updateCursor();
-    render();
+    doaredraw();
     
     console.log(`Switched to ${mode} > ${submode}`);
 }
 
 
-function createModeSelector(currentMode, currentSubmode) {
+
+function createModeSelector() {
     const container = document.createElement('div');
     container.className = 'mode-container';
     
     // Main Modes
     const mainModes = [
         { 
-            id: 'edit',
+            id: EDIT_MODE,
             label: '✏️ Editing',
             submodes: [
-                { id: 'free', label: 'Standard Editing' },
-                { id: 'crossing-free', label: 'Non-Crossing Editing' }
+                { id: DEFAULT_EDIT_MODE, label: 'Standard Editing' },
+                { id: CROSSING_FREE_EDIT_MODE, label: 'Non-Crossing Editing' }
             ]
         },
         {
-            id: 'reconfigure',
+            id: RECONFIGURATION_MODE,
             label: '🔄 Reconfigurations',
             submodes: [
-                { id: 'pairings', label: 'Matchings' },
-                { id: 'triangulations', label: 'Triangulations - todo' },
-                { id: 'path', label: 'Spanning Paths - todo' },
-                { id: 'tree', label: 'Spanning trees - todo'},
+                { id: MATCHINGS_RECONFIGURATION_MODE, label: 'Matchings' },
+                { id: TRIANGULATION_RECONFIGURATION_MODE, label: 'Triangulations - todo' },
+                { id: CFSP_RECONFIGURATION_MODE, label: 'Spanning Paths - todo' },
+                { id: CFST_RECONFIGURATION_MODE, label: 'Spanning trees - todo'},
             ]
         }
     ];
 
-    mainModes.forEach(mode => {
+    mainModes.forEach(mainMode => {
         const modeGroup = document.createElement('div');
         modeGroup.className = 'mode-group';
         
         // Main mode header
         const header = document.createElement('h3');
-        header.textContent = mode.label;
-        if(currentMode === mode.id) {
+        header.textContent = mainMode.label;
+        if(mode === mainMode.id) {
             header.classList.add('active-mode');
         }
         
@@ -69,17 +103,22 @@ function createModeSelector(currentMode, currentSubmode) {
         const submodeContainer = document.createElement('div');
         submodeContainer.className = 'submode-container';
         
-        mode.submodes.forEach(submode => {
+        mainMode.submodes.forEach(s => {
             const btn = document.createElement('button');
-            btn.className = `submode-btn ${currentSubmode === submode.id ? 'active' : ''}`;
-            btn.textContent = submode.label;
-            btn.dataset.mode = mode.id;
-            btn.dataset.submode = submode.id;
+            btn.className = `submode-btn ${submode === s.id ? 'active' : ''}`;
+            btn.textContent = s.label;
+            btn.dataset.mode = mainMode.id;
+            btn.dataset.submode = s.id;
             
             btn.addEventListener('click', () => {
                 // Handle mode change here
-                setApplicationMode(mode.id, submode.id);
-                document.body.querySelector('.modal')?.remove();
+                const error = setApplicationMode(mainMode.id, s.id);
+                if (error) {
+                    triggerShake();
+                    toast(error, true);
+                } else{
+                    document.body.querySelector('.modal')?.remove();
+                }
             });
             
             submodeContainer.appendChild(btn);
