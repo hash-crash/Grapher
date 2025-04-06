@@ -151,10 +151,18 @@ function distanceToSegment(mouse, p1, p2) {
 
 
 
-function isNearVertex(mousePos, vertex, radius = DEFAULT_VERTEX_CLICK_PROXIMITY_RADIUS) {
+function isNearVertex(mousePos, vertex) {
     if (!wg || !wg.dims || !mousePos || !vertex) {
         return false;
     }
+
+    let radius = settingsManager.get(PROXIMITY_VERTEX);
+    if (!radius) {
+        console.warn("Could not get proximity radius from settings");
+        radius = DEFAULT_VERTEX_CLICK_PROXIMITY_RADIUS;
+    }
+
+
 
     let canvasPos = wg.dims.toCanvas(vertex);
 

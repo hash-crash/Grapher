@@ -307,7 +307,11 @@ canvas.addEventListener('mouseup', (event) => {
 
 
     let mousePos = getMousePos(event);
-    if (Math.hypot(initialClickPosition.x - mousePos[0], initialClickPosition.y - mousePos[1]) < MAX_DRAG_DISTANCE_FOR_CLICK) {
+    let clickTolerance = settingsManager.get(CLICK_TOLERANCE);
+    if (!clickTolerance) {
+        clickTolerance = MAX_DRAG_DISTANCE_FOR_CLICK;
+    }
+    if (Math.hypot(initialClickPosition.x - mousePos[0], initialClickPosition.y - mousePos[1]) < clickTolerance) {
         handleClick(event);
     }
 
@@ -443,7 +447,11 @@ function handleHoverReconfigurationMode(mousePos) {
             }
 
             const dist = distanceToSegment(mousePos, v1, v2);
-            if (dist < DEFAULT_EDGE_HOVER_PROXIMITY && dist < closestDistance) {
+            let minDist = settingsManager.get(PROXIMITY_EDGE);
+            if (!minDist) {
+                minDist = DEFAULT_EDGE_HOVER_PROXIMITY;
+            }
+            if (dist < minDist && dist < closestDistance) {
                 closestDistance = dist;
                 highlightedEdge = i;
             }
@@ -495,7 +503,12 @@ function handleHoverEditMode(mousePos) {
             }
 
             const dist = distanceToSegment(mousePos, v1, v2);
-            if (dist < DEFAULT_EDGE_HOVER_PROXIMITY && dist < closestDistance) {
+            let minDist = settingsManager.get(PROXIMITY_EDGE);
+            if (!minDist) {
+                minDist = DEFAULT_EDGE_HOVER_PROXIMITY;
+            }
+
+            if (dist < minDist && dist < closestDistance) {
                 closestDistance = dist;
                 highlightedEdge = i;
             }
@@ -655,7 +668,11 @@ function findAnyClickedItem(mousePos) {
         }
 
         const dist = distanceToSegment(mousePos, v1, v2);
-        if (dist < DEFAULT_EDGE_HOVER_PROXIMITY && dist < closestDistance) {
+        let minDist = settingsManager.get(PROXIMITY_EDGE);
+        if (!minDist) {
+            minDist = DEFAULT_EDGE_HOVER_PROXIMITY;
+        }
+        if (dist < minDist && dist < closestDistance) {
             closestDistance = dist;
             likeliestEdge = j;
         }

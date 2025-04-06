@@ -32,7 +32,7 @@ body {
   border: 2px solid #4CAF50;
   border-radius: 15px;
   background-color: #f9f9f9;
-  color: #333;
+  color: #333333;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -139,6 +139,8 @@ box-shadow: 0 0 5px rgba(76, 175, 80, 0.75);
   padding: 20px;
   border-radius: 5px;
   max-width: 700px;
+  max-height: 800px;
+  overflow: auto;
   width: 90%;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   position: relative;

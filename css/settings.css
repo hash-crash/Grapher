@@ -1,9 +1,16 @@
 /* Settings Panel Specific Styles */
+.settings-parent-container {
+    display: flex;
+    flex-direction: column;
+}
+
 
 .settings-panel-container {
     display: flex;
     flex-direction: column;
     gap: 20px; /* Space between setting groups */
+    max-height: 500px;
+    overflow: scroll;
 }
 
 .settings-group {
@@ -64,9 +71,10 @@
 
 .settings-actions button {
     padding: 8px 15px;
-    background-color: #f0ad4e; /* Orange theme for reset */
-    color: white;
-    border: none;
+    background-color: #f9f9f9; /* Orange theme for reset */
+    color: #333333;
+
+    border: 1px solid black;
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s ease;

@@ -1,15 +1,29 @@
 const SETTINGS_STORAGE_KEY = 'mySimpleWebAppSettings';
 
 const DEFAULT_SETTINGS = {
-    vertexProximityPx: 10,     // Default proximity for vertices
+    vertexProximityPx: 16,     // Default proximity for vertices
     edgeProximityPx: 8,       // Default proximity for edges
     explodeCoordinates: 4,    // Default value for explodeCoordinates
-    selectedColor: 'blue',    // Default color for selected items
-    regularColor: 'black',   // Default color for regular items
-    forRemovalColor: 'orange', // Default color for items marked for removal
-    highlightColor: 'lime',    // Default color for highlighted items
-    willBeAddedColor: 'mediumaquamarine' // Default color for potential additions (distinct from lime)
+    clickDragTolerancePx: 4,  // How much the mouse can move before it's a drag and not a click
+    selectedColor: '#0000ff',    // blue -  Default color for selected items
+    regularColor: '#000000',   // black- Default color for regular items
+    vertexColor: '#000000',
+    edgeColor: '#333333',
+    forRemovalColor: '#dc143c', // crimson - Default color for items marked for removal
+    highlightColor: '#00ff00',    // lime - Default color for highlighted items
+    willBeAddedColor: '#66cdaa' // Default color for potential additions (distinct from lime)
 };
+
+const ADD_COLOR =  'willBeAddedColor';
+const HIGHTLIGHT_COLOR = 'highlightColor';
+const REMOVE_COLOR = 'forRemovalColor';
+const SELECT_COLOR = 'selectedColor';
+const REGULAR_COLOR = 'regularColor';
+const VERTEX_COLOR = 'vertexColor';
+const EDGE_COLOR = 'edgeColor';
+const PROXIMITY_VERTEX = 'vertexProximityPx';
+const PROXIMITY_EDGE = 'edgeProximityPx';
+const CLICK_TOLERANCE = 'clickDragTolerancePx';
 
 const settingsManager = {
     settings: {}, // Holds the current settings in memory
@@ -219,9 +233,13 @@ function createSettingInput(key, labelText, type, options = {}) {
  * @returns {HTMLElement} A div element containing the settings panel UI.
  */
 function createSettingsPanel() {
-    const panelContainer = document.createElement('div');
-    panelContainer.className = 'settings-panel-container';
+    const parentContainer = document.createElement('div');
+    parentContainer.className = 'settings-parent-container';
 
+    settingsContainer = document.createElement('div');
+    settingsContainer.className = 'settings-panel-container';
+
+    parentContainer.appendChild(settingsContainer);
 
     // --- Create UI Groups ---
 
@@ -234,10 +252,8 @@ function createSettingsPanel() {
 
     proximityGroup.appendChild(createSettingInput('vertexProximityPx', 'Vertex Hover (px)', 'range', { min: 5, max: 25 }));
     proximityGroup.appendChild(createSettingInput('edgeProximityPx', 'Edge Hover (px)', 'range', { min: 3, max: 20 }));
-    // Note: 'explodeCoordinates' is just a number, maybe not a slider unless range is known
-    proximityGroup.appendChild(createSettingInput('explodeCoordinates', 'Explode Factor', 'range', { min: 2, max: 20 }));
 
-    panelContainer.appendChild(proximityGroup);
+    settingsContainer.appendChild(proximityGroup);
 
     // Color Group
     const colorGroup = document.createElement('div');
@@ -246,13 +262,28 @@ function createSettingsPanel() {
     colorHeader.textContent = 'Color Settings';
     colorGroup.appendChild(colorHeader);
 
-    colorGroup.appendChild(createSettingInput('selectedColor', 'Selected Item', 'color'));
-    colorGroup.appendChild(createSettingInput('regularColor', 'Regular Item', 'color'));
-    colorGroup.appendChild(createSettingInput('forRemovalColor', 'Marked for Removal', 'color'));
-    colorGroup.appendChild(createSettingInput('highlightColor', 'Highlight Action', 'color'));
-    colorGroup.appendChild(createSettingInput('willBeAddedColor', 'Potential Addition', 'color'));
+    colorGroup.appendChild(createSettingInput(REGULAR_COLOR, 'Fallback color', 'color'));
 
-    panelContainer.appendChild(colorGroup);
+    colorGroup.appendChild(createSettingInput(VERTEX_COLOR, 'Regular Vertex', 'color'));
+    colorGroup.appendChild(createSettingInput(EDGE_COLOR, 'Regular Edge', 'color'));
+
+    colorGroup.appendChild(createSettingInput(SELECT_COLOR, 'Selected Item', 'color'));
+    colorGroup.appendChild(createSettingInput(REMOVE_COLOR, 'Marked for Removal', 'color'));
+    colorGroup.appendChild(createSettingInput(HIGHTLIGHT_COLOR, 'Highlight Action', 'color'));
+    colorGroup.appendChild(createSettingInput(ADD_COLOR, 'Potential Addition', 'color'));
+
+    settingsContainer.appendChild(colorGroup);
+
+    const miscGroup = document.createElement('div');
+    miscGroup.className = 'settings-group';
+    const miscHeader = document.createElement('h4');
+    miscHeader.textContent = 'Miscellaneous Settings'
+    miscGroup.appendChild(miscHeader);
+
+    miscGroup.appendChild(createSettingInput('explodeCoordinates', 'Explode Factor', 'range', { min: 2, max: 20 }));
+    miscGroup.appendChild(createSettingInput(CLICK_TOLERANCE, 'Click tolearnce (px)', 'range', {min: 1, max: 10}));
+
+    settingsContainer.appendChild(miscGroup);    
 
     // Actions Group (Reset Button)
     const actionsGroup = document.createElement('div');
@@ -265,22 +296,22 @@ function createSettingsPanel() {
         settingsManager.resetToDefaults();
         // IMPORTANT: Update the UI controls within *this panel* to reflect the defaults
         const newDefaults = settingsManager.getAll();
-        panelContainer.querySelectorAll('input').forEach(input => {
+        settingsContainer.querySelectorAll('input').forEach(input => {
             const key = input.id.replace('setting-', ''); // Extract key from input ID
             if (Object.prototype.hasOwnProperty.call(newDefaults, key)) {
                 input.value = newDefaults[key];
                 // Also update slider value displays if they exist
-                const valueDisplay = panelContainer.querySelector(`#value-${key}`);
+                const valueDisplay = settingsContainer.querySelector(`#value-${key}`);
                 if (valueDisplay) {
                     valueDisplay.textContent = newDefaults[key];
                 }
             }
         });
-         console.log("Settings panel UI updated to defaults.");
+        console.log("Settings panel UI updated to defaults.");
     });
 
     actionsGroup.appendChild(resetButton);
-    panelContainer.appendChild(actionsGroup);
+    parentContainer.appendChild(actionsGroup);
 
-    return panelContainer;
+    return parentContainer;
 }

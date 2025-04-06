@@ -4,7 +4,7 @@
 const CATASTROPHIC_ERROR_RESTART_APP = "Something went catastrophically wrong. Application has lost state, please try restarting it.";
 const DEFAULT_VERTEX_CLICK_PROXIMITY_RADIUS = 12;
 const MAX_DRAG_DISTANCE_FOR_CLICK = 4;
-const DEFAULT_EDGE_HOVER_PROXIMITY = 5;
+const DEFAULT_EDGE_HOVER_PROXIMITY = 8;
 
 const NORMAL = 'normal';
 const DELETE = 'delete';
@@ -48,26 +48,5 @@ function getMousePos(event) {
 
 
 
-
-
-
-
-function toast(message, error = false) {
-	const cont = document.getElementById("contentId");
-    const toast = document.createElement("div");
-    if (error) {
-        toast.className = "toast errortoast";
-    } else {
-        toast.className = "toast infotoast";
-    }
-    toast.textContent = message;
-
-    cont.append(toast);
-
-    // Automatically remove toast after 3 seconds
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
-}
 
 

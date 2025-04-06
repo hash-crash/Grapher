@@ -1,14 +1,14 @@
 
 function drawEdge(e) {
 
-
+    let color = settingsManager.get(EDGE_COLOR);
 
     let s = wg.dims.toCanvas(wg.state.vertices[e[0]]);
     let end = wg.dims.toCanvas(wg.state.vertices[e[1]]);
     ctx.beginPath();
     ctx.lineWidth = 3;
-    ctx.strokeStyle = "#222222"
-    ctx.fillStyle = "#222222"
+    ctx.strokeStyle = color ? color : '#333333';
+    ctx.fillStyle = color ? color : '#333333';
     ctx.moveTo(s[0], s[1]);
     ctx.lineTo(end[0], end[1]);
 
@@ -16,6 +16,8 @@ function drawEdge(e) {
     ctx.closePath();
     
     ctx.lineWidth = 1;
+
+    resetColor();
 }
 
 
@@ -23,8 +25,9 @@ function drawHighlightedEdge(e) {
     let s = wg.dims.toCanvas(wg.state.vertices[e[0]]);
     let end = wg.dims.toCanvas(wg.state.vertices[e[1]]);
 
-    ctx.fillStyle = "limegreen";
-    ctx.strokeStyle = "limegreen";
+    let color = settingsManager.get(HIGHTLIGHT_COLOR);
+    ctx.fillStyle = color ? color : 'lime';
+    ctx.strokeStyle = color ? color : 'lime';
     ctx.beginPath();
     ctx.lineWidth = 4;
     ctx.moveTo(s[0], s[1]);
@@ -34,16 +37,17 @@ function drawHighlightedEdge(e) {
     ctx.closePath();
     
     ctx.lineWidth = 1;
-    ctx.fillStyle = "black";
-    ctx.strokeStyle = "black";
+
+    resetColor();
 }
 
 function drawSelectedEdge(e) {
     let s = wg.dims.toCanvas(wg.state.vertices[e[0]]);
     let end = wg.dims.toCanvas(wg.state.vertices[e[1]]);
 
-    ctx.fillStyle = "deepskyblue";
-    ctx.strokeStyle = "deepskyblue";
+    let color = settingsManager.get(SELECT_COLOR);
+    ctx.fillStyle = color ? color : 'blue';
+    ctx.strokeStyle = color ? color : 'blue';
     ctx.beginPath();
     ctx.lineWidth = 5;
     ctx.moveTo(s[0], s[1]);
@@ -53,8 +57,7 @@ function drawSelectedEdge(e) {
     ctx.closePath();
     
     ctx.lineWidth = 1;
-    ctx.fillStyle = "black";
-    ctx.strokeStyle = "black";
+    resetColor()
 }
 
 
@@ -62,8 +65,9 @@ function drawEdgeForRemoval(e) {
     let s = wg.dims.toCanvas(wg.state.vertices[e[0]]);
     let end = wg.dims.toCanvas(wg.state.vertices[e[1]]);
 
-    ctx.fillStyle = "orange";
-    ctx.strokeStyle = "orange";
+    let color = settingsManager.get(REMOVE_COLOR);
+    ctx.fillStyle = color ? color : 'crimson';
+    ctx.strokeStyle = color ? color : 'crimson';
     ctx.beginPath();
     ctx.lineWidth = 5;
     ctx.moveTo(s[0], s[1]);
@@ -73,8 +77,7 @@ function drawEdgeForRemoval(e) {
     ctx.closePath();
     
     ctx.lineWidth = 1;
-    ctx.fillStyle = "black";
-    ctx.strokeStyle = "black";
+    resetColor()
 }
 
 
@@ -84,8 +87,10 @@ function drawVx(v) {
 
 
 
+    let color = settingsManager.get(VERTEX_COLOR);
+
     let c = wg.dims.toCanvas(v);
-    ctx.strokeStyle = "black";
+    ctx.strokeStyle = color ? color : 'black';
     ctx.lineWidth = 4;
 
 
@@ -102,15 +107,15 @@ function drawVx(v) {
     ctx.closePath();
 
     
-    ctx.fillStyle = "black";
-    ctx.strokeStyle = "black"; 
+    resetColor();
 }
 
 
 function drawSelectedVx(v) {
 
     let c = wg.dims.toCanvas(v);
-    ctx.strokeStyle = "blue";
+    let color = settingsManager.get(SELECT_COLOR);
+    ctx.strokeStyle = color ? color : 'blue';
     ctx.lineWidth = 6;
 
     ctx.beginPath();
@@ -126,8 +131,7 @@ function drawSelectedVx(v) {
     ctx.closePath();
 
     
-    ctx.fillStyle = "black";
-    ctx.strokeStyle = "black"; 
+    resetColor() 
 
     //todo get better coords for text based on pixel color? Or mabe use something like the pop-up system?
     // ctx.fillText(`Selected vertex: ${i} (${v[0]}, ${v[1]})`, 0.5 * this.dims.minpx[0], 0.5 * this.dims.minpx[1]);
@@ -138,7 +142,8 @@ function drawSelectedVx(v) {
 function drawHighlighedVx(v) {
 
     let c = wg.dims.toCanvas(v);
-    ctx.strokeStyle = "limegreen";
+    let color = settingsManager.get(HIGHTLIGHT_COLOR);
+    ctx.strokeStyle = color ? color : 'lime';
     ctx.lineWidth = 6;
 
     ctx.beginPath();
@@ -154,16 +159,16 @@ function drawHighlighedVx(v) {
     ctx.closePath();
 
     
-    ctx.fillStyle = "black";
-    ctx.strokeStyle = "black"; 
-
-
-    ctx.fillStyle = "black";
-    ctx.strokeStyle = "black";
+    resetColor();
 }
 
 
 
+function resetColor() {
+    let regularColor =  settingsManager.get(REGULAR_COLOR);
+    ctx.fillStyle = regularColor;
+    ctx.strokeStyle = regularColor; 
+}
 
 
 
@@ -198,6 +203,7 @@ function drawHihglightedCoordinate(mousePos) {
     ctx.stroke();
     ctx.closePath();
 
+    resetColor();
 }
 
 
@@ -229,6 +235,7 @@ function drawBackgroundCoordinateGrid() {
     let endY   = Math.ceil(topLeftGraph[1]);
 
     ctx.save();
+    // grey with some opacity
     ctx.strokeStyle = "rgba(192, 192, 192, 0.5)";
     ctx.lineWidth = 1;
 
@@ -252,6 +259,8 @@ function drawBackgroundCoordinateGrid() {
         ctx.stroke();
     }
     ctx.restore();
+
+    resetColor();
 }
 
 
@@ -278,6 +287,9 @@ function cooridinateMarkings() {
 function selectedCoordinateMarkings(selectedCoords) {
     
 }
+
+
+
 
 function normalCoordinateMarkings() {
     let dc = wg.dims.difc;

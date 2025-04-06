@@ -58,6 +58,9 @@ function initializeButtons() {
     let downloadBtn = document.getElementById('downloadfilebuttonid');
     downloadBtn.addEventListener('click', downloadFileContent);
 
+    let explodeButton = document.getElementById('explodeid');
+    explodeButton.addEventListener('click', explodeCoordinates);
+
     let graphModeBtn = document.getElementById('graphmodeid');
     graphModeBtn.addEventListener('click', () => {
         console.log("Opening mode selection modal...");
@@ -74,9 +77,25 @@ function initializeButtons() {
         showModal(settingsPanelElement);
     });
 
-    let explodeButton = document.getElementById('explodeid');
-    explodeButton.addEventListener('click', explodeCoordinates);
+    
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 function triggerShake() {
@@ -89,3 +108,27 @@ function triggerShake() {
         canvas.classList.remove('shake-element');
     }, {once: true});
   }
+
+
+
+
+
+function toast(message, error = false) {
+	const cont = document.getElementById("contentId");
+    const toast = document.createElement("div");
+    if (error) {
+        toast.className = "toast errortoast";
+    } else {
+        toast.className = "toast infotoast";
+    }
+    toast.textContent = message;
+
+    cont.append(toast);
+
+    // Automatically remove toast after 3 seconds
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
+
