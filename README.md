@@ -26,7 +26,7 @@ The source code can also be found on [Github](https://github.com/hash-crash/Grap
 
 ### 2.1 Requirements:
 * A mouse or touchpad 
-* A modern web browser (e.g., Chrome, Firefox, Safari, Edge).
+* A modern web browser
 
 ## 3. Interface Overview
 

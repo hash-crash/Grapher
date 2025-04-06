@@ -89,6 +89,7 @@ canvas {
 .topcontrols {
     display: flex;
     position: absolute;
+    justify-content: space-between;
     top: 0;
     right: 0;
     width: 70px; /* Fixed width for the control bar */
@@ -101,7 +102,11 @@ canvas {
     z-index: 11;
 }
 
-
+.toolbar-close {
+    display: flex;
+    flex-direction: inherit;
+    justify-content: flex-start;
+}
 
 
 

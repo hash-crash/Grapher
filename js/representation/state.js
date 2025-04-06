@@ -165,6 +165,15 @@ function stateUpdated(saveToLocalStorage=true) {
 const EMPTY_STATE = new State([], []);
 
 
+function explodeCoordinatesInState(factor) {
+    wg.state.vertices.forEach((v) => {
+        v[0] = v[0] * factor;
+        v[1] = v[1] * factor;
+    });
+    wg.state.updateAdjList();
+    addToHistory(wg.state.copyConstructor(), EXPLODE_COORDS, factor);
+    stateUpdated();
+}
 
 
 /**

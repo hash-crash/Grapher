@@ -56,8 +56,7 @@ return new Promise((resolve, reject) => {
         if(typeof(callback) == "function"){
             callback();
             resolve();
-        }
-        else {
+        } else {
             resolve();
         }
     }
@@ -82,23 +81,22 @@ async function loadAllScripts() {
     // these files are indepedent and can be loaded whenever
     let statePromise = scriptLoader('js/representation/state.js');
     let dimsPromise = scriptLoader('js/representation/dims.js');
+
     let fcPromise = scriptLoader('js/sidebar/filecontent.js');
     let historyPromise = scriptLoader('js/sidebar/history.js');
     let geometryPromise = scriptLoader('js/representation/geometry.js');
     let drawingPromise = scriptLoader('js/representation/drawing.js');
     let hiPromise = scriptLoader('js/interactivity/htmlinteractivity.js');
     let miPromise = scriptLoader('js/interactivity/modeinteractivity.js');
-
+    let settingsPromise = scriptLoader('js/interactivity/settings.js');
 
 
     // we need utilsPromise first
     await utilsPromise;
-
-    let grapherPromise =  scriptLoader('js/representation/grapher.js'); 
-
-
     await statePromise;
     await dimsPromise;
+
+    let grapherPromise =  scriptLoader('js/representation/grapher.js'); 
 
 
     await fcPromise;
@@ -106,9 +104,10 @@ async function loadAllScripts() {
     await geometryPromise;
     await hiPromise;
     await miPromise;
+    await settingsPromise;
     await drawingPromise;
     await grapherPromise;
-        // the main grapher object representing the state, dimensions of the image.
+    // the main grapher object representing the state, dimensions of the image.
     // please don't remove this
     window.Grapher = new Grapher(null, null, ctx);
 
@@ -201,6 +200,7 @@ cssLoader('css/canvas.css');
 cssLoader('css/modeineractivity.css');
 cssLoader('css/history.css');
 cssLoader('css/filecontent.css');
+cssLoader('css/settings.css');
 }
 
 

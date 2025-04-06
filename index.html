@@ -58,18 +58,31 @@
 
         <div id="contentId" class="content">
           <div id="topcontrolsid" class="controls topcontrols">
-            <!-- add tools here later -->
-             <div id="undobtnid" class="controlbutton tooltipped tooltipped-left" data-tooltip="Undo">
-              <img id="undoicon" src="assets/icons/undo.svg" alt="Undo"/>
-             </div>
-             <div id="redobtnid" class="controlbutton tooltipped tooltipped-left" data-tooltip="Redo">
-              <img id="redoicon" src="assets/icons/redo.svg" alt="Redo"/>
-             </div>
-             <div id="resizecanvasid" class="controlbutton tooltipped tooltipped-left" data-tooltip="Resize canvas coordinates">
-              <img id="resizecanvasicon" src="assets/icons/resizecanvas.svg" alt="Resize canvas coordinates">
+            <div class="toolbar-close">
+
+              <div id="undobtnid" class="controlbutton tooltipped tooltipped-left" data-tooltip="Undo">
+                <img id="undoicon" src="assets/icons/undo.svg" alt="Undo"/>
+              </div>
+              <div id="redobtnid" class="controlbutton tooltipped tooltipped-left" data-tooltip="Redo">
+                <img id="redoicon" src="assets/icons/redo.svg" alt="Redo"/>
+              </div>
+              <div id="resizecanvasid" class="controlbutton tooltipped tooltipped-left" data-tooltip="Resize canvas coordinates">
+                <img id="resizecanvasicon" src="assets/icons/resizecanvas.svg" alt="Resize canvas coordinates">
+              </div>
+              <div id="explodeid" class="controlbutton tooltipped tooltipped-left" data-tooltip="Explode coordinates by a set factor"> 
+                <img id="explodeicon" src="assets/icons/expand_content.svg" alt="Explode coordinates">
+              </div>
+
             </div>
-            <div id="graphmodeid" class="controlbutton tooltipped tooltipped-right" data-tooltip="Change target graph type">
-              <img id="graphmodeicon" src="assets/icons/graphmode.svg" alt="Change target graph type">
+
+            <div class="toolbar-close">
+              <div id="graphmodeid" class="controlbutton tooltipped tooltipped-left" data-tooltip="Change target graph type">
+                <img id="graphmodeicon" src="assets/icons/graphmode.svg" alt="Change target graph type">
+              </div>
+              <div id="settingsid" class="controlbutton tooltipped tooltipped-left" data-tooltip="Settings"> 
+                <img id="settingsicon" src="assets/icons/settings.svg" alt="Settings modal">
+              </div>
+            
             </div>
           </div>
           <canvas id="canvas" alt="Canvas on which the graph is displayed">

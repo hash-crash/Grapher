@@ -129,18 +129,5 @@ function createModeSelector() {
         container.appendChild(modeGroup);
     });
 
-    document.addEventListener('mousedown', modalMouseDown);
-
     return container;
-}
-
-function modalMouseDown(event)  {
-    let modalList = document.getElementsByClassName('modal-content');
-    let openModal = document.querySelector('.modal.visible');
-    console.l
-    if (modalList.length > 0 && !modalList[0].contains(event.target)) {
-        document.removeEventListener('mousedown', modalMouseDown);
-        openModal.remove();
-        return; // Stop further processing
-    }
 }

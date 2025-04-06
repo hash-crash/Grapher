@@ -1,0 +1,77 @@
+/* Settings Panel Specific Styles */
+
+.settings-panel-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Space between setting groups */
+}
+
+.settings-group {
+    border: 1px solid #eee;
+    padding: 15px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Space between settings within a group */
+}
+
+.settings-group h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+.setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Align label and control */
+    gap: 15px;
+}
+
+.setting-item label {
+    flex-basis: 50%; /* Give label decent space */
+    font-size: 0.9em;
+    color: #555;
+}
+
+.setting-item input[type="range"],
+.setting-item input[type="number"],
+.setting-item input[type="color"] {
+    flex-grow: 1; /* Allow input to take remaining space */
+    max-width: 150px; /* Limit width of controls */
+}
+
+.setting-item input[type="color"] {
+    height: 30px;
+    padding: 2px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+.setting-item .value-display {
+    font-weight: bold;
+    min-width: 30px; /* Ensure space for value */
+    text-align: right;
+}
+
+.settings-actions {
+    display: flex;
+    justify-content: flex-end; /* Align button to the right */
+    margin-top: 10px;
+}
+
+.settings-actions button {
+    padding: 8px 15px;
+    background-color: #f0ad4e; /* Orange theme for reset */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.settings-actions button:hover {
+    background-color: #ec971f;
+}

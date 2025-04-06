@@ -335,7 +335,9 @@ function getDescription(action, item1, item2, item3) {
             return 'Clear the file';
         break;
         case IMOPRT_FILE:
-            return 'Import new file'
+            return 'Import new file';
+        case EXPLODE_COORDS:
+            return `Explode coordinates by ${item1}`;
         default:
             return 'Unknown action';
     }
@@ -350,6 +352,7 @@ const REMOVE_EDGE = 4;
 const MODIFY_EDGE = 5;
 const CLEAR_FILE = 6;
 const IMOPRT_FILE = 7;
+const EXPLODE_COORDS = 8;
 
 
 

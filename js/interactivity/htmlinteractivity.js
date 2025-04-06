@@ -17,13 +17,28 @@ function showModal(contentElement) {
     modalContent.appendChild(contentElement);
     modal.appendChild(modalContent);
 
-    
     document.body.appendChild(modal);
-    setTimeout(() => modal.classList.add('visible'), 10);
+    document.addEventListener('mousedown', modalMouseDown);
+
+    setTimeout(() => {
+        modal.classList.add('visible');
+        document.addEventListener('mousedown', modalMouseDown);
+    }, 10);
 }
 
 
 
+
+function modalMouseDown(event)  {
+    let modalList = document.getElementsByClassName('modal-content');
+    let openModal = document.querySelector('.modal.visible');
+
+    if (modalList.length > 0 && !modalList[0].contains(event.target)) {
+        document.removeEventListener('mousedown', modalMouseDown);
+        openModal.remove();
+        return; // Stop further processing
+    }
+}
 
 
 function initializeButtons() {
@@ -45,11 +60,22 @@ function initializeButtons() {
 
     let graphModeBtn = document.getElementById('graphmodeid');
     graphModeBtn.addEventListener('click', () => {
+        console.log("Opening mode selection modal...");
+        // Generate the UI content
         const selectorUI = createModeSelector();
         showModal(selectorUI);
     });
 
+    let settingsButton = document.getElementById('settingsid');
+    settingsButton.addEventListener('click', () => {
+        console.log("Opening settings modal...");
+        // Generate the UI content
+        const settingsPanelElement = createSettingsPanel();
+        showModal(settingsPanelElement);
+    });
 
+    let explodeButton = document.getElementById('explodeid');
+    explodeButton.addEventListener('click', explodeCoordinates);
 }
 
 

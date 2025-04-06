@@ -160,6 +160,20 @@ function refreshDims(zoom = null, offset = null) {
 }
 
 
+function explodeCoordinates() {
+    let factor = settingsManager.get('explodeCoordinates');
+    if (!factor) {
+        toast("Settings are missing", true);
+        triggerShake();
+        return;
+    }
+
+    // divide zoom by factor. If zoom = 10 and factor = 2, new zoom is 5. 
+    // So, we went from 10px per grid coord to 5px per grid coord
+    refreshDims(wg.dims.zoom / factor, wg.dims.offset);
+
+    explodeCoordinatesInState(factor);
+}
 
 
 
