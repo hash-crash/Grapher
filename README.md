@@ -17,8 +17,16 @@
 
 ## 2. Getting Started
 
-* **Accessing the Tool:** The tool can be found on [Github](https://github.com/hash-crash/Grapher). After cloning the repository, using the tool is as simple as opening the index.html file in the 'root' directory. Alternatively, the Live Server extension for VSCode can be used to speed up development (by default, it makes the tool accessible through [localhost](http://127.0.0.1:5500/index.html)) and it could be hosted on a server with minimal changes.
-* **Requirements:** A modern web browser (e.g., Chrome, Firefox, Safari, Edge).
+### 2.1 Accessing the Tool:
+
+An instance of the tool is hosted on [GitHub pages](https://hash-crash.github.io/Grapher/).
+
+The source code can also be found on [Github](https://github.com/hash-crash/Grapher). After cloning the repository, using the tool is as simple as opening the index.html file in the 'root' directory. Alternatively, the Live Server extension for VSCode can be used to speed up development (by default, it makes the tool accessible through [localhost](http://127.0.0.1:5500/index.html)).
+
+
+### 2.1 Requirements:
+* A mouse or touchpad 
+* A modern web browser (e.g., Chrome, Firefox, Safari, Edge).
 
 ## 3. Interface Overview
 
@@ -129,6 +137,9 @@ This is the core feature for exploring graph transformations while maintaining s
 
 * **6.2. Importing:** Use the file input or drag-and-drop (See Section 4.1). Invalid formats will trigger an error message.
 * **6.3. Exporting/Viewing:** Use the 'File Contents' panel in the right sidebar to view the current graph data, download it as a `.txt` file, or copy it to the clipboard.
+* **6.4. Your Data** Grapher runs entirely in your web browser. Any data you import or otherwise input will not be sent to any server, and no cookies are used. 
+
+    * Note: The most recent graph is saved to [Local Storage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) as a best-effort means of combatting data loss.
 
 ## 7. Change History & Undo/Redo
 

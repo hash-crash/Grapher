@@ -77,33 +77,43 @@ return new Promise((resolve, reject) => {
 
 
 async function loadAllScripts() {
-    // these files are indepedent and can be loaded whenever
-    let fcPromise = scriptLoader('js/sidebar/filecontent.js');
-    let historyPromise = scriptLoader('js/sidebar/history.js');
-    let geometryPromise = scriptLoader('js/geometry.js');
-
     let utilsPromise =  scriptLoader('js/utils.js');
 
-    await utilsPromise;
-
-    // the rest depend on some stuff defined in utils
-    let miPromise = scriptLoader('js/modeinteractivity.js');
+    // these files are indepedent and can be loaded whenever
     let statePromise = scriptLoader('js/representation/state.js');
     let dimsPromise = scriptLoader('js/representation/dims.js');
+    let fcPromise = scriptLoader('js/sidebar/filecontent.js');
+    let historyPromise = scriptLoader('js/sidebar/history.js');
+    let geometryPromise = scriptLoader('js/representation/geometry.js');
+    let drawingPromise = scriptLoader('js/representation/drawing.js');
+    let hiPromise = scriptLoader('js/interactivity/htmlinteractivity.js');
+    let miPromise = scriptLoader('js/interactivity/modeinteractivity.js');
+
+
+
+    // we need utilsPromise first
+    await utilsPromise;
+
     let grapherPromise =  scriptLoader('js/representation/grapher.js'); 
+
+
+    await statePromise;
+    await dimsPromise;
+
+
     await fcPromise;
     await historyPromise;
     await geometryPromise;
-
+    await hiPromise;
     await miPromise;
-    await statePromise;
-    await dimsPromise;
+    await drawingPromise;
     await grapherPromise;
-    // the main grapher object representing the state, dimensions of the image.
+        // the main grapher object representing the state, dimensions of the image.
     // please don't remove this
     window.Grapher = new Grapher(null, null, ctx);
 
-    await scriptLoader('js/canvas.js');
+
+    await scriptLoader('js/interactivity/canvas.js');
     initializeButtons();
 
     await scriptLoader('js/sidebar/file.js');
@@ -133,7 +143,7 @@ async function runAutoInit() {
     try {
         console.log(`Miliseconds needed for init: ${performance.now() - timestampStart}`);
 
-        await autoLoadInputFile("in 2.txt"); // Now waits for completion
+        await autoLoadInputFile("in 3.txt"); // Now waits for completion
 
         // for now just add vertices and edges;
         // addVx([12,12]);

@@ -280,3 +280,17 @@ function resizeAndCenterGraph() {
 
 
 
+
+function resizeCanvcasModal() {
+    if (!wg || !wg.dims) {
+        console.log("ResizeCanvasModal called but now wg or dims");
+        return;
+    }
+    
+    let newDims = resizeAndCenterGraph();
+    wg.dims = newDims;
+    wg.redraw();
+    
+}
+
+

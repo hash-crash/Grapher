@@ -38,62 +38,53 @@ class Grapher {
 
         this.context.clearRect(0, 0, window.Grapher.context.canvas.width, window.Grapher.context.canvas.height);
 
-
-
-        this.dims = newdims;
         drawBackgroundCoordinateGrid();
 
-        let i = 0;
+        if (mode === EDIT_MODE) {
+
+        }
+
+        // important: do edges first, then vertices, so that vertices would appear 'on top'
+        this.state.edges.forEach(this.regularDrawEdge);
+        this.state.vertices.forEach(this.regularDrawVx);
 
 
-
-
-       
-
-
-        this.state.edges.forEach(e => {
-            // console.log("e je " + e + " start je " + this.state.vertices[e[0]] + " end je " + this.state.vertices[e[1]]);
-
-            if (selectedEdge === i) {
-                drawSelectedEdge(e);
-            } else if (highlightedEdge === i) {
-                drawHighlightedEdge(e);
-            } else if (edgeForRemoval === i) {
-                drawEdgeForRemoval(e);
-            } else {
-                drawEdge(e);
-            }
-
-            i += 1;
-        });
-
-        ctx.restore();
-
-
-
-        i = 0;
-        this.state.vertices.forEach(v => {
-            
-            if (selectedVx === i) {
-                
-                drawSelectedVx(v);
-                
-            } else if (highlightedVx == i) {
-                drawHighlighedVx(v);
-            } else {
-                drawVx(v);
-            }
-
-            i+= 1;
-            
-        });
-
-        // todo replace this with the div items list
-        //ctx.drawImage(moveIcon, 0.8 * this.dims.maxpx[0], 0.05 * this.dims.minpx[1], 50, 50);
 
         // if (this.state?.mode === MOVE || this.state?.mode === ADD) {
         //     // todo figure out what to do here
         // }
 
     }
+
+    regularDrawEdge(e, i) {
+        if (selectedEdge === i) {
+            drawSelectedEdge(e);
+        } else if (highlightedEdge === i) {
+            drawHighlightedEdge(e);
+        } else if (edgeForRemoval === i) {
+            drawEdgeForRemoval(e);
+        } else {
+            drawEdge(e);
+        }
+    }
+
+    regularDrawVx(v, i) {
+        if (selectedVx === i) {
+            drawSelectedVx(v);
+        } else if (highlightedVx == i) {
+            drawHighlighedVx(v);
+        } else {
+            drawVx(v);
+        }
+    }
+}
+
+
+
+function doaredraw() {
+    if (!window.Grapher) {
+        alert(CATASTROPHIC_ERROR_RESTART_APP);
+        return;
+    }
+    window.Grapher.redraw();
 }

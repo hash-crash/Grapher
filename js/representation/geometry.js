@@ -33,8 +33,12 @@ function edgeIntersect(e1, e2) {
 
 
 /**
- * Check if point lies on segment
- *  Only call this after you've checked that d
+ * Check if point p lies on segment [a,b]
+ * @param {[Number, Number]} a coordinates
+ * @param {[Number, Number]} b coordinates
+ * @param {[Number, Number]} p coordinates
+ * 
+ * @returns true if colinear and p beween a,b
  */ 
 
 function isOnSegment(a, b, p) {
@@ -124,7 +128,7 @@ function det(p1, p2, q) {
 
 
 function distanceToSegment(mouse, p1, p2) {
-    if (!Array.isArray(mouse) || mouse.length === 0 ) {
+    if (!Array.isArray(mouse) || mouse.length != 2) {
         return;
     }
     const dx = p2[0] - p1[0];
@@ -245,6 +249,7 @@ function isSpanningPath() {
         if (deg === 1){
             leafCount++;
         }
+        // this is probably irrelevantg
         else if (deg !== 2) {
             return false;
         }
@@ -349,6 +354,7 @@ function isCFST() {
 function isCFSP() {
     return isCrossingFree() && isSpanningPath();
 }
+
 
 
 /**
