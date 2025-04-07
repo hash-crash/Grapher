@@ -174,6 +174,10 @@ function editEdgeLine(event) {
 
     event.stopPropagation();
 
+    if (mode !== EDIT_MODE) {
+        return;
+    }
+
     // Get the clicked <li> index
     const index = Array.from(edgelist.children).indexOf(event.target);
 
@@ -262,6 +266,10 @@ function editVxLine(event) {
     }
 
     event.stopPropagation();
+
+    if (mode !== EDIT_MODE) {
+        return;
+    }
 
     // Get the clicked <li> index
     const index = Array.from(vertexlist.children).indexOf(event.target);

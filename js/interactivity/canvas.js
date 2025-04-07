@@ -49,6 +49,10 @@ document.addEventListener('contextmenu', (e) => {
 
     resetContextMenuButtonsVisibility();
 
+    if (mode !== EDIT_MODE) {
+        return;
+    }
+
     if (highlightedEdge === -1) {
         removeEdgeBtn.style.display = 'none';
         console.log("No edge - no remove edge");
