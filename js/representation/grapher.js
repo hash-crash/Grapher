@@ -21,7 +21,7 @@ class Grapher {
      * this function should be called, completely clearing the canvas and redrawing everything from scratch.
      */
     redraw() {
-        // just making sure we dont get the incorrect 
+        // just making sure we dont get the incorrect object somehow
         wg = this;
         if (!this.state?.vertices) {
             alert(CATASTROPHIC_ERROR_RESTART_APP);
@@ -46,6 +46,11 @@ class Grapher {
 
         // important: do edges first, then vertices, so that vertices would appear 'on top'
         this.state.edges.forEach(this.regularDrawEdge);
+
+        if (showColinearPoints) {
+            this.drawColinearIndicators()
+        }
+
         this.state.vertices.forEach(this.regularDrawVx);
 
 
@@ -76,6 +81,18 @@ class Grapher {
         } else {
             drawVx(v);
         }
+    }
+
+    drawColinearIndicators() {
+        allColinearTriples.forEach((triple) => {
+            if (triple[0] === draggedVertexIndex ||
+                triple[1] === draggedVertexIndex ||
+                triple[2] === draggedVertexIndex
+            ) {
+                return;
+            }
+            drawEdgeWithWarning([triple[0], triple[2]]);
+        });
     }
 }
 

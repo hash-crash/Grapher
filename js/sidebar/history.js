@@ -226,6 +226,9 @@ function redo() {
         return;
     }
 
+    if (showColinearPoints) {
+        allColinearTriples = findAllColinearTriples();
+    }
     updateFileView();
     updateHistoryView();
     window.Grapher.redraw();
@@ -265,6 +268,9 @@ function undo() {
         return;
     }
 
+    if (showColinearPoints) {
+        allColinearTriples = findAllColinearTriples();
+    }
     updateFileView();
     updateHistoryView();
     window.Grapher.redraw();

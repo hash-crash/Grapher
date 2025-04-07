@@ -1,0 +1,119 @@
+
+
+.controlbutton {
+    width: 50px;
+    height: 50px;
+    margin: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid black;
+    border-radius: 5px;
+    background-color: #f5f5f5;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.controlbutton:hover {
+    background-color: #e0e0e0;
+}
+
+.controlbutton:active {
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+
+.controlbutton img {
+    width: 80%; /* Scale icons to fit within buttons */
+    height: 80%;
+}
+
+
+.bottomcontrols {
+    display: flex;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px; /* Fixed width for the control bar */
+    height: calc(100%);
+    justify-content: center;
+    align-items: center;
+    flex-direction: column; /* Stack buttons vertically */
+    align-items: center;
+    padding: 0;
+    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); 
+}
+
+.topcontrols {
+    display: flex;
+    position: absolute;
+    justify-content: space-between;
+    top: 0;
+    right: 0;
+    width: 70px; /* Fixed width for the control bar */
+    height: calc(100%);
+    flex-direction: column; /* Stack buttons vertically */
+    align-items: center;
+    padding: 0;
+    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for separation */
+    z-index: 11;
+}
+
+.toolbar-close {
+    display: flex;
+    flex-direction: inherit;
+    justify-content: flex-start;
+}
+
+
+.tooltipped {
+    position: relative;
+    z-index: 900;
+  }
+  
+  .tooltipped-right::after {
+    position: absolute;
+    left: 100%;
+    transform: translateX(5px);
+    z-index: 1000;
+  }
+  
+  .tooltipped-left::after {
+    position: absolute;
+    right: 100%;
+    transform: translateX(-5px);
+    z-index: 1000;
+  }
+  
+  .tooltipped-belowleft::after {
+    position: fixed; /* Escape scroll containers */
+    transform: translate(-90%, 80%); /* Center horizontally */
+    z-index: 1000;
+  }
+  
+  .tooltipped::after {
+    content: attr(data-tooltip);
+    background-color: #333;
+    color: #ffffff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out;
+  
+    z-index: 1000;
+  }
+  
+  .tooltipped:hover::after {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  
+  .pressed-button {
+    background-color: #c5c5c5 !important;
+  }

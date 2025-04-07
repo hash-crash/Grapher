@@ -83,6 +83,7 @@ async function loadAllScripts() {
     let dimsPromise = scriptLoader('js/representation/dims.js');
 
     let fcPromise = scriptLoader('js/sidebar/filecontent.js');
+    let filePromise = scriptLoader('js/sidebar/file.js');
     let historyPromise = scriptLoader('js/sidebar/history.js');
     let geometryPromise = scriptLoader('js/representation/geometry.js');
     let drawingPromise = scriptLoader('js/representation/drawing.js');
@@ -115,7 +116,7 @@ async function loadAllScripts() {
     await scriptLoader('js/interactivity/canvas.js');
     initializeButtons();
 
-    await scriptLoader('js/sidebar/file.js');
+    await filePromise;
     runAutoInit();
 }
 loadAllScripts();
@@ -201,6 +202,7 @@ cssLoader('css/modeineractivity.css');
 cssLoader('css/history.css');
 cssLoader('css/filecontent.css');
 cssLoader('css/settings.css');
+cssLoader('css/toolbar.css');
 }
 
 

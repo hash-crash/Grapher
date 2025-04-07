@@ -1,5 +1,8 @@
-
-
+/**
+ * This file handles the majority of the logic for dealing with the user-interactions with the actual canvas
+ * 
+ * This includes clicking, hovering, dragging, right-clicking, etc logic.
+ */
 
 
 const customMenu = document.getElementById("custom-menu");
@@ -714,7 +717,6 @@ function keydownHandler(event) {
     if ((event.key === 'u'  && !event.shiftKey) || (event.key === 'U' && EventTarget.shiftKey)
              || ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey)) {
         undo();
-        console.log("undo done");
         return;
     }
 
@@ -722,7 +724,6 @@ function keydownHandler(event) {
     else if (( event.shiftKey && (event.key === 'u' || ((event.ctrlKey || event.metaKey) && event.key === 'z'))) 
             || (event.key === 'U' && !event.shiftKey)) {  
         redo();  
-        console.log("redo done");
         return;
     } 
 
@@ -736,11 +737,13 @@ function keydownHandler(event) {
         const openModal = document.querySelector('.modal.visible');
         if (openModal) {
             openModal.remove();
-            return; // Stop further processing
+            // Stop further processing
+            return; 
         }
 
         if (customMenu.style.display === 'block') {
             hideCustomMenu();
+            // Stop further processing
             return;
         }
         console.log("escape or n clicked, now normal mode")
@@ -760,18 +763,6 @@ function keydownHandler(event) {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-const moveIcon = new Image();
-moveIcon.src = "assets/icons/move.svg";
-
 
 
 canvas.addEventListener('mousemove', handleHover);

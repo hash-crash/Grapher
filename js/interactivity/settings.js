@@ -10,8 +10,8 @@ const DEFAULT_SETTINGS = {
     vertexColor: '#000000',
     edgeColor: '#333333',
     forRemovalColor: '#dc143c', // crimson - Default color for items marked for removal
-    highlightColor: '#00ff00',    // lime - Default color for highlighted items
-    willBeAddedColor: '#66cdaa' // Default color for potential additions (distinct from lime)
+    highlightColor: '#FFD700',    // gold - Default color for highlighted items
+    willBeAddedColor: '#66cdaa' // Default color for potential additions
 };
 
 const ADD_COLOR =  'willBeAddedColor';
@@ -148,7 +148,6 @@ const settingsManager = {
 // --- IMPORTANT ---
 // Initialize the settings manager when the script loads
 settingsManager.init();
-
 
 
 

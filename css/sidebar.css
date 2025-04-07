@@ -124,3 +124,33 @@
 
 
 
+
+
+.applyBtn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  padding: 4px;
+  border: 2px solid #4CAF50;
+  border-radius: 15px;
+  background-color: #f9f9f9;
+  color: #333333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+applyBtn:hover {
+background-color: #4CAF50;
+color: white;
+border-color: #3e8e41;
+}
+
+applyBtn:active {
+background-color: #3e8e41;
+border-color: #2e6e31;
+color: white;
+}
+
+applyBtn:focus {
+outline: none;
+box-shadow: 0 0 5px rgba(76, 175, 80, 0.75);
+}

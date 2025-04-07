@@ -171,6 +171,41 @@ function isNearVertex(mousePos, vertex) {
 
 
 
+function findAllColinearTriples() {
+    const collinearTriples = [];
+    const n = wg.state.vertices.length;
+
+    // Need at least 3 vertices to form a triple
+    if (n < 3) {
+        return collinearTriples;
+    }
+
+    // Iterate through all unique combinations of three distinct vertex indices i, j, k
+    for (let i = 0; i < n - 2; i++) {
+        for (let j = i + 1; j < n - 1; j++) {
+            for (let k = j + 1; k < n; k++) {
+                const p1 = wg.state.vertices[i];
+                const p2 = wg.state.vertices[j];
+                const p3 = wg.state.vertices[k];
+                if (det(p1, p2, p3) !== 0) {
+                    continue;
+                }
+                if (isOnSegment(p1, p3, p2)) {
+                    collinearTriples.push([i, j, k]);
+                    continue;
+                }
+                if (isOnSegment(p1, p2, p3)) {
+                    collinearTriples.push([i, k, j]);
+                    continue;
+                }
+                collinearTriples.push([j, i, k]);
+            }
+        }
+    }
+    return collinearTriples;
+}
+
+
 
 /**
  * Checks if the graph is connected using BFS

@@ -80,6 +80,23 @@ function drawEdgeForRemoval(e) {
     resetColor()
 }
 
+function drawEdgeWithWarning(e) {
+    let s = wg.dims.toCanvas(wg.state.vertices[e[0]]);
+    let end = wg.dims.toCanvas(wg.state.vertices[e[1]]);
+
+    ctx.fillStyle = 'red';
+    ctx.strokeStyle = 'red';
+    ctx.beginPath();
+    ctx.lineWidth = 5;
+    ctx.moveTo(s[0], s[1]);
+    ctx.lineTo(end[0], end[1]);
+
+    ctx.stroke();
+    ctx.closePath();
+    
+    ctx.lineWidth = 1;
+    resetColor()
+}
 
 
 // Simple solid black circle

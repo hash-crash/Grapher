@@ -156,6 +156,9 @@ function stateUpdated(saveToLocalStorage=true) {
     updateFileView();
     updateHistoryView();
     wg.state.updateAdjList();
+    if (showColinearPoints) {
+        allColinearTriples = findAllColinearTriples();
+    }
     wg.redraw();
     if (saveToLocalStorage) {
         wg.state.saveState();

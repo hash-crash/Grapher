@@ -61,6 +61,12 @@ function initializeButtons() {
     let explodeButton = document.getElementById('explodeid');
     explodeButton.addEventListener('click', explodeCoordinates);
 
+    let colinearButton = document.getElementById('showcolinearid');
+    colinearButton.addEventListener('click', () => {
+        toggleShowColinear();
+        colinearButton.classList.toggle('pressed-button', showColinearPoints);
+    });
+
     let graphModeBtn = document.getElementById('graphmodeid');
     graphModeBtn.addEventListener('click', () => {
         console.log("Opening mode selection modal...");
@@ -77,7 +83,7 @@ function initializeButtons() {
         showModal(settingsPanelElement);
     });
 
-    
+
 }
 
 

@@ -26,12 +26,28 @@ var mode = EDIT_MODE;
 var submode = DEFAULT_EDIT_MODE;
 
 
+var showColinearPoints = false;
+var allColinearTriples = [];
 
 
 
 
+function toggleShowColinear() {
+    showColinearPoints = !showColinearPoints;
 
-
+    if (showColinearPoints) {
+        allColinearTriples = findAllColinearTriples();
+        if (allColinearTriples.length === 0) {
+            toast("No 3 vertices are colinear");
+        } else {
+            wg.redraw();
+            toast(`Showing lines between all ${allColinearTriples.length} colinear vertices`);
+        }
+    } else {
+        allColinearTriples = [];
+        wg.redraw();
+    }
+}
 
 
 
