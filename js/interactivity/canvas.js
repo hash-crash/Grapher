@@ -242,7 +242,8 @@ let isDraggingVertex = false;
 let draggedVertexIndex = -1;
 let originalState = null;
 let vertexDragOffset = { x: 0, y: 0 };
-let dragStart = { x: 0, y: 0 };
+let offsetAtDragStart = { x: 0, y: 0 };
+let maxDragPoint = {x: 0, y: 0};
 let initialClickPosition = {x: 0, y: 0};
 
 
@@ -254,7 +255,9 @@ canvas.addEventListener('mousedown', (event) => {
     let mousePos = getMousePos(event);
 
     initialClickPosition.x = mousePos[0];
+    maxDragPoint.x = mousePos[0];
     initialClickPosition.y = mousePos[1];
+    maxDragPoint.y = mousePos[1];
 
     if (mode === EDIT_MODE) {
     // Check if the click is near any vertex.
@@ -278,8 +281,8 @@ canvas.addEventListener('mousedown', (event) => {
     // If no vertex was clicked, start dragging the canvas.
     isDraggingCanvas = true;
     // Record the starting offset relative to the mouse position.
-    dragStart.x = mousePos[0] - wg.dims.offset[0];
-    dragStart.y = mousePos[1] - wg.dims.offset[1];
+    offsetAtDragStart.x = mousePos[0] - wg.dims.offset[0];
+    offsetAtDragStart.y = mousePos[1] - wg.dims.offset[1];
 
 
     handleHover(event);
@@ -289,10 +292,19 @@ canvas.addEventListener('mousedown', (event) => {
 canvas.addEventListener('mousemove', (event) => {
     let dims = window.Grapher.dims;
     let mousePos = getMousePos(event);
+
+
+    let diff = Math.hypot(initialClickPosition.x - mousePos[0], initialClickPosition.y - mousePos[1]);
+    let previousMaxDiff = Math.hypot(initialClickPosition.x - maxDragPoint.x, initialClickPosition.y - maxDragPoint.y);
+    if (diff > previousMaxDiff) {
+        maxDragPoint.x = mousePos[0];
+        maxDragPoint.y = mousePos[1];
+    }
+
     if (isDraggingCanvas) {
         // Update the camera offset based on mouse movement.
-        dims.offset[0] = mousePos[0] - dragStart.x;
-        dims.offset[1] = mousePos[1] - dragStart.y;
+        dims.offset[0] = mousePos[0] - offsetAtDragStart.x;
+        dims.offset[1] = mousePos[1] - offsetAtDragStart.y;
     } else if (isDraggingVertex && draggedVertexIndex !== -1) {
         // Adjust mouse position by the vertex drag offset.
         let adjustedX = mousePos[0] + vertexDragOffset.x;
@@ -318,7 +330,7 @@ canvas.addEventListener('mouseup', (event) => {
     if (!clickTolerance) {
         clickTolerance = MAX_DRAG_DISTANCE_FOR_CLICK;
     }
-    if (Math.hypot(initialClickPosition.x - mousePos[0], initialClickPosition.y - mousePos[1]) < clickTolerance) {
+    if (Math.hypot(initialClickPosition.x - maxDragPoint.x, initialClickPosition.y - maxDragPoint.y) < clickTolerance) {
         handleClick(event);
     }
 

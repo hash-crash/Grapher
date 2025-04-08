@@ -202,7 +202,7 @@ function redrawIntoState(event) {
 
 
 
-function redo() {
+function redo(depth = 0) {
     if (window.undoneStates.length === 0) {
         console.log("nothing to redo");
         toast("Nothing to re-do.")
@@ -226,6 +226,15 @@ function redo() {
         return;
     }
 
+    // a little hacky but it saves us from infinite recursion
+    if (depth === 0 && !isValidGraphForMode()) {
+        toast("Cannot redo because of current graph mode", true);
+        undo(1);
+    } else if (depth === 0 && mode === RECONFIGURATION_MODE && futureItem.action !== FLIP) {
+        toast("Can only redo flips in this mode", true);
+        undo(1);
+    }
+
     if (showColinearPoints) {
         allColinearTriples = findAllColinearTriples();
     }
@@ -236,7 +245,7 @@ function redo() {
 
 
 
-function undo() {
+function undo(depth = 0) {
     if (window.stateHistory.length === 0) {
         console.log("Nothing to undo.");
         toast("Nothing to undo.")
@@ -267,6 +276,19 @@ function undo() {
         showFileInput();
         return;
     }
+
+
+    // a little hacky but it saves us from infinite recursion
+    if (depth === 0 && !isValidGraphForMode()) {
+        toast("Cannot undo because of current graph mode", true);
+        redo(1);
+    } else if (depth === 0 && mode === RECONFIGURATION_MODE && historyItem.action !== FLIP) {
+        toast("Can only undo flips in this mode", true);
+        redo(1);
+    }
+
+
+
 
     if (showColinearPoints) {
         allColinearTriples = findAllColinearTriples();
@@ -344,6 +366,8 @@ function getDescription(action, item1, item2, item3) {
             return 'Import new file';
         case EXPLODE_COORDS:
             return `Explode coordinates by ${item1}`;
+        case FLIP:
+            return `Flip edge ${item1} to ${item2}`;
         default:
             return 'Unknown action';
     }
@@ -359,7 +383,7 @@ const MODIFY_EDGE = 5;
 const CLEAR_FILE = 6;
 const IMOPRT_FILE = 7;
 const EXPLODE_COORDS = 8;
-
+const FLIP = 9;
 
 
 
@@ -369,5 +393,4 @@ class HistoryItem{
         this.action = action;
         this.description = description;
     }
-
 }

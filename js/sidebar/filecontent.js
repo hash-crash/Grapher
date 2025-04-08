@@ -121,8 +121,6 @@ function highlightEdgeLine(event) {
     // Get the clicked <li> index
     const index = Array.from(edgelist.children).indexOf(event.target);
 
-    console.log(`You hovered on item ${index + 1}: ${event.target.textContent}`);
-
     highlightedEdge = index;
 
     wg.redraw();
@@ -135,8 +133,6 @@ function highlightVxLine(event) {
 
     // Get the clicked <li> index
     const index = Array.from(vertexlist.children).indexOf(event.target);
-
-    console.log(`You hovered on vertex ${index + 1}: ${event.target.textContent}`);
 
     highlightedVx = index;
 

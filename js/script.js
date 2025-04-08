@@ -18,6 +18,8 @@
 
 // Boot up the javascript:
 {
+    let timestampStart = performance.now();
+
     const scripts = document.getElementsByTagName("script");
     src = scripts[scripts.length-1].src;
     let foundPath = "";
@@ -32,8 +34,7 @@
         console.log(foundPath);
     }
 
-    let timestampStart = performance.now();
-
+    
 
 
 /**

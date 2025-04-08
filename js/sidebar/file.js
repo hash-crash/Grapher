@@ -112,9 +112,15 @@ function handleFileLines(allLines) {
         edgesBuffer.push(edge);
     }
 
+    if (mode !== EDIT_MODE || submode !== DEFAULT_EDIT_MODE) {
+        mode = EDIT_MODE;
+        submode = DEFAULT_EDIT_MODE;
+        toast("File imported. Mode reset to free editing.")
+    } else {
+        toast("File imported.")
+    }
 
-    let ng = new Grapher(new State(edgesBuffer, verticesBuffer), null, ctx);
-    window.Grapher = ng;
+    window.Grapher =  new Grapher(new State(edgesBuffer, verticesBuffer), null, ctx);
     wg = window.Grapher;
 
     let dims = resizeAndCenterGraph();
@@ -122,7 +128,7 @@ function handleFileLines(allLines) {
 
     window.stateHistory = [];
     window.undoneStates = [];
-    addToHistory(ng.state.copyConstructor(), IMOPRT_FILE);
+    addToHistory(wg.state.copyConstructor(), IMOPRT_FILE);
 
     stateUpdated();
     

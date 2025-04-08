@@ -153,6 +153,16 @@ function restoreFromLocalStorage() {
 
 
 function stateUpdated(saveToLocalStorage=true) {
+
+    if(!isValidGraphForMode()) {
+        toast("Invalid graph for this mode.", true);
+        triggerShake();
+        poppedItem = window.stateHistory.pop();
+    
+        prevState = window.stateHistory[window.stateHistory.length - 1];
+        wg.state = prevState.state.copyConstructor();
+    }
+
     updateFileView();
     updateHistoryView();
     wg.state.updateAdjList();
@@ -174,6 +184,7 @@ function explodeCoordinatesInState(factor) {
         v[1] = v[1] * factor;
     });
     wg.state.updateAdjList();
+
     addToHistory(wg.state.copyConstructor(), EXPLODE_COORDS, factor);
     stateUpdated();
 }
@@ -213,8 +224,6 @@ function addVx(coords) {
     wg.state.updateAdjList();
 
     addToHistory(wg.state.copyConstructor(), ADD_VERTEX, coords);
-
-
     stateUpdated();
 
 }
@@ -256,7 +265,6 @@ function moveVertex(oldCoords, newCoords) {
         wg.state.updateAdjList();
 
         addToHistory(wg.state.copyConstructor(), MOVE_VERTEX, oldCoords, newCoords);
-
         stateUpdated();
 
         return true;
@@ -309,7 +317,6 @@ function addEdge(indices, userPresentation=false) {
     wg.state.updateAdjList();
 
     addToHistory(wg.state.copyConstructor(), ADD_EDGE, indices.map((e) => e + 1));
-
     stateUpdated();
 
     return true;
@@ -331,6 +338,8 @@ function editEdge(orignalEdge, indices) {
         return false;
     }
 
+
+
     for (let i = 0; i < wg.state.edges.length; i++) {
         let edge = wg.state.edges[i];
         if ((edge[0] === orignalEdge[0] && edge[1] === orignalEdge[1]) ||
@@ -342,7 +351,6 @@ function editEdge(orignalEdge, indices) {
             wg.state.updateAdjList();
 
             addToHistory(wg.state.copyConstructor(), MODIFY_EDGE, orignalEdge, indices);
-
             stateUpdated();
 
             return true;
@@ -402,9 +410,9 @@ function removeEdge(edge) {
             || element[0] === edge[1] && element[1] === edge[0]) {
 
             wg.state.edges.splice(index, 1);
+            wg.state.updateAdjList();
 
             addToHistory(wg.state.copyConstructor(), REMOVE_EDGE, edge.map((i) => i+1));
-
             stateUpdated();
 
             return;
@@ -454,10 +462,10 @@ function removeVx(vxIndex) {
             e[1] -= 1;
         }
     });
+    wg.state.updateAdjList();
 
 
     addToHistory(wg.state.copyConstructor(), REMOVE_VERTEX, vertexCoords);
-
     stateUpdated();
 }
 
@@ -494,12 +502,11 @@ function deleteItem() {
         // if we delete an edge, it's fine to leave the vertices.
         removeEdge(edgeToDelete);
 
+        selectedEdge = -1;
+
         wg.state.updateAdjList();
 
-        selectedEdge = -1;
         addToHistory(wg.state.copyConstructor(), REMOVE_EDGE, edgeToDelete);
-
-
         stateUpdated();
 
     } else {

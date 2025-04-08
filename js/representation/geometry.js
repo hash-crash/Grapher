@@ -239,20 +239,24 @@ function isConnected() {
     return visitedCount === n;
 }
 
-function isCrossingFree() {
-    const n = wg.state.vertices.length;
+function isCrossingFree(state=null) {
+    if (state === null) {
+        state = wg.state;
+    }
+
+    const n = state.vertices.length;
     //non-planar graph must have crossings
-    if (n > 4 && wg.state.edges.length > 3 * n - 6) {
+    if (n > 4 && state.edges.length > (3 * n) - 6) {
         return false;
     }
 
     // Now edges.length is bound to be O(n), so worst case is O(n²)
     let isGood = true;
-    wg.state.edges.forEach((edge, i) => {
-        for (let j = i + 1; j < wg.state.edges.length; j++) {
-            const otherEdge = wg.state.edges[j];
+    state.edges.forEach((edge, i) => {
+        for (let j = i + 1; j < state.edges.length; j++) {
+            const otherEdge = state.edges[j];
             if (edgeIntersect(edge, otherEdge)) {
-                console.log(`${edge}, ${otherEdge}, {[${wg.state.vertices[edge[0]]}, ${wg.state.vertices[edge[1]]}]} and {[${wg.state.vertices[otherEdge[0]]}, ${wg.state.vertices[otherEdge[1]]}]}`)
+                console.log(`${edge}, ${otherEdge}, {[${state.vertices[edge[0]]}, ${state.vertices[edge[1]]}]} and {[${state.vertices[otherEdge[0]]}, ${state.vertices[otherEdge[1]]}]}`)
                 isGood = false;
             }
         }
@@ -406,4 +410,30 @@ function isCFSP() {
  */
 function isCFMatching() {
     return isCrossingFree() && isMatching();
+}
+
+
+
+
+
+function isValidGraphForMode() {
+    if (mode === EDIT_MODE) {
+        return submode === DEFAULT_EDIT_MODE ?
+            true :
+            isCrossingFree();
+    } else {
+        switch (submode) {
+            case TRIANGULATION_RECONFIGURATION_MODE:
+                return isGeometricTriangulation();
+            case CFSP_RECONFIGURATION_MODE:
+                return isCFSP();
+            case CFST_RECONFIGURATION_MODE:
+                return isCFST();
+            case MATCHINGS_RECONFIGURATION_MODE:
+                return isMatching();
+            default:
+                console.error("unkown submode");
+                break;
+        }
+    }
 }
