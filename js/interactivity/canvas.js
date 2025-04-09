@@ -72,6 +72,7 @@ document.addEventListener('contextmenu', (e) => {
         console.log("Yes vx - no add to empty space");
     }
 
+
     if (selectedVx === -1 ) {
         // Nothing is currently selected, meaning we have nowhere to draw from
         drawEdgeBtn.style.display = 'none';
@@ -83,12 +84,21 @@ document.addEventListener('contextmenu', (e) => {
         if (t["eiv"].includes(highlightedVx)) {
             drawEdgeBtn.style.display = 'none';
         } else {
+            // we have selected, and there isn't an edge between selected and highlighted.
             removeEdgeToHereBtn.style.display = 'none';
         }
-        if ( highlightedVx === selectedVx) {
+        if (highlightedVx === selectedVx) {
             drawEdgeBtn.style.display = 'none';
             removeEdgeToHereBtn.style.display = 'none';
         }
+    }
+
+    if (drawEdgeBtn.style.display === 'block' && intersectsAny(wg.state.vertices[selectedVx], wg.state.vertices[highlightedVx])) {
+        drawEdgeBtn.style.display = 'none';
+    }
+
+    if (addVertexAndDrawEdgeBtn.style.display === 'block' && intersectsAny(wg.state.vertices[selectedVx], closestGraphCoord)) {
+        addVertexAndDrawEdgeBtn.style.display = 'none';
     }
 
     // i feel like this should all be doable much much cleaner but i really dk how to do that atm
@@ -408,6 +418,12 @@ function handleHover(event) {
     }
 
     mousePos = getMousePos(event);
+
+    let graphCoords = window.Grapher.dims.toCoords(mousePos);
+    closestGraphCoord = [
+        Math.round(graphCoords[0]),
+        Math.round(graphCoords[1])
+    ];
 
     let found = false;
     if (mode === EDIT_MODE) {

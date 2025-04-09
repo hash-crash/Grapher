@@ -56,6 +56,27 @@ function isOnSegment(a, b, p) {
  * 
  * @param {[Number, Number]} p1 coordinates
  * @param {[Number, Number]} p2 coordinates
+ * 
+ * @returns true if this line would intersect any existing edge
+ */
+function intersectsAny(p1, p2, state=null) {
+    if (state === null) {
+        state = wg.state;
+    }
+    for (const edge of state.edges) {
+        let v1 = state.vertices[edge[0]];
+        let v2 = state.vertices[edge[1]];
+        if (intersects(p1, p2, v1, v2)) {
+            return true;
+        }
+    }
+}
+
+
+/**
+ * 
+ * @param {[Number, Number]} p1 coordinates
+ * @param {[Number, Number]} p2 coordinates
  * @param {[Number, Number]} q1 coordinates
  * @param {[Number, Number]} q2 coordinates
  * @returns true if intersection found, false if no intersection

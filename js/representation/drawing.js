@@ -188,23 +188,16 @@ function resetColor() {
 }
 
 
-
+ /** @type {[Number, Number]} */
 let closestGraphCoord = null;
 
 
 function drawHihglightedCoordinate(mousePos) {
 
-    
-    let graphCoords = window.Grapher.dims.toCoords(mousePos);
-    closestGraphCoord = [
-        Math.round(graphCoords[0]),
-        Math.round(graphCoords[1])
-    ];
-
     let canvasCoord = wg.dims.toCanvas(closestGraphCoord);
     
     // Adjust the size of the green cross here: 
-    let crossSize = (wg.dims.zoom / 3)  * Math.SQRT2;
+    let crossSize = (wg.dims.zoom / 4)  * Math.SQRT2;
     
     // console.log(mousePos);
     // console.log(`trying to draw cross mouse graph coords: mousePos: ${mousePos} ${graphCoords}, closest: ${closestGraphCoord}, canvasC: ${canvasCoord}`);
