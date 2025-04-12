@@ -188,8 +188,6 @@ function seeIfClickOnFlip(mousePos) {
         console.log(dist1);
         console.log(dist2);
         if (dist1 < minDist || dist2 < minDist) {
-            console.log("DO THE FLIP");
-
             flipMatching('a');
 
 
@@ -204,7 +202,6 @@ function seeIfClickOnFlip(mousePos) {
 
             flipMatching('b');
 
-            console.log("DO THE FLIP, 2");
             return;
         }
     }

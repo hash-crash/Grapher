@@ -514,13 +514,13 @@ function deleteItem() {
 }
 
 
-function flipMatching(mode) {
+function flipMatching(flipMode) {
     let e1 = [wg.state.edges[selectedEdge][0], wg.state.edges[selectedEdge][1]];
     let e2 = [wg.state.edges[chosenFlipEdge][0], wg.state.edges[chosenFlipEdge][1]];
 
 
 
-    if (mode === 'a') {
+    if (flipMode === 'a') {
         wg.state.edges[selectedEdge][1] = e2[0];
         wg.state.edges[chosenFlipEdge][0] = e1[1];
     } else {
@@ -528,6 +528,6 @@ function flipMatching(mode) {
         wg.state.edges[chosenFlipEdge][1] = e1[1];
     }
 
-    addToHistory(wg.state.copyConstructor(), FLIP, e1, e2, mode);
+    addToHistory(wg.state.copyConstructor(), FLIP, e1, e2, flipMode);
     stateUpdated();
 }

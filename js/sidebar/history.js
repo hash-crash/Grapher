@@ -315,7 +315,7 @@ function undo(depth = 0) {
  * @param {String | Number} item3 3rd -||-
  */
 function addToHistory(state, action, item1 = null, item2 = null, item3 = null) {
-    let description = getDescription(action, item1, item2);
+    let description = getDescription(action, item1, item2, item3);
     let newHistoryItem = new HistoryItem(state, action, description);
 
 
@@ -366,7 +366,7 @@ function getDescription(action, item1, item2, item3) {
         case EXPLODE_COORDS:
             return `Explode coordinates by ${item1}`;
         case FLIP:
-            if (item3 === null) {
+            if (!item3) {
                 return `Flip edge ${item1} to ${item2}`;
             }
             return `Flip edge ${item1} and ${item2} via mode ${item3}`;

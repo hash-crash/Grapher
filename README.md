@@ -2,18 +2,44 @@
 
 # User Guide: Grapher
 
+
+## 0. Work Log
+Excpected working:
+1. Fully editing the graph - moving the vertices, drawing edges, everything
+2. editing the graph in crossing-free mode - it should be impossible to make a crossing.
+3. entering matchings mode if the graph is a perfect matching
+    * click on an edge, all edges with which a flip could be performed are now red, and the clicked edge is green
+    * click on one of the red edges, all other edges go back to black, and green lines are drawn for where the new lines would be drawn
+    * click on one of the green lines, the flip is perfromed
+    * the flip can be undone and re-done via history (ctrl+z or button)
+    * in the matcings mode, only flips can be undone/redone
+4. highlighting of colinear points
+    * it's a toggle, so it needs to be turned off. It obstructs visibility for flipping
+5. settings
+    * adjusting the hover/click proximity, colors, and by what factor the coordinates get multiplied
+6. coordinate multiplaction
+    * it's at the bottom of the top part of the toolbar (icon is like small markers pointing diagonally)
+7. re-zoom graph so that it's fully within the canvas
+
+Expected not working:
+1. other flip types (almost-perfect matchings, triangulations, CFSP, CFST)
+
+
+
+
 ## 1. Introduction
 
-* **Purpose:** This is Grapher, an interactive web-app for investigating graph reconfigurations! The primary motivation for this tool is to help us explore graph *reconfigurations* for a few main types of geometric graphs.
-    * Configurations are plane drawings of straight line graphs with labeled vertices
-    * A reconfiguration step, or a flip, is an exchange of (a bounded number of) edges
-* **Supported Graph Types for reconfiguration:**
-    * Perfect Pairings / Matchings
-    * Almost-Perfect Pairings / Matchings
-    * Crossing-Free Spanning Trees
-    * Crossing-Free Spanning Paths
-    * Triangulations
-* **Target Audience:** Researchers, students, and anyone interested in exploring the structural properties and transformations of these specific graph classes.
+### 1.1 Purpose: This is Grapher, an interactive web-app for investigating graph reconfigurations! The primary motivation for this tool is to help us explore graph *reconfigurations* for a few main types of geometric graphs.
+
+* Configurations are plane drawings of straight line graphs with labeled vertices
+* A reconfiguration step, or a flip, is an exchange of (a bounded number of) edges
+### 1.2 Supported Graph Types for reconfiguration:
+* Perfect Pairings / Matchings
+* Almost-Perfect Pairings / Matchings
+* Crossing-Free Spanning Trees
+* Crossing-Free Spanning Paths
+* Triangulations
+### 1.3 Target Audience: Researchers, students, and anyone interested in exploring the structural properties and transformations of these specific graph classes.
 
 ## 2. Getting Started
 
@@ -68,14 +94,14 @@ The tool interface is divided into several key areas:
 
 You can start with a graph in two ways:
 
-* **4.1. Importing a Graph:**
+* ### 4.1. Importing a Graph:
     * Use the file selector button or drag and drop a valid graph file onto the indicated box.
     
      <img src="data/File_area_user_guide.png" width=400px>
 
     * The tool only supports a specific plain text format (see [Section 6](#6-file-handling)).
-* **4.2. Building a Graph from Scratch (Edit Mode):**
-    * Ensure you are in 'Edit Mode' ()
+* ### 4.2. Building a Graph from Scratch (Edit Mode):
+    * Ensure you are in 'Edit Mode' (See [Toolbar-modes](#8-toolbar-actions) and [Graph types](#12-supported-graph-types-for-reconfiguration))
     * **Selecting Elements:**
         * Left-click a vertex or an edge to select it. Selected elements are rendered in a blue color.
         * Selection is used for actions like deleting or starting edge creation.
@@ -101,13 +127,13 @@ You can start with a graph in two ways:
         1. To pan, simply use the mouse to drag the canvas. Grab anywhere except a vertex, the mouse pointer will change to a 'move' icon.
         2. To zoom, use the use the scroll wheel. The tool will always zoom towards where the mouse is positioned. The vertices will always be rendered the same size, allowing you to have an easier time adjusting graphs where vertices are close to each other.
 
-## 5. Performing Recombinations
+## 5. Performing Reconfigurations
 
 This is the core feature for exploring graph transformations while maintaining specific structural properties.
 
-* **5.1. Pre-requisite: Valid Graph:** Ensure the graph currently displayed in the canvas conforms to the desired graph type (e.g., is a valid Crossing-Free Spanning Tree) *before* attempting recombination for that type.
+* **5.1. Pre-requisite: Valid Graph:** Ensure the graph currently displayed in the canvas conforms to the desired graph type (e.g., is a valid Crossing-Free Spanning Tree) *before* attempting reconfiguration for that type.
 * **5.2. Select Graph Type:** Choose the graph type you want to work with (toolbar, ![Graph icon](assets/icons/graphmode.svg) graph-mode icon, then click on the desired type). The tool will verify if the current graph matches the selected type. If not, an error message will appear.
-* **5.3. Initiate Recombination:** The method depends on the selected graph type:
+* **5.3. Initiate reconfigurations:** The method depends on the selected graph type:
     * **For  Almost-Perfect Matchings:**
         * **Option A (Edge-based):** Select **one** existing edge. The tool will highlight potential alternative edges that could replace the selected one while maintaining the graph type.
         * **Option B (Vertex-pair-based):** Select **two** vertices that do *not* currently have an edge between them (representing a *candidate* edge). The tool will highlight existing edges that could be removed if this candidate edge were added, maintaining the graph type.
@@ -149,14 +175,28 @@ This is the core feature for exploring graph transformations while maintaining s
     * `Ctrl+Shift+Z` (Windows/Linux) or `Cmd+Shift+Z` (Mac): Redo the last undone action.
 * Clicking on history list entries jumps to the state of the graph that ensues after the described change was applied.
 
-## 8. Keyboard Shortcuts
+
+## 8. Toolbar actions
+
+The toolbar contains buttons that permit interacting with the program. The main usage is outlined here:
+* **Undo/Redo** button go through [History](#7-change-history--undoredo)
+* **Resize canvas coordinates** will adjust the zoom and move the view so that the entire current graph appears on the screen
+* **Explode coordinates** will multiply every vertex' coordinates by a fixed amount (by default, 4). This is useful in case the current graph gets too cluttered. 
+* **Show all colinear vertices** will draw red lines between any 3 vertices that are colinear. It can be useful for finding crossings. It's a toggle, and it's turned off by clicking the button again
+* **Change target graph type** opens a modal with which the program can be adjusted for specific graph types.
+    * Standard editing is described in [Building a graph](#42-building-a-graph-from-scratch-edit-mode)
+    * Non-crossing editing is the same, with the additional rule that crossings can't be created
+    * The other modes are flip modes, listed under [Supported graph types](#12-supported-graph-types-for-reconfiguration), and described under [Performing reconfigurations](#5-performing-reconfigurations)
+
+
+## 9. Keyboard Shortcuts
 
 * **Undo:** `Ctrl+Z` / `Cmd+Z`
 * **Redo:** `Ctrl+Shift+Z` / `Cmd+Shift+Z`
 * **Delete Selected:** `Delete` or `Backspace` (when a vertex or edge is selected in Edit Mode).
 * **Deselect:** `Escape`
 
-## 9. Troubleshooting / FAQ
+## 10. Troubleshooting / FAQ
 
 * **Q: Why can't I import my file?**
     * A: Check if it strictly follows the format described in [Section 6.1](#6-file-handling). Ensure vertex indices for edges are 1-based, not 0-based. Verify the vertex and edge counts on the first line match the actual data.
