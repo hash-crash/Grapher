@@ -88,8 +88,8 @@ async function loadAllScripts() {
     let historyPromise = scriptLoader('js/sidebar/history.js');
     let geometryPromise = scriptLoader('js/representation/geometry.js');
     let drawingPromise = scriptLoader('js/representation/drawing.js');
-    let editModePromise = scriptLoader('js/interactivity/editmode.js');
-    let matchingsModePromise = scriptLoader('js/interactivity/matchingsmode.js');
+    let editModePromise = scriptLoader('js/graphlogic/editmode.js');
+    let matchingsModePromise = scriptLoader('js/graphlogic/matchingsmode.js');
     let contextMenuPromise = scriptLoader('js/interactivity/contextmenu.js');
     let hiPromise = scriptLoader('js/interactivity/htmlinteractivity.js');
     let miPromise = scriptLoader('js/interactivity/modeinteractivity.js');

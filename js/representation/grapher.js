@@ -69,7 +69,7 @@ drawAllReconfigurationMode() {
     this.state.edges.forEach(this.drawFlippingEdge);
 
     if (chosenFlipEdge !== -1 && selectedEdge !== -1) {
-        drawFlipIndication(chosenFlipEdge, selectedEdge);
+        drawFlipIndicationMatching(chosenFlipEdge, selectedEdge);
     }
 
     if (showColinearPoints) {
