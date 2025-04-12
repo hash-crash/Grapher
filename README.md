@@ -23,6 +23,7 @@ Excpected working:
 
 Expected not working:
 1. other flip types (almost-perfect matchings, triangulations, CFSP, CFST)
+2. show all possible flips button/toggle
 
 
 
