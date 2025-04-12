@@ -121,13 +121,11 @@ function resizeCanvas() {
     if (window.innerWidth > 768) {
         // For desktops, use 80% of window width.
 
-        s.mobileScreen = false;
         height = window.innerHeight;
         width = Math.round(window.innerWidth * 0.8);
     } else {
         // For smaller screens (if ever needed)
 
-        s.mobileScreen = true;
         height = Math.round(window.innerHeight * 0.8);
         width = window.innerWidth;
     }
@@ -242,7 +240,7 @@ function resizeAndCenterGraph() {
     let pixelsizes = resizeCanvas();
     let minpxL = [];
     let maxpxL = [];
-    if (s.mobileScreen) {
+    if (canvas.style.width < 600) {
         // on narrow screens we leave space for toolbars on the top and botom
         minpxL = [0,  0.1 * pixelsizes[1]];
         maxpxL = [pixelsizes[0], 0.9 * pixelsizes[1]];

@@ -83,6 +83,11 @@ function selectEdgeLine(event) {
         return;
     }
 
+    if (mode !== EDIT_MODE) {
+        return;
+    }
+
+
     // Get the clicked <li> index
     const index = Array.from(edgelist.children).indexOf(event.target);
 
@@ -101,6 +106,10 @@ function selectVxLine(event) {
 
     // prevent the second click on the same element
     if (event.detail > 1) {
+        return;
+    }
+
+    if (mode !== EDIT_MODE) {
         return;
     }
 

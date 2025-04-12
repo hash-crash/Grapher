@@ -144,7 +144,6 @@ function jumpToLine(event) {
 
     wg.redraw();
 
-    // todo maybe move these into wg.redraw()???????
     updateFileView();
     updateHistoryView();
 
@@ -367,7 +366,10 @@ function getDescription(action, item1, item2, item3) {
         case EXPLODE_COORDS:
             return `Explode coordinates by ${item1}`;
         case FLIP:
-            return `Flip edge ${item1} to ${item2}`;
+            if (item3 === null) {
+                return `Flip edge ${item1} to ${item2}`;
+            }
+            return `Flip edge ${item1} and ${item2} via mode ${item3}`;
         default:
             return 'Unknown action';
     }

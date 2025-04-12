@@ -88,6 +88,9 @@ async function loadAllScripts() {
     let historyPromise = scriptLoader('js/sidebar/history.js');
     let geometryPromise = scriptLoader('js/representation/geometry.js');
     let drawingPromise = scriptLoader('js/representation/drawing.js');
+    let editModePromise = scriptLoader('js/interactivity/editmode.js');
+    let matchingsModePromise = scriptLoader('js/interactivity/matchingsmode.js');
+    let contextMenuPromise = scriptLoader('js/interactivity/contextmenu.js');
     let hiPromise = scriptLoader('js/interactivity/htmlinteractivity.js');
     let miPromise = scriptLoader('js/interactivity/modeinteractivity.js');
     let settingsPromise = scriptLoader('js/interactivity/settings.js');
@@ -104,6 +107,9 @@ async function loadAllScripts() {
     await fcPromise;
     await historyPromise;
     await geometryPromise;
+    await editModePromise;
+    await matchingsModePromise;
+    await contextMenuPromise;
     await hiPromise;
     await miPromise;
     await settingsPromise;
@@ -127,11 +133,10 @@ loadAllScripts();
  * Enables checking with the user if they want to re-esablish the state that
  * was put into localstorage the previous time that the program was ran. TODO before giving this to the professor, i should actually enable this feature
  * 
- * For development purposes, this function will perform a
- * 100ms pause and then run the automatic loading of data/filename
+ * For development purposes, this function will  run the automatic loading of data/filename
  * 
  * This is here to speed up development, when it is needed,
- *  simply add runTimeout as the callback argument for the file.js scriptloader.
+ *  simply add a call to this function at the end of loadAllScripts
  */
 async function runAutoInit() {
     // setTimeout(() => {
@@ -237,7 +242,8 @@ var selectedVx = -1;
 var selectedEdge = -1;
 var highlightedEdge = -1;
 var highlightedVx = -1;
-var selectedEdges = [];
+var flipEdges = [];
+var chosenFlipEdge = -1;
 
 
 
@@ -260,12 +266,5 @@ const beforeUnloadHandler = (event) => {
 // more shortcut utils
 window.stateHistory = [];
 window.undoneStates = [];
-
-
-
-// settings object
-s = {
-    mobileScreen: false,
-}
 
 

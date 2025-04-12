@@ -37,13 +37,17 @@ function setApplicationMode(modeL, submodeL) {
 
 
     // Cleanup previous state
-    selectedEdges = [];
-    selectedEdge = -1;
     selectedVx = -1;
+    selectedEdge = -1;
+    flipEdges = [];
+    chosenFlipEdge = -1;
     
     // Update global state
     mode = modeL;
     submode = submodeL;
+    if (submode === MATCHINGS_RECONFIGURATION_MODE && almostPerfectMatching) {
+        submode = MATCHINGS_ALMOSTPERFECT_RECONFIGURATION_MODE;
+    } 
 
     
     // Update UI indicators

@@ -46,7 +46,7 @@ class State {
             eiv: item.eiv.map((e) => e), // Deep copy eiv array
         }));
 
-        return new State(edgesCopy, verticesCopy, true,  unfcopy);
+        return new State(edgesCopy, verticesCopy, true /* complete flag */,  unfcopy);
     }
 
     updateAdjList() {
@@ -93,6 +93,7 @@ class State {
         // this will do the trick for now. 🙉🙉
         return true;
     }
+
 
     saveState() {
         const stateData = {
@@ -209,7 +210,6 @@ function addVx(coords) {
         return;
     }
 
-    //TODO add bounds checking?
 
     for (vx of wg.state.vertices) {
         if (vx[0] === coords[0] && vx[1] === coords[1]) {
@@ -245,7 +245,6 @@ function moveVertex(oldCoords, newCoords) {
     }
 
 
-    // TODO check if i should check for minmax coords, maybe -50 +50
     for (let vx of wg.state.vertices) {
         if (vx[0] === newCoords[0] && vx[1] === newCoords[1]) {
             toast("There already exists a vertex there.", true);
@@ -514,3 +513,21 @@ function deleteItem() {
     }
 }
 
+
+function flipMatching(mode) {
+    let e1 = [wg.state.edges[selectedEdge][0], wg.state.edges[selectedEdge][1]];
+    let e2 = [wg.state.edges[chosenFlipEdge][0], wg.state.edges[chosenFlipEdge][1]];
+
+
+
+    if (mode === 'a') {
+        wg.state.edges[selectedEdge][1] = e2[0];
+        wg.state.edges[chosenFlipEdge][0] = e1[1];
+    } else {
+        wg.state.edges[selectedEdge][1] = e2[1];
+        wg.state.edges[chosenFlipEdge][1] = e1[1];
+    }
+
+    addToHistory(wg.state.copyConstructor(), FLIP, e1, e2, mode);
+    stateUpdated();
+}

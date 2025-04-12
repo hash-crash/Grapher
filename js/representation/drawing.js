@@ -21,6 +21,47 @@ function drawEdge(e) {
 }
 
 
+function drawFlipInsertEdgeA(e) {
+    let s = wg.dims.toCanvas(wg.state.vertices[e[0]]);
+    let end = wg.dims.toCanvas(wg.state.vertices[e[1]]);
+
+    ctx.fillStyle = 'darkgreen';
+    ctx.strokeStyle = 'darkgreen';
+    ctx.beginPath();
+    ctx.lineWidth = 4;
+    ctx.moveTo(s[0], s[1]);
+    ctx.lineTo(end[0], end[1]);
+
+    ctx.stroke();
+    ctx.closePath();
+    
+    ctx.lineWidth = 1;
+
+    resetColor();
+}
+
+
+
+function drawFlipInsertEdgeB(e) {
+    let s = wg.dims.toCanvas(wg.state.vertices[e[0]]);
+    let end = wg.dims.toCanvas(wg.state.vertices[e[1]]);
+
+    ctx.fillStyle = 'mediumseagreen';
+    ctx.strokeStyle = 'mediumseagreen';
+    ctx.beginPath();
+    ctx.lineWidth = 4;
+    ctx.moveTo(s[0], s[1]);
+    ctx.lineTo(end[0], end[1]);
+
+    ctx.stroke();
+    ctx.closePath();
+    
+    ctx.lineWidth = 1;
+
+    resetColor();
+}
+
+
 function drawHighlightedEdge(e) {
     let s = wg.dims.toCanvas(wg.state.vertices[e[0]]);
     let end = wg.dims.toCanvas(wg.state.vertices[e[1]]);
@@ -148,10 +189,7 @@ function drawSelectedVx(v) {
     ctx.closePath();
 
     
-    resetColor() 
-
-    //todo get better coords for text based on pixel color? Or mabe use something like the pop-up system?
-    // ctx.fillText(`Selected vertex: ${i} (${v[0]}, ${v[1]})`, 0.5 * this.dims.minpx[0], 0.5 * this.dims.minpx[1]);
+    resetColor();
 
 
 }

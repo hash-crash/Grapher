@@ -59,11 +59,15 @@ function isOnSegment(a, b, p) {
  * 
  * @returns true if this line would intersect any existing edge
  */
-function intersectsAny(p1, p2, state=null) {
+function intersectsAny(p1, p2, state=null, edges = null) {
     if (state === null) {
         state = wg.state;
     }
-    for (const edge of state.edges) {
+    if (edges === null) {
+        edges = state.edges;
+    }
+
+    for (const edge of edges) {
         let v1 = state.vertices[edge[0]];
         let v2 = state.vertices[edge[1]];
         if (intersects(p1, p2, v1, v2)) {
