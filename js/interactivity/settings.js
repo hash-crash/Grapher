@@ -11,7 +11,8 @@ const DEFAULT_SETTINGS = {
     edgeColor: '#333333',
     forRemovalColor: '#dc143c', // crimson - Default color for items marked for removal
     highlightColor: '#FFD700',    // gold - Default color for highlighted items
-    willBeAddedColor: '#66cdaa' // Default color for potential additions
+    willBeAddedColor: '#66cdaa', // Default color for potential additions
+    useIPEformat: false,
 };
 
 const ADD_COLOR =  'willBeAddedColor';
@@ -24,6 +25,7 @@ const EDGE_COLOR = 'edgeColor';
 const PROXIMITY_VERTEX = 'vertexProximityPx';
 const PROXIMITY_EDGE = 'edgeProximityPx';
 const CLICK_TOLERANCE = 'clickDragTolerancePx';
+const USE_IPE_FORMAT = 'useIPEformat';
 
 const settingsManager = {
     settings: {}, // Holds the current settings in memory
@@ -211,6 +213,11 @@ function createSettingInput(key, labelText, type, options = {}) {
         input.addEventListener('input', (event) => {
             settingsManager.set(key, event.target.value); // Save setting immediately
         });
+    } else if (type === 'checkbox') {
+        input.checked = currentSettings[key];
+        input.addEventListener('change', (event) => {
+            settingsManager.set(key, event.target.checked); // Save setting immediately
+        });
     }
 
     itemDiv.appendChild(label);
@@ -281,6 +288,7 @@ function createSettingsPanel() {
 
     miscGroup.appendChild(createSettingInput('explodeCoordinates', 'Explode Factor', 'range', { min: 2, max: 20 }));
     miscGroup.appendChild(createSettingInput(CLICK_TOLERANCE, 'Click tolearnce (px)', 'range', {min: 1, max: 10}));
+    miscGroup.appendChild(createSettingInput(USE_IPE_FORMAT, 'Export as IPE?', 'checkbox', {}));
 
     settingsContainer.appendChild(miscGroup);    
 
