@@ -351,20 +351,13 @@ function editVxLine(event) {
 
 }
 
-
-
-
-
-
-
-
 function downloadFileContent() {
-    const fileContent = getFileContentAsString();
+    const fileContent = settingsManager.get(USE_IPE_FORMAT) ? graphToIPE() : graphToCSV();
 
     // Generate the filename dynamically with ISO date including seconds
     const now = new Date();
     const isoDateWithSeconds = now.toISOString().replace(/:/g, "-").split(".")[0]; // Replace colons for filename safety
-    const filename = `graph_${isoDateWithSeconds}.txt`;
+    const filename = `graph_${isoDateWithSeconds}${settingsManager.get(USE_IPE_FORMAT) ? '.ipe' : '.csv'}`;
 
     // Create a Blob from the file content
     const blob = new Blob([fileContent], { type: "text/plain" });
@@ -385,7 +378,7 @@ function downloadFileContent() {
 }
 
 function copyFileContent() {
-    let fc = getFileContentAsString();
+    let fc = graphToCSV();
 
     navigator.clipboard.writeText(fc).then(() => {
         console.log("File contents copied to clipboard!");
@@ -398,15 +391,65 @@ function copyFileContent() {
 
 }
 
-function getFileContentAsString() {
-return `${wg.state.vertices.length},${wg.state.edges.length}
-${verticesToTextFile()}
-${edgesToTextFile()}`;
+function graphToIPE() {
+    return `<?xml version="1.0"?>
+<!DOCTYPE ipe SYSTEM "ipe.dtd">
+<ipe version="70218" creator="Grapher">
+<ipestyle name="basic">
+<pen name="heavier" value="0.8"/>
+<symbol name="mark/fdisk(sfx)" transformations="translations">
+<group>
+<path fill="sym-fill">
+0.5 0 0 0.5 0 0 e
+</path>
+<path fill="sym-stroke" fillrule="eofill">
+0.6 0 0 0.6 0 0 e
+0.4 0 0 0.4 0 0 e
+</path>
+</group>
+</symbol>
+</ipestyle>
+<page>
+    <layer name="alpha"/>
+    <view layers="alpha" active="alpha"/>
+    ${edgesToIPEPaths()}
+    ${verticesToIPENodes()}
+</page>
+</ipe>
+`;
 }
-function verticesToTextFile() {
+
+function verticesToIPENodes() {
+    return wg.state.vertices.map(
+        (v) => `
+        <use layer="alpha" name="mark/fdisk(sfx)" pos="${v[0]} ${v[1]}" size="normal" stroke="black" fill="white"/>`
+    ).join("\n");
+}
+
+function edgesToIPEPaths() {
+    return wg.state.edges.map(
+        (e) => {
+            return `
+            <path stroke="black" weight="heavier">
+                ${wg.state.vertices[e[0]][0]} ${wg.state.vertices[e[0]][1]} m
+                ${wg.state.vertices[e[1]][0]} ${wg.state.vertices
+                [e[1]][1]} l
+            </path>`;
+        }
+    ).join("");
+}
+
+function graphToCSV() {
+return `${wg.state.vertices.length},${wg.state.edges.length}
+${verticesToCSV()}
+${edgesToCSV()}`;
+}
+
+function verticesToCSV() {
     return wg.state.vertices.map((v) => `${v[0]},${v[1]}`).join("\n");
 }
-function edgesToTextFile() {
+
+function edgesToCSV() {
     return wg.state.edges.map((e) => `${e[0] + 1},${e[1] + 1}`).join("\n");
 }
 
