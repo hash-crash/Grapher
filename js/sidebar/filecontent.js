@@ -410,8 +410,9 @@ function graphToIPE() {
 </symbol>
 </ipestyle>
 <page>
-    <layer name="alpha"/>
-    <view layers="alpha" active="alpha"/>
+    <layer name="vertices"/>
+    <layer name="edges"/>
+    <view layers="vertices edges" active="edges"/>
     ${edgesToIPEPaths()}
     ${verticesToIPENodes()}
 </page>
@@ -422,7 +423,7 @@ function graphToIPE() {
 function verticesToIPENodes() {
     return wg.state.vertices.map(
         (v) => `
-        <use layer="alpha" name="mark/fdisk(sfx)" pos="${v[0]} ${v[1]}" size="normal" stroke="black" fill="white"/>`
+        <use layer="vertices" name="mark/fdisk(sfx)" pos="${v[0]} ${v[1]}" size="normal" stroke="black" fill="white"/>`
     ).join("\n");
 }
 
@@ -430,7 +431,7 @@ function edgesToIPEPaths() {
     return wg.state.edges.map(
         (e) => {
             return `
-            <path stroke="black" weight="heavier">
+            <path layer="edges" stroke="black" pen="heavier">
                 ${wg.state.vertices[e[0]][0]} ${wg.state.vertices[e[0]][1]} m
                 ${wg.state.vertices[e[1]][0]} ${wg.state.vertices
                 [e[1]][1]} l
