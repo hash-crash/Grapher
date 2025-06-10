@@ -47,9 +47,9 @@ function setApplicationMode(modeL, submodeL) {
     submode = submodeL;
     if (submode === MATCHINGS_RECONFIGURATION_MODE && almostPerfectMatching) {
         submode = MATCHINGS_ALMOSTPERFECT_RECONFIGURATION_MODE;
-    } 
+    }
 
-    
+
     // Update UI indicators
     document.querySelectorAll('.submode-btn').forEach(btn => {
         btn.classList.toggle('active', 
@@ -57,6 +57,20 @@ function setApplicationMode(modeL, submodeL) {
             btn.dataset.submode === submode
         );
     });
+
+
+    let possibleFlipsButton = document.getElementById('showflipsid');
+    let explodeButton = document.getElementById('explodeid');
+    let clearButton = document.getElementById('clearFile');
+    if (mode === EDIT_MODE) {
+        clearButton.classList.remove('hidden-controlbutton');
+        explodeButton.classList.remove('hidden-controlbutton');
+        possibleFlipsButton.classList.add('hidden-controlbutton');
+    } else if (mode === RECONFIGURATION_MODE) {
+        clearButton.classList.add('hidden-controlbutton');
+        explodeButton.classList.add('hidden-controlbutton');
+        possibleFlipsButton.classList.remove('hidden-controlbutton');
+    }
     
     // Update cursor and other visual feedback
     doaredraw();
@@ -85,7 +99,7 @@ function createModeSelector() {
             label: '🔄 Reconfigurations',
             submodes: [
                 { id: MATCHINGS_RECONFIGURATION_MODE, label: 'Matchings' },
-                { id: TRIANGULATION_RECONFIGURATION_MODE, label: 'Triangulations - todo' },
+                { id: TRIANGULATION_RECONFIGURATION_MODE, label: 'Triangulations' },
                 { id: CFSP_RECONFIGURATION_MODE, label: 'Spanning Paths - todo' },
                 { id: CFST_RECONFIGURATION_MODE, label: 'Spanning trees - todo'},
             ]

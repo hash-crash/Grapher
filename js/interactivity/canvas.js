@@ -203,7 +203,8 @@ function handleHover(event) {
 
 
     // console.log("drawing coordintate");
-    if ((!found && !isDraggingCanvas) || (isDraggingVertex && draggedVertexIndex !== -1)) {
+    if (mode === EDIT_MODE &&
+        ((!found && !isDraggingCanvas) || (isDraggingVertex && draggedVertexIndex !== -1))) {
         drawHihglightedCoordinate(mousePos);
     }
 
@@ -236,8 +237,6 @@ function handleClick(event) {
         handleClickEditMode(mousePos);
     } else if (mode === RECONFIGURATION_MODE) {
         handleClickReconfigurationMode(mousePos);
-        
-
     } else {
         console.error(`Main mode is something it shouldn't be: ${mode}`);
         toast("Problem with tool mode, please try to set a mode in the sidebar", true);

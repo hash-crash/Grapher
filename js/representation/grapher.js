@@ -19,6 +19,8 @@ class Grapher {
  * This is where the magic happens.
  *  Every time some event is spotted which should alter the presentation of the graph, 
  * this function should be called, completely clearing the canvas and redrawing everything from scratch.
+ * 
+ * It is very important that this function always be callable without messing anything up!
  */
 redraw() {
     // just making sure we dont get the incorrect object somehow
@@ -59,22 +61,59 @@ drawAllReconfigurationMode() {
         return;
     }
 
-    if (selectedEdge === -1) {
-        // todo: add a toggle for all possible flips
-        this.drawAllEditMode();
-        return;
-    }
-
 
     this.state.edges.forEach(this.drawFlippingEdge);
 
-    if (chosenFlipEdge !== -1 && selectedEdge !== -1) {
-        drawFlipIndicationMatching(chosenFlipEdge, selectedEdge);
+
+
+    // --- Stage 1: Highlighting initial selection and potential next steps ---
+    if (selectionMode === 'vertex' && selectedVx !== -1 && chosenFlipVx === -1) {
+        console.log("vx type");
+        // A vertex is selected, waiting for the user to pick a target vertex.
+        flippableWithSelectedVx.forEach(v => {
+            drawHighlighedVx(wg.state.vertices[v]);
+        });
+    } else if (selectionMode === 'edge' && selectedEdge !== -1 && chosenFlipEdge === -1) {
+        console.log("edge type");
+        // An edge is selected, waiting for the user to pick a compatible edge.
+        flipEdges.forEach(e => {
+            drawEdgeForRemoval(wg.state.edges[e])
+        });
     }
 
-    if (showColinearPoints) {
-        this.drawColinearIndicators()
+    // --- Stage 2: Drawing the green flip indication lines ---
+    // This is when two original edges are determined, and we know the flip type(s).
+    if (selectedEdge !== -1 && chosenFlipEdge !== -1 && currentFlipTypeToShow !== null) {
+        // Highlight the two original edges that will be removed/flipped
+        // drawHighlightOnEdge(selectedEdge, 'color_for_edge_to_be_flipped_1'); // Example
+        // drawHighlightOnEdge(chosenFlipEdge, 'color_for_edge_to_be_flipped_2'); // Example
+        
+        // Call the updated drawFlipIndicationMatching
+        drawFlipIndicationMatching(selectedEdge, chosenFlipEdge, currentFlipTypeToShow);
     }
+
+
+
+
+    if (chosenFlipEdge !== -1 && selectedEdge !== -1) {
+        console.log("wtf man why here");
+        drawFlipIndicationMatching(chosenFlipEdge, selectedEdge);
+    } else if (currentFlipTypeToShow !== null) {
+        console.log("screm for me");
+        drawFlipIndicationMatching(tempFlipEdges[0], tempFlipEdges[1], currentFlipTypeToShow);
+    } else {
+        // todo: add a toggle for all possible flips
+        console.log("what am i even dong?")
+        this.drawAllEditMode();
+    }
+
+    if (settingsManager.get(SHOW_COLINEAR_TRIPLES_TOGGLE)) {
+        this.drawColinearIndicators();
+    }
+    if (settingsManager.get(SHOW_CROSSINGS_TOGGLE)) {
+        this.drawCrossingIndicators();
+    }
+
     this.state.vertices.forEach(this.regularDrawVx);
 }
 
@@ -88,8 +127,12 @@ drawAllEditMode() {
     // important: do edges first, then vertices, so that vertices would appear 'on top'
     this.state.edges.forEach(this.regularDrawEdge);
 
-    if (showColinearPoints) {
+    if (settingsManager.get(SHOW_COLINEAR_TRIPLES_TOGGLE)) {
         this.drawColinearIndicators()
+    }
+
+    if (settingsManager.get(SHOW_CROSSINGS_TOGGLE)) {
+        this.drawCrossingIndicators();
     }
 
     this.state.vertices.forEach(this.regularDrawVx);
@@ -138,6 +181,10 @@ regularDrawVx(v, i) {
         drawSelectedVx(v);
     } else if (highlightedVx == i) {
         drawHighlighedVx(v);
+    } else if(selectionMode === 'vertex' && chosenFlipVx === i) {
+        drawHighlighedVx(v);
+    } else if (selectionMode === 'vertex' && chosenFlipVx === -1 && flippableWithSelectedVx.includes(i)) {
+        drawHighlighedVx(v);
     } else {
         drawVx(v);
     }
@@ -154,7 +201,30 @@ drawColinearIndicators() {
         drawEdgeWithWarning([triple[0], triple[2]]);
     });
 }
+
+drawCrossingIndicators() {
+    for (let i = 0; i < wg.state.edges.length; i++) {
+        const e1 = wg.state.edges[i];
+        for (let j = i + 1; j < wg.state.edges.length; j++) {
+            const e2 = wg.state.edges[j];
+            if (!edgeIntersect(e1, e2)) {
+                continue;
+            }
+            let p1 = wg.state.vertices[e1[0]];
+            let p2 = wg.state.vertices[e1[1]];
+            let q1 = wg.state.vertices[e2[0]];
+            let q2 = wg.state.vertices[e2[1]];
+            let pt = getIntersectionPoint(p1, p2, q1, q2);
+            if (pt !== null) {
+                drawIntersectionWarningCircle(pt);
+            }
+        }
+    }
 }
+
+}
+
+
 
 
 

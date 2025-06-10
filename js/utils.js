@@ -29,14 +29,15 @@ var mode = EDIT_MODE;
 var submode = DEFAULT_EDIT_MODE;
 
 
-var showColinearPoints = false;
+
+
+
 var allColinearTriples = [];
 
 
 
-
 function toggleShowColinear() {
-    showColinearPoints = !showColinearPoints;
+    let showColinearPoints = settingsManager.get(SHOW_COLINEAR_TRIPLES_TOGGLE);
 
     if (showColinearPoints) {
         allColinearTriples = findAllColinearTriples();
@@ -52,6 +53,24 @@ function toggleShowColinear() {
     }
 }
 
+var allPossibleFlips = [];
+function drawPossibleFlips() {
+    console.log("Called draw possible flips");
+
+    if (settingsManager.get(INSTA_FLIP_TOGGLE) && mode === RECONFIGURATION_MODE) {
+        allPossibleFlips = allPossibleFlipsMatchings();
+        if (allPossibleFlips.length === 0) {
+            toast("No flips are possible");
+        } else {
+            wg.redraw();
+            toast(`Showing lines for all ${allPossibleFlips.length} possible flips`);
+        }
+    } else {
+        allPossibleFlips = [];
+        wg.redraw();
+    }
+
+}
 
 
 function getMousePos(event) {

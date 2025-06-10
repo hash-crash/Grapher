@@ -1,6 +1,11 @@
 const SETTINGS_STORAGE_KEY = 'mySimpleWebAppSettings';
 
 const DEFAULT_SETTINGS = {
+    showColinearTriplesToggle: false,
+    showCrossingsToggle: false,
+    instaFlip: false,
+    vertexSize: 10,
+    edgeThickness: 3,
     vertexProximityPx: 16,     // Default proximity for vertices
     edgeProximityPx: 8,       // Default proximity for edges
     explodeCoordinates: 4,    // Default value for explodeCoordinates
@@ -24,6 +29,12 @@ const EDGE_COLOR = 'edgeColor';
 const PROXIMITY_VERTEX = 'vertexProximityPx';
 const PROXIMITY_EDGE = 'edgeProximityPx';
 const CLICK_TOLERANCE = 'clickDragTolerancePx';
+const SHOW_COLINEAR_TRIPLES_TOGGLE = 'showColinearTriplesToggle';
+const SHOW_CROSSINGS_TOGGLE = 'showCrossingsToggle';
+const INSTA_FLIP_TOGGLE = 'instaFlip';
+const VERTEX_SIZE = 'vertexSize';
+const EDGE_THICKNESS = 'edgeThickness';
+
 
 const settingsManager = {
     settings: {}, // Holds the current settings in memory
@@ -175,6 +186,10 @@ function createSettingInput(key, labelText, type, options = {}) {
     input.type = type;
     input.id = `setting-${key}`;
     input.value = currentSettings[key]; // Set initial value
+    if (input.type === 'checkbox') {
+        console.log(`key: ${key}, value: ${currentSettings[key]}, typeof: ${typeof currentSettings[key]}`);
+        input.checked = currentSettings[key];
+    }
 
     let valueDisplay = null;
 
@@ -197,9 +212,8 @@ function createSettingInput(key, labelText, type, options = {}) {
     } else if (type === 'number') {
          input.min = options.min || 0;
          input.step = options.step || 1;
-         input.addEventListener('change', (event) => { // 'change' might be better than 'input' for number
+         input.addEventListener('change', (event) => { 
             const newValue = parseInt(event.target.value, 10);
-             // Basic validation if needed:
              if (!isNaN(newValue) && newValue >= (options.min || 0)) {
                 settingsManager.set(key, newValue);
              } else {
@@ -210,6 +224,12 @@ function createSettingInput(key, labelText, type, options = {}) {
     } else if (type === 'color') {
         input.addEventListener('input', (event) => {
             settingsManager.set(key, event.target.value); // Save setting immediately
+        });
+    } else if (type === 'checkbox') {
+        input.addEventListener('input', (event) => {
+            input.value = event.target.checked;
+            settingsManager.set(key, event.target.checked); // Save boolean state
+            toggleShowColinear();
         });
     }
 
@@ -242,15 +262,30 @@ function createSettingsPanel() {
 
     // --- Create UI Groups ---
 
+    // Display Group
+    const displayGroup = document.createElement('div');
+    displayGroup.className = 'settings-group';
+    const displayHeader = document.createElement('h4');
+    displayHeader.textContent = 'Display settings';
+    displayGroup.appendChild(displayHeader);
+
+    displayGroup.appendChild(createSettingInput(SHOW_COLINEAR_TRIPLES_TOGGLE, 'Show colinear triples of vertices', 'checkbox'));
+    displayGroup.appendChild(createSettingInput(SHOW_CROSSINGS_TOGGLE, 'Show crossings', 'checkbox'));
+
+    settingsContainer.appendChild(displayGroup);
+
+
     // Proximity Group
     const proximityGroup = document.createElement('div');
     proximityGroup.className = 'settings-group';
     const proximityHeader = document.createElement('h4');
-    proximityHeader.textContent = 'Proximity Settings';
+    proximityHeader.textContent = 'Accessibility Settings';
     proximityGroup.appendChild(proximityHeader);
 
     proximityGroup.appendChild(createSettingInput('vertexProximityPx', 'Vertex Hover (px)', 'range', { min: 5, max: 25 }));
     proximityGroup.appendChild(createSettingInput('edgeProximityPx', 'Edge Hover (px)', 'range', { min: 3, max: 20 }));
+    proximityGroup.appendChild(createSettingInput(VERTEX_SIZE, 'Vertex size (px)', 'range', {min: 8, max: 20}));
+    proximityGroup.appendChild(createSettingInput(EDGE_THICKNESS, 'Edge thickness (px)', 'range', {min: 2, max: 10}));
 
     settingsContainer.appendChild(proximityGroup);
 
@@ -280,7 +315,8 @@ function createSettingsPanel() {
     miscGroup.appendChild(miscHeader);
 
     miscGroup.appendChild(createSettingInput('explodeCoordinates', 'Explode Factor', 'range', { min: 2, max: 20 }));
-    miscGroup.appendChild(createSettingInput(CLICK_TOLERANCE, 'Click tolearnce (px)', 'range', {min: 1, max: 10}));
+    miscGroup.appendChild(createSettingInput(CLICK_TOLERANCE, 'Click/drag tolearnce (px)', 'range', {min: 1, max: 10}));
+    miscGroup.appendChild(createSettingInput(INSTA_FLIP_TOGGLE, 'Instantly flip when only 1 option', 'checkbox'));
 
     settingsContainer.appendChild(miscGroup);    
 

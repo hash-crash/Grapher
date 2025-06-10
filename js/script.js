@@ -90,6 +90,7 @@ async function loadAllScripts() {
     let drawingPromise = scriptLoader('js/representation/drawing.js');
     let editModePromise = scriptLoader('js/graphlogic/editmode.js');
     let matchingsModePromise = scriptLoader('js/graphlogic/matchingsmode.js');
+    let reconfModePromise = scriptLoader('js/graphlogic/reconfigurationmode.js');
     let contextMenuPromise = scriptLoader('js/interactivity/contextmenu.js');
     let hiPromise = scriptLoader('js/interactivity/htmlinteractivity.js');
     let miPromise = scriptLoader('js/interactivity/modeinteractivity.js');
@@ -109,6 +110,7 @@ async function loadAllScripts() {
     await geometryPromise;
     await editModePromise;
     await matchingsModePromise;
+    await reconfModePromise;
     await contextMenuPromise;
     await hiPromise;
     await miPromise;
@@ -156,10 +158,11 @@ async function runAutoInit() {
         // addVx([-25,20]);
         // addEdge([10, 9], true);
         // addEdge([9,10]);
-        console.log(`Miliseconds needed for including file: ${performance.now() - timestampStart}`);
+        console.log(`Miliseconds needed for init including file auto-loading: ${performance.now() - timestampStart}`);
 
     } catch (error) {
         console.error("Error:", error);
+        toast(`Error: ${error}`, true);
     }
 }
 
@@ -242,9 +245,13 @@ var selectedVx = -1;
 var selectedEdge = -1;
 var highlightedEdge = -1;
 var highlightedVx = -1;
+
+var tempFlipEdges = [];
 var flipEdges = [];
 var chosenFlipEdge = -1;
-
+var selectionMode = null;    // null, 'edge', or 'vertex'
+var chosenFlipVx = -1;       // Index of the target vertex chosen by the user (for vertex mode)
+var flippableWithSelectedVx = []; // Array of vertex indices that selectedVx can flip to connect with
 
 
 

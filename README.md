@@ -24,6 +24,7 @@ Excpected working:
 Expected not working:
 1. other flip types (almost-perfect matchings, triangulations, CFSP, CFST)
 2. show all possible flips button/toggle
+3. insta-flip toggle (present in settings but still not implemented)
 
 Note: Spiral graph with only 3 possible flips for matchings (with 3 'levels') can be found in data/matchings_only_3_flips_spiral_graph.txt
 
