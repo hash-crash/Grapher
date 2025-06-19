@@ -229,7 +229,7 @@ function handleClick(event) {
 
     const mousePos = getMousePos(event);
 
-    console.log("onclick handler called at " + mousePos[0] + " and " + mousePos[1]);
+    // console.log("onclick handler called at " + mousePos[0] + " and " + mousePos[1]);
     
 
 
@@ -250,23 +250,41 @@ var edgeForRemoval = -1;
 
 
 
-
+/**
+ * The specialized dispatcher for Reconfiguration Mode.
+ * Its only job is to check the 'submode' and route to the correct logic file.
+ * @param {Array} mousePos - The [x, y] coordinates of the click.
+ */
 function handleClickReconfigurationMode(mousePos) {
+    switch (submode) {
+        case MATCHINGS_RECONFIGURATION_MODE:
+            // This calls the function from your existing, working file.
+            handleClickMatchingsMode(mousePos);
+            break;
+        
+        case TRIANGULATION_RECONFIGURATION_MODE:
+            // This will be the new function we build for triangulations.
+            handleClickTriangulationMode(mousePos);
+            break;
 
+        case CFSP_RECONFIGURATION_MODE:
+            // Placeholder for when we implement path reconfiguration
+            console.log("TODO: Handle Path Reconfiguration Click");
+            // handleClickPathMode(mousePos);
+            break;
 
-    if (submode !== MATCHINGS_RECONFIGURATION_MODE) {
-        console.log("TODO");
-        return;
+        // You mentioned this mode, so we can add a case for it.
+        // If its logic is the same as perfect matchings, it can call the same function.
+        case MATCHINGS_ALMOSTPERFECT_RECONFIGURATION_MODE:
+            console.log("TODO: Handle Almost-Perfect Matching Reconfiguration Click");
+            // handleClickMatchingsMode(mousePos); 
+            break;
+        
+        default:
+            console.error("Unknown reconfiguration submode:", submode);
+            toast("Error: This reconfiguration type is not yet supported.", true);
+            break;
     }
-
-
-    // if (submode === MATCHINGS_RECONFIGURATION_MODE && perfectMatching) {
-    //     console.log("TODO");
-    //     return;
-    // }
-
-    handleClickMatchingsMode(mousePos);
-
 }
 
 

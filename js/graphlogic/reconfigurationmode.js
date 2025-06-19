@@ -58,6 +58,37 @@ function handleHoverReconfigurationMode(mousePos) {
 
 
 
+function createInitialSelection(graph) {
+    return {
+        // The user interaction mode (can be different for each graph type)
+        mode: null,          // Either 'edges' or 'vertices'
+
+        isReady: false,   // True when a valid reconfiguration is ready to be shown
+        
+        edges_to_remove: [], // An array of edge indices to be removed - size 2 for perfect matchings, size 1 otherwise
+        edges_to_add: [],    // An array of new edges to be added (as vertex index pairs)
+                             // e.g., [[v1, v2], [v3, v4]]
+
+        picked_vertex: -1, // The index of the vertex that is currently selected for flipping
+        // Data for the UI and intermediate steps
+        possibleTargets: [], // Array of indices (edges or vertices) to highlight
+    };
+}
+
+
+/**
+ * Resets the reconfiguration state
+ */
+function resetSelectionState() {
+    reconfigState = createInitialSelection(wg);
+    wg.redraw();
+}
+
+
+
+
+
+
 /**
  * 
  * @returns 

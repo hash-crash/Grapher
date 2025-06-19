@@ -92,6 +92,47 @@ function intersectsAny(p1, p2, state=null, edges = null) {
 
 
 /**
+ * Finds all existing edges that are properly intersected by a potential new edge.
+ * "Properly intersected" means the edges cross and do not share any endpoints.
+ *
+ * @param {[Nunmber, Number]} potentialEdge - The edge to check, as a pair of vertex indices [v1, v2].
+ * @returns {[Number..]} - An array of indices of all existing edges that are properly intersected.
+ */
+function findIntersectedEdges(potentialEdge) {
+    const intersected_indices = [];
+    const [v1_idx, v2_idx] = potentialEdge;
+
+    // Get the coordinates of the potential new edge.
+    const p1 = wg.state.vertices[v1_idx];
+    const p2 = wg.state.vertices[v2_idx];
+
+    // Loop through all existing edges in the graph.
+    for (let i = 0; i < wg.state.edges.length; i++) {
+        const existingEdge = wg.state.edges[i];
+        const [v3_idx, v4_idx] = existingEdge;
+
+        // --- Crucial Guard Clause ---
+        // If the potential new edge shares any vertex with the existing edge,
+        // they cannot properly intersect. They are adjacent, not crossing.
+        if (v1_idx === v3_idx || v1_idx === v4_idx || v2_idx === v3_idx || v2_idx === v4_idx) {
+            continue; // Skip to the next edge.
+        }
+
+        // Now that we know the edges are disjoint, we can perform the geometric test.
+        // We leverage your existing, robust 'intersects' function.
+        const q1 = wg.state.vertices[v3_idx];
+        const q2 = wg.state.vertices[v4_idx];
+        
+        if (intersects(p1, p2, q1, q2)) {
+            intersected_indices.push(i);
+        }
+    }
+
+    return intersected_indices;
+}
+
+
+/**
  * 
  * @param {[Number, Number]} p1 coordinates
  * @param {[Number, Number]} p2 coordinates

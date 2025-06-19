@@ -90,6 +90,7 @@ async function loadAllScripts() {
     let drawingPromise = scriptLoader('js/representation/drawing.js');
     let editModePromise = scriptLoader('js/graphlogic/editmode.js');
     let matchingsModePromise = scriptLoader('js/graphlogic/matchingsmode.js');
+    let triangulationsModePromise = scriptLoader('js/graphlogic/triangulationsmode.js');
     let reconfModePromise = scriptLoader('js/graphlogic/reconfigurationmode.js');
     let contextMenuPromise = scriptLoader('js/interactivity/contextmenu.js');
     let hiPromise = scriptLoader('js/interactivity/htmlinteractivity.js');
@@ -110,6 +111,7 @@ async function loadAllScripts() {
     await geometryPromise;
     await editModePromise;
     await matchingsModePromise;
+    await triangulationsModePromise;
     await reconfModePromise;
     await contextMenuPromise;
     await hiPromise;
@@ -121,6 +123,7 @@ async function loadAllScripts() {
     // please don't remove this
     window.Grapher = new Grapher(null, null, ctx);
 
+    reconfigState = createInitialSelection(window.Grapher);
 
     await scriptLoader('js/interactivity/canvas.js');
     initializeButtons();
@@ -151,7 +154,7 @@ async function runAutoInit() {
     try {
         console.log(`Miliseconds needed for init: ${performance.now() - timestampStart}`);
 
-        await autoLoadInputFile("in 3.txt"); // Now waits for completion
+        await autoLoadInputFile("in4.txt"); // Now waits for completion
 
         // for now just add vertices and edges;
         // addVx([12,12]);
@@ -246,12 +249,10 @@ var selectedEdge = -1;
 var highlightedEdge = -1;
 var highlightedVx = -1;
 
-var tempFlipEdges = [];
-var flipEdges = [];
-var chosenFlipEdge = -1;
-var selectionMode = null;    // null, 'edge', or 'vertex'
-var chosenFlipVx = -1;       // Index of the target vertex chosen by the user (for vertex mode)
-var flippableWithSelectedVx = []; // Array of vertex indices that selectedVx can flip to connect with
+/**
+ * See {@link ReconfigurationMode#createInitialSelection} 
+ */
+var reconfigState = null;
 
 
 

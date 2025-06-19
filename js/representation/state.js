@@ -528,6 +528,7 @@ function flipMatching(flipMode, e1_idx, e2_idx) {
         wg.state.edges[e2_idx][1] = e1[1];
     }
 
+    resetSelectionState();
     addToHistory(wg.state.copyConstructor(), FLIP, e1, e2, flipMode);
     stateUpdated();
 }
