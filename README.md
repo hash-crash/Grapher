@@ -20,11 +20,12 @@ Excpected working:
 6. coordinate multiplaction
     * it's at the bottom of the top part of the toolbar (icon is like small markers pointing diagonally)
 7. re-zoom graph so that it's fully within the canvas
+8. insta-flip toggle for perfect matchings
 
 Expected not working:
 1. other flip types (almost-perfect matchings, triangulations, CFSP, CFST)
 2. show all possible flips button/toggle
-3. insta-flip toggle (present in settings but still not implemented)
+3. insta-flip toggle for other modes
 
 Note: Spiral graph with only 3 possible flips for matchings (with 3 'levels') can be found in data/matchings_only_3_flips_spiral_graph.txt
 
