@@ -1,61 +1,9 @@
 
 
 
-
-function handleHoverReconfigurationMode(mousePos) {
-    let found = false;
-    highlightedEdge = -1;
-
-    // Check proximity to all vertices
-    window.Grapher.state.vertices.forEach((v, i) => {
-        if (isNearVertex(mousePos, v)) {
-            highlightedVx = i;
-            found = true;
-            if (isDraggingCanvas) {
-                canvas.style.cursor = 'move';
-            } else {
-                canvas.style.cursor = 'pointer';
-            }
-        }
-    });
-
-    if (!found) {
-        highlightedVx = -1;
-        let closestDistance = Infinity;
-
-        window.Grapher.state.edges.forEach((edge, i) => {
-            
-            const v1 = window.Grapher.dims.toCanvas(window.Grapher.state.vertices[edge[0]]);
-            const v2 = window.Grapher.dims.toCanvas(window.Grapher.state.vertices[edge[1]]);
-            
-            // I think this is redundant, but I'd rather be safe than sorry
-            if (isNearVertex(mousePos, window.Grapher.state.vertices[edge[0]]) || 
-                isNearVertex(mousePos, window.Grapher.state.vertices[edge[1]])) {
-                return;
-            }
-
-            const dist = distanceToSegment(mousePos, v1, v2);
-            let minDist = settingsManager.get(PROXIMITY_EDGE);
-            if (!minDist) {
-                minDist = DEFAULT_EDGE_HOVER_PROXIMITY;
-            }
-            if (dist < minDist && dist < closestDistance) {
-                closestDistance = dist;
-                highlightedEdge = i;
-            }
-        });
-
-        if (isDraggingCanvas) {
-            canvas.style.cursor = 'move';
-        } else if (highlightedEdge !== -1) {
-            canvas.style.cursor = 'pointer';
-        } else {
-            canvas.style.cursor = 'default';
-        }
-    }
-    return found;
+function allPossibleFlipsMatchings() {
+    return [];
 }
-
 
 
 
@@ -101,7 +49,7 @@ function handleHoverReconfigurationMode(mousePos) {
  * @param {Number} index in the vertices array
  * @returns index in edges array of edge which it belongs to
  */
-function findEdgeOfVx(index) {
+function findEdgeOfVxMatchings(index) {
     let relevantEdge = -1;
     wg.state.edges.forEach((e, i) => {
         if (e[0] === index || e[1] === index) {
@@ -109,6 +57,7 @@ function findEdgeOfVx(index) {
         }
     });
     if (relevantEdge === -1) {
+        console.error(`Could not find edge of vx ${index}`)
         toast("Something went really wrong", true);
     }
     return relevantEdge;
@@ -117,187 +66,333 @@ function findEdgeOfVx(index) {
 
 
 /**
- * 
- * @param {Number} e1 index in edges array
- * @param {Number} e2 index in edges array
- * 
- * 
+ * Main click handler for matching reconfiguration
  */
-function drawFlipIndicationMatching(e1, e2) {
-
-    let edge1 = wg.state.edges[e1];
-    let edge2 = wg.state.edges[e2];
-
-
-    if (!isFlipPossibleMatching(edge1, edge2)) {
-        console.log("cannot do anything here :(");
+function handleClickMatchingsMode(mousePos) {
+    if (submode !== MATCHINGS_RECONFIGURATION_MODE || !isCFMatching()) {
+        resetSelectionState();
         return;
     }
 
-    let p1 = wg.state.vertices[edge1[0]];
-    let p2 = wg.state.vertices[edge1[1]];
-    let p3 = wg.state.vertices[edge2[0]];
-    let p4 = wg.state.vertices[edge2[1]];
+    const clickedItem = findAnyClickedItem(mousePos);
 
-    let edgesWithoutEither = wg.state.edges.filter((edge) => {
-        return !pequals(edge, edge2) && !pequals(edge, edge2);
+    if (reconfigState.isReady) {
+        // State 3: Reconfiguration is ready, check if user clicked a flip indication
+        handleFlipConfirmationMatching(mousePos);
+
+    } else if (reconfigState.mode === null) {
+        // State 1: Nothing selected yet
+        handleInitialClick(clickedItem);
+    } else {
+        // State 2: First item selected
+        handleSecondClick(clickedItem);
+    }
+
+    wg.redraw();
+}
+
+/**
+ * Handles the initial click in the selection process
+ */
+function handleInitialClick(clickedItem) {
+    if (clickedItem.vx !== -1) { // Vertex clicked
+        reconfigState.mode = 'vertices';
+        selectedVx = clickedItem.vx;
+        const edgeIdx = findEdgeOfVxMatchings(clickedItem.vx);
+        if (edgeIdx === -1) {
+            resetSelectionState();
+            return;
+        }
+        
+        reconfigState.edges_to_remove = [edgeIdx];
+        reconfigState.possibleTargets = verticesWithPossibleFlipsMatchingsFromVertex(selectedVx);
+        
+        if (reconfigState.possibleTargets.length === 0) {
+            toast("No possible flips from this vertex.", false);
+            resetSelectionState();
+        }
+    } else if (clickedItem.edge !== -1) { // Edge clicked
+        reconfigState.mode = 'edges';
+        selectedEdge = clickedItem.edge;
+        reconfigState.edges_to_remove = [clickedItem.edge];
+        reconfigState.possibleTargets = edgesWithPossibleFlipsMatchings(selectedEdge);
+        
+        if (reconfigState.possibleTargets.length === 0) {
+            toast("No possible flips for this edge.", false);
+            resetSelectionState();
+        }
+    }
+}
+
+
+/**
+ * Handles the second click after initial selection
+ */
+function handleSecondClick(clickedItem) {
+    if (reconfigState.mode === 'edges') {
+        handleEdgeModeSecondClick(clickedItem);
+    } else if (reconfigState.mode === 'vertices') {
+        handleVertexModeSecondClick(clickedItem);
+    }
+    if (reconfigState.isReady && settingsManager.get(INSTA_FLIP_TOGGLE) && reconfigState.edges_to_add.length === 1) {
+
+        if (reconfigState.edges_to_add.length !== 1) {
+            console.error("Inconsistent state: Expected exactly one flip option to be ready.");
+            resetSelectionState();
+            return;
+        }
+
+        let selectedFlip = getFlipTypeFromEdges(reconfigState.edges_to_remove, reconfigState.edges_to_add[0]);
+
+        if (selectedFlip) {
+            flipMatching(selectedFlip, reconfigState.edges_to_remove[0], reconfigState.edges_to_remove[1]);
+            return;
+        }
+
+    } else {
+        console.log("Not ready yet, waiting for third click or confirmation.");
+    }
+}
+
+/**
+ * Handles second click in edge mode
+ */
+function handleEdgeModeSecondClick(clickedItem) {
+    if (clickedItem.edge !== -1 && 
+        reconfigState.possibleTargets.includes(clickedItem.edge)) {
+        
+        // Add second edge to removal list
+        reconfigState.edges_to_remove.push(clickedItem.edge);
+        
+        const edge1 = wg.state.edges[reconfigState.edges_to_remove[0]];
+        const edge2 = wg.state.edges[reconfigState.edges_to_remove[1]];
+        const flipType = possibleFlipsMatching(edge1, edge2);
+
+
+
+        // REFACTOR: This is the crucial change. We now handle the 'a', 'b', 'c' cases.
+        if (flipType === 'a' || flipType === 'b') {
+            // Unambiguous flip.
+            reconfigState.edges_to_add = [getEdgesToAdd(edge1, edge2, flipType)];
+        } else if (flipType === 'c') {
+            // Ambiguous flip. We must store both options and let the user choose.
+            reconfigState.edges_to_add = [
+                getEdgesToAdd(edge1, edge2, 'a'),
+                getEdgesToAdd(edge1, edge2, 'b')
+            ];
+        } else {
+            console.error("Inconsistent state: Flip should be possible but no type was found.");
+            resetSelectionState();
+            return;
+        }
+
+
+        reconfigState.possibleTargets = [];
+        reconfigState.isReady = true;
+
+    }
+}
+
+/**
+ * REFACTOR: A new helper to translate a flip type into an explicit edge payload.
+ * @param {Array} e1 - The first edge vertex indices, e.g., [0, 1]
+ * @param {Array} e2 - The second edge vertex indices, e.g., [2, 3]
+ * @param {'a'|'b'} flipType - The type of flip to perform.
+ * @returns {Array} The array of new edges to add, e.g., [[0, 2], [1, 3]]
+ */
+function getEdgesToAdd(e1, e2, flipType) {
+    if (flipType === 'a') {
+        return [[e1[0], e2[0]], [e1[1], e2[1]]];
+    } else if (flipType === 'b') {
+        return [[e1[0], e2[1]], [e1[1], e2[0]]];
+    }
+    return [];
+}
+
+
+/**
+ * Handles second click in vertex mode
+ */
+function handleVertexModeSecondClick(clickedItem) {
+    if (clickedItem.vx === -1 || 
+        !reconfigState.possibleTargets.includes(clickedItem.vx)
+    ) {
+        resetSelectionState();
+        return;
+    }
+        
+    const edge2_idx = findEdgeOfVxMatchings(clickedItem.vx);
+    
+    if (edge2_idx === -1 || 
+        reconfigState.edges_to_remove[0] === edge2_idx
+    ) {
+        resetSelectionState();
+        return;
+    }
+    
+
+    console.log(reconfigState.edges_to_remove);
+    // Add second edge to removal list
+    reconfigState.edges_to_remove.push(edge2_idx);
+
+    console.log(reconfigState.edges_to_remove)
+    
+    // Determine specific flip type
+    const flipType2 = possibleFlipsMatching(
+        wg.state.edges[reconfigState.edges_to_remove[0]],
+        wg.state.edges[reconfigState.edges_to_remove[1]]
+    );
+    
+    if (flipType2 === null) {
+        toast("Cannot perform this flip.", true);
+        resetSelectionState();
+        return;
+    }
+
+
+    let e1 = wg.state.edges[reconfigState.edges_to_remove[0]];
+    let e2 = wg.state.edges[edge2_idx];
+
+    if (e1[0] === selectedVx) {
+        if (e2[0] === clickedItem.vx) {
+            reconfigState.edges_to_add = [getEdgesToAdd(e1, e2, 'a')];
+        } else if (e2[1] === clickedItem.vx) {
+            reconfigState.edges_to_add = [getEdgesToAdd(e1, e2, 'b')];
+        }
+    } else if (e1[1] === selectedVx) {
+        if (e2[0] === clickedItem.vx) {
+            reconfigState.edges_to_add = [getEdgesToAdd(e1, e2, 'b')];
+        } else if (e2[1] === clickedItem.vx) {
+            reconfigState.edges_to_add = [getEdgesToAdd(e1, e2, 'a')];
+        }
+    } else {
+        console.error("Inconsistent state: Selected vertex does not match either edge.");
+        toast("Cannot perform this flip.", true);
+        resetSelectionState();
+        return;
+    }
+    
+
+    // Prepare to show flip indications
+    reconfigState.picked_vertex = clickedItem.vx;
+    reconfigState.possibleTargets = [];
+    reconfigState.isReady = true;
+}
+
+
+/**
+ * Handles flip confirmation when user clicks on an indication
+ */
+function handleFlipConfirmationMatching(mousePos) {
+    const [e1_idx, e2_idx] = reconfigState.edges_to_remove;
+    const e1 = wg.state.edges[e1_idx];
+    const e2 = wg.state.edges[e2_idx];
+    
+    const v1 = wg.state.vertices[e1[0]];
+    const v2 = wg.state.vertices[e1[1]];
+    const v3 = wg.state.vertices[e2[0]];
+    const v4 = wg.state.vertices[e2[1]];
+    
+    const p1 = wg.dims.toCanvas(v1);
+    const p2 = wg.dims.toCanvas(v2);
+    const p3 = wg.dims.toCanvas(v3);
+    const p4 = wg.dims.toCanvas(v4);
+    
+    const minDist = settingsManager.get(PROXIMITY_EDGE) || DEFAULT_EDGE_HOVER_PROXIMITY;
+    
+    // Check if click is near any of the potential new edges
+    let clickedEdge = null;
+    let edgeSetIdx = 0;
+    
+    // Check all potential edges in edges_to_add
+    for (const edgeset of reconfigState.edges_to_add) {
+        for (const edge of edgeset) {
+            const startVx = wg.state.vertices[edge[0]];
+            const endVx = wg.state.vertices[edge[1]];
+            const pStart = wg.dims.toCanvas(startVx);
+            const pEnd = wg.dims.toCanvas(endVx);
+            
+            const dist = distanceToSegment(mousePos, pStart, pEnd);
+            if (dist < minDist) {
+                clickedEdge = edge;
+                break;
+            }
+        }
+        if (clickedEdge) {
+            break;
+        }
+        edgeSetIdx += 1;
+    }
+    
+    if (clickedEdge) {
+        // Find which flip option was selected
+        let selectedFlip = getFlipTypeFromEdges(reconfigState.edges_to_remove, reconfigState.edges_to_add[edgeSetIdx]);
+
+        if (selectedFlip) {
+            flipMatching(selectedFlip, e1_idx, e2_idx);
+        } else {
+            console.error("Inconsistent state: Selected flip type is null.");
+            toast("Cannot perform this flip.", true);
+        }
+    }
+    
+    // Clicked elsewhere - reset
+    resetSelectionState();
+}
+
+
+
+
+
+
+
+
+function verticesWithPossibleFlipsMatchingsFromVertex(v) {
+    const edgeIdx = findEdgeOfVxMatchings(v);
+    if (edgeIdx === -1) {
+        return [];
+    }
+    
+    const originalEdge = wg.state.edges[edgeIdx];
+    const flippableEdges = edgesWithPossibleFlipsMatchings(edgeIdx);
+    const targetVertices = new Set();
+
+    flippableEdges.forEach(flipEdgeIdx => {
+        const flipEdge = wg.state.edges[flipEdgeIdx];
+        const flipType = possibleFlipsMatching(originalEdge, flipEdge);
+
+        console.log(flipType);
+        
+        // Get the specific vertices based on flip type
+        const [v3, v4] = flipEdge;
+        let originalVx = wg.state.vertices[v];
+        if (pequals(wg.state.vertices[originalEdge[0]], originalVx)) {
+            if (flipType === 'a' || flipType === 'c') {
+                // For flip type 'a' connections: p1->p3
+                targetVertices.add(v3);
+            }
+            if (flipType === 'b' || flipType === 'c') {
+                // For flip type 'b' connections: p1-> p4, p2->p3
+                targetVertices.add(v4);
+            }
+        } else if (pequals(wg.state.vertices[originalEdge[1]], originalVx)) {
+            if (flipType === 'a' || flipType === 'c') {
+                // For flip type 'a' connections: p2->p4
+                targetVertices.add(v4);
+            }
+            if (flipType === 'b' || flipType === 'c') {
+                // For flip type 'b' connections: p2->p3
+                targetVertices.add(v3);
+            }
+        } else {
+            console.error("Something went really wrong, originalVx canot be found in either vertex of edge")
+        }
     });
 
-    let flips = possibleFlipsMatchingPoints(p1, p2, p3, p4, edgesWithoutEither);
-
-    if (flips === null) {
-        console.error("isFlipPossibleMatching says yes, but possibleFlips says no. pick a struggle.");
-        return;
-    }
-
-    if (flips === 'a' || flips === 'c') {
-        drawFlipInsertEdgeA([edge1[0], edge2[0]]);
-        drawFlipInsertEdgeA([edge1[1], edge2[1]]);
-    }
-
-    if (flips === 'b' || flips === 'c') {
-        drawFlipInsertEdgeB([edge1[0], edge2[1]]);
-        drawFlipInsertEdgeB([edge1[1], edge2[0]]);
-    }
-
-
-
-
+    // Remove original edge's vertices
+    const originalVertices = new Set(originalEdge);
+    return Array.from(targetVertices).filter(v => !originalVertices.has(v));
 }
-
-
-
-
-
-
-function handleClickMatchingsMode(mousePos) {
-
-
-    if (submode !== MATCHINGS_RECONFIGURATION_MODE) {
-        console.error("Only matchings allowed here");
-        return;
-    }
-
-
-    if (selectedEdge === -1) {
-        // nothing already selected, so we can try to do some stuff: namely, see if the user is selecting an edge or vertex
-
-        let result = findAnyClickedItem(mousePos);
-        selectedVx = result.vx;
-        selectedEdge = result.edge;
-
-        if (selectedVx !== -1) {
-            selectedEdge = findEdgeOfVx(selectedVx);
-            selectedVx = -1;
-            flipEdges = edgesWithPossibleFlipsMatchings(selectedEdge);
-
-        } else if (selectedEdge === -1) {
-            console.log("Found nothing in click");
-        }
-
-        flipEdges = edgesWithPossibleFlipsMatchings(selectedEdge);
-        return;
-    }
-
-    let clickedItem = findAnyClickedItem(mousePos);
-
-    // something was selected, but they clicked on empty space
-    if (clickedItem.vx === -1 && clickedItem.edge === -1) {
-
-        if (selectedEdge !== -1 && chosenFlipEdge !== -1) {
-            seeIfClickOnFlip(mousePos);
-        }
-
-
-        selectedVx = -1;
-        selectedEdge = -1;
-        flipEdges = [];
-        chosenFlipEdge = -1;
-        wg.redraw();
-        return;
-    }
-
-
-    
-    // Something is already selected. Let's make sure that we have flippable edges:
-    let clickedEdge = -1;
-    if (clickedItem.vx !== -1) {
-        clickedEdge = findEdgeOfVx(clickedItem.vx);
-    } else {
-        clickedEdge = clickedItem.edge;
-    }
-    
-
-    if (chosenFlipEdge === -1 && flipEdges.includes(clickedEdge)) {
-        chosenFlipEdge = clickedEdge;
-    }
-    //TODO here consider if clicking on another edge that would be flippable with current selected can be chosen as flippable,
-    //  or if it should do nothing, as it does now
-
-
-
-
-
-    canvas.style.cursor = "auto";
-}
-
-
-
-
-function seeIfClickOnFlip(mousePos) {
-
-
-    let e1 = wg.state.edges[selectedEdge];
-    let e2 = wg.state.edges[chosenFlipEdge];
-    let flips = possibleFlipsMatching(e1, e2);
-
-    if (flips === null) {
-        toast("Something went really wrong. Can't find possible flips", true);
-        return;
-    }
-
-    let v1 = wg.state.vertices[e1[0]];
-    let v2 = wg.state.vertices[e1[1]];
-    let v3 = wg.state.vertices[e2[0]];
-    let v4 = wg.state.vertices[e2[1]];
-    let p1 = wg.dims.toCanvas(v1);
-    let p2 = wg.dims.toCanvas(v2);
-    let p3 = wg.dims.toCanvas(v3);
-    let p4 = wg.dims.toCanvas(v4);
-    let minDist = settingsManager.get(PROXIMITY_EDGE);
-    if (!minDist) {
-        minDist = DEFAULT_EDGE_HOVER_PROXIMITY;
-    }
-
-    if (flips === 'a' || flips === 'c') {
-        const dist1 = distanceToSegment(mousePos, p1, p3);
-        const dist2 = distanceToSegment(mousePos, p2, p4);
-        console.log(`v1 ${v1} v2 ${v2}, v3 ${v3}, v4 ${v4}`);
-        console.log(dist1);
-        console.log(dist2);
-        if (dist1 < minDist || dist2 < minDist) {
-            flipMatching('a');
-
-
-            return;
-        }
-    }
-
-    if (flips === 'b' || flips === 'c') {
-        const dist1 = distanceToSegment(mousePos, p1, p4);
-        const dist2 = distanceToSegment(mousePos, p2, p3);
-        if (dist1 < minDist || dist2 < minDist) {
-
-            flipMatching('b');
-
-            return;
-        }
-    }
-    return;
-}
-
-
-
 
 
 
@@ -343,7 +438,7 @@ function edgesWithPossibleFlipsMatchings(e) {
 /**
  * 
  * @param {[Number, Number]} e1 
- * @param {[Number, Number]} edgeToCheck 
+ * @param {[Number, Number]} e2 
  * @returns {boolean} 
  */
 function isFlipPossibleMatching(e1, e2) {
@@ -351,6 +446,8 @@ function isFlipPossibleMatching(e1, e2) {
 }
 
 /**
+ * @param {[Number, Number]} e1 
+ * @param {[Number, Number]} e2 
  * @returns 'a' if p1-p3, p2-p4 is only possible
  *          'b' if p1-p4, p2-p3 is only possible
  *          'c' if both are possible
@@ -362,7 +459,7 @@ function possibleFlipsMatching(e1, e2) {
         return null;
     }
 
-    if (pequals(e1, e2)) {
+    if (areEdgesEqual(e1, e2)) {
         return null;
     }
 
@@ -405,4 +502,39 @@ function possibleFlipsMatchingPoints(p1, p2, p3, p4, otherEdges) {
                 b ? 'b' :
                 null;
 
+}
+
+
+/**
+ * Determines the flip type ('a' or 'b') by comparing the edges that were
+ * removed with the edges that are proposed to be added.
+ * This is the "reverse-engineering" step.
+ *
+ * @param {Array} edgesToRemove - An array of the two original edge indices, e.g., [2, 5].
+ * @param {Array} edgesToAdd - An array containing the two new edges, e.g., [[v1, v3], [v2, v4]].
+ * @returns {'a' | 'b' | null} The determined flip type, or null if no match.
+ */
+function getFlipTypeFromEdges(edgesToRemove, edgesToAdd) {
+    // Get the vertex indices from the original edges
+    const e1 = wg.state.edges[edgesToRemove[0]];
+    const e2 = wg.state.edges[edgesToRemove[1]];
+
+    // Define the patterns for flip 'a' and 'b'
+    const flipA_edges = [[e1[0], e2[0]], [e1[1], e2[1]]];
+    const flipB_edges = [[e1[0], e2[1]], [e1[1], e2[0]]];
+
+    // Check if the provided edgesToAdd match the 'a' pattern.
+    // We must check both orderings since the array order isn't guaranteed.
+    if ((areEdgesEqual(edgesToAdd[0], flipA_edges[0]) && areEdgesEqual(edgesToAdd[1], flipA_edges[1])) ||
+        (areEdgesEqual(edgesToAdd[0], flipA_edges[1]) && areEdgesEqual(edgesToAdd[1], flipA_edges[0]))) {
+        return 'a';
+    }
+
+    // Check if the provided edgesToAdd match the 'b' pattern.
+    if ((areEdgesEqual(edgesToAdd[0], flipB_edges[0]) && areEdgesEqual(edgesToAdd[1], flipB_edges[1])) ||
+        (areEdgesEqual(edgesToAdd[0], flipB_edges[1]) && areEdgesEqual(edgesToAdd[1], flipB_edges[0]))) {
+        return 'b';
+    }
+
+    return null; // Should not happen in a consistent state
 }

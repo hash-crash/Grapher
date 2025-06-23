@@ -61,11 +61,14 @@ function initializeButtons() {
     let explodeButton = document.getElementById('explodeid');
     explodeButton.addEventListener('click', explodeCoordinates);
 
-    let colinearButton = document.getElementById('showcolinearid');
-    colinearButton.addEventListener('click', () => {
-        toggleShowColinear();
-        colinearButton.classList.toggle('pressed-button', showColinearPoints);
-    });
+    let possibleFlipsButton = document.getElementById('showflipsid');
+    possibleFlipsButton.addEventListener('click', drawPossibleFlips);
+
+    // let colinearButton = document.getElementById('showcolinearid');
+    // colinearButton.addEventListener('click', () => {
+    //     toggleShowColinear();
+    //     colinearButton.classList.toggle('pressed-button', showColinearPoints);
+    // });
 
     let graphModeBtn = document.getElementById('graphmodeid');
     graphModeBtn.addEventListener('click', () => {

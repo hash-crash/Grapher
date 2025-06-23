@@ -9,6 +9,20 @@ function pequals(a, b) {
     return a[0] === b[0] && a[1] === b[1];
 }
 
+/**
+ * Checks if two edges (represented by their vertex index pairs) are the same.
+ * @param {[Number, Number]} e_idx_pair1 - Vertex indices of the first edge.
+ * @param {[Number, Number]} e_idx_pair2 - Vertex indices of the second edge.
+ * @returns {boolean} True if the edges are the same, false otherwise.
+ */
+function areEdgesEqual(e_idx_pair1, e_idx_pair2) {
+    if (!e_idx_pair1 || !e_idx_pair2 || e_idx_pair1.length !== 2 || e_idx_pair2.length !== 2) {
+        return false;
+    }
+    return (e_idx_pair1[0] === e_idx_pair2[0] && e_idx_pair1[1] === e_idx_pair2[1]) ||
+           (e_idx_pair1[0] === e_idx_pair2[1] && e_idx_pair1[1] === e_idx_pair2[0]);
+}
+
 
 /**
  * @param {[Number, Number]} e1 the edge, containing the 0-based indices of the vertices it connects
@@ -78,6 +92,47 @@ function intersectsAny(p1, p2, state=null, edges = null) {
 
 
 /**
+ * Finds all existing edges that are properly intersected by a potential new edge.
+ * "Properly intersected" means the edges cross and do not share any endpoints.
+ *
+ * @param {[Nunmber, Number]} potentialEdge - The edge to check, as a pair of vertex indices [v1, v2].
+ * @returns {[Number..]} - An array of indices of all existing edges that are properly intersected.
+ */
+function findIntersectedEdges(potentialEdge) {
+    const intersected_indices = [];
+    const [v1_idx, v2_idx] = potentialEdge;
+
+    // Get the coordinates of the potential new edge.
+    const p1 = wg.state.vertices[v1_idx];
+    const p2 = wg.state.vertices[v2_idx];
+
+    // Loop through all existing edges in the graph.
+    for (let i = 0; i < wg.state.edges.length; i++) {
+        const existingEdge = wg.state.edges[i];
+        const [v3_idx, v4_idx] = existingEdge;
+
+        // --- Crucial Guard Clause ---
+        // If the potential new edge shares any vertex with the existing edge,
+        // they cannot properly intersect. They are adjacent, not crossing.
+        if (v1_idx === v3_idx || v1_idx === v4_idx || v2_idx === v3_idx || v2_idx === v4_idx) {
+            continue; // Skip to the next edge.
+        }
+
+        // Now that we know the edges are disjoint, we can perform the geometric test.
+        // We leverage your existing, robust 'intersects' function.
+        const q1 = wg.state.vertices[v3_idx];
+        const q2 = wg.state.vertices[v4_idx];
+        
+        if (intersects(p1, p2, q1, q2)) {
+            intersected_indices.push(i);
+        }
+    }
+
+    return intersected_indices;
+}
+
+
+/**
  * 
  * @param {[Number, Number]} p1 coordinates
  * @param {[Number, Number]} p2 coordinates
@@ -125,7 +180,39 @@ function intersects(p1, p2, q1, q2) {
 }
 
 
+/**
+ * If 2 lines intersect, this function returns the point at which they intersect (in graph coordinates, not canvas)
+ * @param {[Number, Number]} p1 
+ * @param {[Number, Number]} p2 
+ * @param {[Number, Number]} q1 
+ * @param {[Number, Number]} q2 
+ * @returns {[Number, Number]?} intersection point
+ */
+function getIntersectionPoint(p1, p2, q1, q2) {
+    const x1 = p1[0], y1 = p1[1];
+    const x2 = p2[0], y2 = p2[1];
+    const x3 = q1[0], y3 = q1[1];
+    const x4 = q2[0], y4 = q2[1];
 
+    const denominator = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+    if (denominator === 0) {
+        // Lines are parallel, and we are assuming they do intersect
+        return  isOnSegment(p1, p2, q1) ? q1 :
+                isOnSegment(p1, p2, q2) ? q2 :
+                isOnSegment(q1, q2, p1) ? p1 :
+                isOnSegment(q1, q2, p2) ? p2 :
+                null;
+        
+    }
+
+    const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denominator;
+    const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / denominator;
+
+    if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+        return [x1 + t * (x2 - x1), y1 + t * (y2 - y1)];
+    }
+    return null;
+}
 
 
 
@@ -151,7 +238,13 @@ function det(p1, p2, q) {
 
 
 
-
+/**
+ * 
+ * @param {[Number, Number]} mouse position in canvas (so, not in graph coordinates)
+ * @param {[Number, Number]} p1 position in canvas
+ * @param {[Number, Number]} p2 position in canvas
+ * @returns {Number} canvas units distance between mouse and p1-p2
+ */
 function distanceToSegment(mouse, p1, p2) {
     if (!Array.isArray(mouse) || mouse.length != 2) {
         return;
@@ -175,7 +268,12 @@ function distanceToSegment(mouse, p1, p2) {
 
 
 
-
+/**
+ * 
+ * @param {[Number, Number]} mousePos coordinates in the canvas
+ * @param {[Number, Number]} vertex coordinates in the graph
+ * @returns {Boolean} whetheher it's within PROXIMITY_VERTEX-setting pixels
+ */
 function isNearVertex(mousePos, vertex) {
     if (!wg || !wg.dims || !mousePos || !vertex) {
         return false;
@@ -448,14 +546,14 @@ function isValidGraphForMode() {
             isCrossingFree();
     } else {
         switch (submode) {
+            case MATCHINGS_RECONFIGURATION_MODE:
+                return isMatching();
             case TRIANGULATION_RECONFIGURATION_MODE:
                 return isGeometricTriangulation();
             case CFSP_RECONFIGURATION_MODE:
                 return isCFSP();
             case CFST_RECONFIGURATION_MODE:
                 return isCFST();
-            case MATCHINGS_RECONFIGURATION_MODE:
-                return isMatching();
             default:
                 console.error("unkown submode");
                 break;

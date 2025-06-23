@@ -234,7 +234,7 @@ function redo(depth = 0) {
         undo(1);
     }
 
-    if (showColinearPoints) {
+    if (settingsManager.get(SHOW_COLINEAR_TRIPLES_TOGGLE)) {
         allColinearTriples = findAllColinearTriples();
     }
     updateFileView();
@@ -289,7 +289,7 @@ function undo(depth = 0) {
 
 
 
-    if (showColinearPoints) {
+    if (settingsManager.get(SHOW_COLINEAR_TRIPLES_TOGGLE)) {
         allColinearTriples = findAllColinearTriples();
     }
     updateFileView();

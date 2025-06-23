@@ -90,6 +90,8 @@ async function loadAllScripts() {
     let drawingPromise = scriptLoader('js/representation/drawing.js');
     let editModePromise = scriptLoader('js/graphlogic/editmode.js');
     let matchingsModePromise = scriptLoader('js/graphlogic/matchingsmode.js');
+    let triangulationsModePromise = scriptLoader('js/graphlogic/triangulationsmode.js');
+    let reconfModePromise = scriptLoader('js/graphlogic/reconfigurationmode.js');
     let contextMenuPromise = scriptLoader('js/interactivity/contextmenu.js');
     let hiPromise = scriptLoader('js/interactivity/htmlinteractivity.js');
     let miPromise = scriptLoader('js/interactivity/modeinteractivity.js');
@@ -109,6 +111,8 @@ async function loadAllScripts() {
     await geometryPromise;
     await editModePromise;
     await matchingsModePromise;
+    await triangulationsModePromise;
+    await reconfModePromise;
     await contextMenuPromise;
     await hiPromise;
     await miPromise;
@@ -119,6 +123,7 @@ async function loadAllScripts() {
     // please don't remove this
     window.Grapher = new Grapher(null, null, ctx);
 
+    reconfigState = createInitialSelection(window.Grapher);
 
     await scriptLoader('js/interactivity/canvas.js');
     initializeButtons();
@@ -149,17 +154,18 @@ async function runAutoInit() {
     try {
         console.log(`Miliseconds needed for init: ${performance.now() - timestampStart}`);
 
-        await autoLoadInputFile("in 3.txt"); // Now waits for completion
+        await autoLoadInputFile("in4.txt"); // Now waits for completion
 
         // for now just add vertices and edges;
         // addVx([12,12]);
         // addVx([-25,20]);
         // addEdge([10, 9], true);
         // addEdge([9,10]);
-        console.log(`Miliseconds needed for including file: ${performance.now() - timestampStart}`);
+        console.log(`Miliseconds needed for init including file auto-loading: ${performance.now() - timestampStart}`);
 
     } catch (error) {
         console.error("Error:", error);
+        toast(`Error: ${error}`, true);
     }
 }
 
@@ -242,9 +248,11 @@ var selectedVx = -1;
 var selectedEdge = -1;
 var highlightedEdge = -1;
 var highlightedVx = -1;
-var flipEdges = [];
-var chosenFlipEdge = -1;
 
+/**
+ * See {@link ReconfigurationMode#createInitialSelection} 
+ */
+var reconfigState = null;
 
 
 

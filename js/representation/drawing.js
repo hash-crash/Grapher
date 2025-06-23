@@ -5,8 +5,9 @@ function drawEdge(e) {
 
     let s = wg.dims.toCanvas(wg.state.vertices[e[0]]);
     let end = wg.dims.toCanvas(wg.state.vertices[e[1]]);
+    let thickness = settingsManager.get(EDGE_THICKNESS);
     ctx.beginPath();
-    ctx.lineWidth = 3;
+    ctx.lineWidth = thickness;
     ctx.strokeStyle = color ? color : '#333333';
     ctx.fillStyle = color ? color : '#333333';
     ctx.moveTo(s[0], s[1]);
@@ -24,11 +25,11 @@ function drawEdge(e) {
 function drawFlipInsertEdgeA(e) {
     let s = wg.dims.toCanvas(wg.state.vertices[e[0]]);
     let end = wg.dims.toCanvas(wg.state.vertices[e[1]]);
-
+    let thickness = settingsManager.get(EDGE_THICKNESS);
     ctx.fillStyle = 'darkgreen';
     ctx.strokeStyle = 'darkgreen';
     ctx.beginPath();
-    ctx.lineWidth = 4;
+    ctx.lineWidth = Math.round(thickness * 1.33);
     ctx.moveTo(s[0], s[1]);
     ctx.lineTo(end[0], end[1]);
 
@@ -45,11 +46,11 @@ function drawFlipInsertEdgeA(e) {
 function drawFlipInsertEdgeB(e) {
     let s = wg.dims.toCanvas(wg.state.vertices[e[0]]);
     let end = wg.dims.toCanvas(wg.state.vertices[e[1]]);
-
+    let thickness = settingsManager.get(EDGE_THICKNESS);
     ctx.fillStyle = 'mediumseagreen';
     ctx.strokeStyle = 'mediumseagreen';
     ctx.beginPath();
-    ctx.lineWidth = 4;
+    ctx.lineWidth =  Math.round(thickness * 1.33);
     ctx.moveTo(s[0], s[1]);
     ctx.lineTo(end[0], end[1]);
 
@@ -65,12 +66,12 @@ function drawFlipInsertEdgeB(e) {
 function drawHighlightedEdge(e) {
     let s = wg.dims.toCanvas(wg.state.vertices[e[0]]);
     let end = wg.dims.toCanvas(wg.state.vertices[e[1]]);
-
+    let thickness = settingsManager.get(EDGE_THICKNESS);
     let color = settingsManager.get(HIGHTLIGHT_COLOR);
     ctx.fillStyle = color ? color : 'lime';
     ctx.strokeStyle = color ? color : 'lime';
     ctx.beginPath();
-    ctx.lineWidth = 4;
+    ctx.lineWidth =  Math.round(thickness * 1.33);
     ctx.moveTo(s[0], s[1]);
     ctx.lineTo(end[0], end[1]);
 
@@ -85,12 +86,12 @@ function drawHighlightedEdge(e) {
 function drawSelectedEdge(e) {
     let s = wg.dims.toCanvas(wg.state.vertices[e[0]]);
     let end = wg.dims.toCanvas(wg.state.vertices[e[1]]);
-
+    let thickness = settingsManager.get(EDGE_THICKNESS);
     let color = settingsManager.get(SELECT_COLOR);
     ctx.fillStyle = color ? color : 'blue';
     ctx.strokeStyle = color ? color : 'blue';
     ctx.beginPath();
-    ctx.lineWidth = 5;
+    ctx.lineWidth =  Math.round(thickness * 1.66);
     ctx.moveTo(s[0], s[1]);
     ctx.lineTo(end[0], end[1]);
 
@@ -105,12 +106,12 @@ function drawSelectedEdge(e) {
 function drawEdgeForRemoval(e) {
     let s = wg.dims.toCanvas(wg.state.vertices[e[0]]);
     let end = wg.dims.toCanvas(wg.state.vertices[e[1]]);
-
+    let thickness = settingsManager.get(EDGE_THICKNESS);
     let color = settingsManager.get(REMOVE_COLOR);
     ctx.fillStyle = color ? color : 'crimson';
     ctx.strokeStyle = color ? color : 'crimson';
     ctx.beginPath();
-    ctx.lineWidth = 5;
+    ctx.lineWidth =  Math.round(thickness * 1.66);
     ctx.moveTo(s[0], s[1]);
     ctx.lineTo(end[0], end[1]);
 
@@ -122,21 +123,23 @@ function drawEdgeForRemoval(e) {
 }
 
 function drawEdgeWithWarning(e) {
+    ctx.save();
+    
     let s = wg.dims.toCanvas(wg.state.vertices[e[0]]);
     let end = wg.dims.toCanvas(wg.state.vertices[e[1]]);
+    let thickness = settingsManager.get(EDGE_THICKNESS);
 
-    ctx.fillStyle = 'red';
-    ctx.strokeStyle = 'red';
+    ctx.strokeStyle = 'black';
+    ctx.setLineDash([10, 25]); // 5px dash, 5px gap - hardcoded for now
+    ctx.lineWidth = Math.round(thickness * 2);
+
     ctx.beginPath();
-    ctx.lineWidth = 5;
     ctx.moveTo(s[0], s[1]);
     ctx.lineTo(end[0], end[1]);
-
     ctx.stroke();
     ctx.closePath();
-    
-    ctx.lineWidth = 1;
-    resetColor()
+
+    ctx.restore();
 }
 
 
@@ -146,21 +149,21 @@ function drawVx(v) {
 
 
     let color = settingsManager.get(VERTEX_COLOR);
-
+    let size = settingsManager.get(VERTEX_SIZE);
     let c = wg.dims.toCanvas(v);
     ctx.strokeStyle = color ? color : 'black';
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 0.4 * size;
 
 
     ctx.beginPath();
     ctx.fillStyle = "#fefefe";
-    ctx.arc(c[0], c[1], 7, 0, 2 * Math.PI);
+    ctx.arc(c[0], c[1], Math.round(0.8 * size), 0, 2 * Math.PI);
     ctx.fill();
     ctx.closePath();
 
 
     ctx.beginPath();
-    ctx.arc(c[0], c[1], 9, 0, 2 * Math.PI);
+    ctx.arc(c[0], c[1], size, 0, 2 * Math.PI);
     ctx.stroke();
     ctx.closePath();
 
@@ -173,18 +176,19 @@ function drawSelectedVx(v) {
 
     let c = wg.dims.toCanvas(v);
     let color = settingsManager.get(SELECT_COLOR);
+    let size = settingsManager.get(VERTEX_SIZE);
     ctx.strokeStyle = color ? color : 'blue';
-    ctx.lineWidth = 6;
+    ctx.lineWidth = 0.6 * size;
 
     ctx.beginPath();
     ctx.fillStyle = "#e1e1e1";
-    ctx.arc(c[0], c[1], 8, 0, 2 * Math.PI);
+    ctx.arc(c[0], c[1], Math.round(0.8 * size), 0, 2 * Math.PI);
     ctx.fill();
     ctx.closePath();
 
 
     ctx.beginPath();
-    ctx.arc(c[0], c[1], 10, 0, 2 * Math.PI);
+    ctx.arc(c[0], c[1], size, 0, 2 * Math.PI);
     ctx.stroke();
     ctx.closePath();
 
@@ -198,18 +202,19 @@ function drawHighlighedVx(v) {
 
     let c = wg.dims.toCanvas(v);
     let color = settingsManager.get(HIGHTLIGHT_COLOR);
+    let size = settingsManager.get(VERTEX_SIZE);
     ctx.strokeStyle = color ? color : 'lime';
-    ctx.lineWidth = 6;
+    ctx.lineWidth = 0.6 * size;
 
     ctx.beginPath();
     ctx.fillStyle = "#e1e1e1";
-    ctx.arc(c[0], c[1], 8, 0, 2 * Math.PI);
+    ctx.arc(c[0], c[1], Math.round(0.8 * size), 0, 2 * Math.PI);
     ctx.fill();
     ctx.closePath();
 
 
     ctx.beginPath();
-    ctx.arc(c[0], c[1], 10, 0, 2 * Math.PI);
+    ctx.arc(c[0], c[1], size, 0, 2 * Math.PI);
     ctx.stroke();
     ctx.closePath();
 
@@ -217,6 +222,23 @@ function drawHighlighedVx(v) {
     resetColor();
 }
 
+
+/**
+ * 
+ * @param {[Number, Number]} pt point in graph cordinates (not canvas);
+ */
+function drawIntersectionWarningCircle(pt) {
+    let c = wg.dims.toCanvas(pt);
+    ctx.strokeStyle = 'red';
+    ctx.lineWidth = 4;
+
+    ctx.beginPath();
+    ctx.arc(c[0], c[1], 15, 0, 2 * Math.PI);
+    ctx.stroke();
+    ctx.closePath();
+
+    resetColor();
+}
 
 
 function resetColor() {

@@ -17,6 +17,17 @@ function resetContextMenuButtonsVisibility() {
     removeEdgeToHereBtn.style.display = 'block';
 }
 
+function getNumberOfVisibleContextMenuButtons() {
+    let visibleButtons = 0;
+    if (drawEdgeBtn.style.display === 'block') visibleButtons++;
+    if (addVertexBtn.style.display === 'block') visibleButtons++;
+    if (addVertexAndDrawEdgeBtn.style.display === 'block') visibleButtons++;
+    if (removeVertexBtn.style.display === 'block') visibleButtons++;
+    if (removeEdgeBtn.style.display === 'block') visibleButtons++;
+    if (removeEdgeToHereBtn.style.display === 'block') visibleButtons++;
+    return visibleButtons;
+}
+
 function showCustomMenu(x, y) {
     customMenu.style.top = y + 'px';
     customMenu.style.left = x + 'px';
@@ -39,7 +50,7 @@ document.addEventListener('contextmenu', (e) => {
             hideCustomMenu();
         }
         return;
-    } 
+    }
 
     resetContextMenuButtonsVisibility();
 
@@ -52,10 +63,38 @@ document.addEventListener('contextmenu', (e) => {
         console.log("No edge - no remove edge");
     }
 
+    
+
+    let mousePos = getMousePos(e);
+    let coords = wg.dims.toCoords(mousePos).map(Math.round);
+    /**
+     * @param {[Number, Number]} c coords 
+     * @returns {Boolean} true if we are hovering on a vertex, false if we aren't
+     */
+    let hoverResult = ((c) => {
+        for (const vertex of wg.state.vertices) {
+            if (pequals(c, vertex)) {
+                console.log(`    Hovering on vertex at coords: ${c}`);
+                return true;
+            }
+        }
+        console.log("    Not hovering on any vertex");
+        return false;
+    })(coords);
+
+
+
     if (highlightedVx === -1) {
         // We are not actively hovering on an item, meaning that we cannot remove it or draw to it since it doesn't exist
         removeVertexBtn.style.display = 'none';
         drawEdgeBtn.style.display = 'none';
+
+        // but we could still be 'pointing' towards a coordinate that has a vertex, so:
+        if (hoverResult) {
+            console.log("  HERE MOTHERFUCKER");
+            addVertexAndDrawEdgeBtn.style.display = 'none';
+            addVertexBtn.style.display = 'none';
+        }
 
         console.log("No vx - no remove vx or drawedge");
     } else {
@@ -93,6 +132,13 @@ document.addEventListener('contextmenu', (e) => {
 
     if (addVertexAndDrawEdgeBtn.style.display === 'block' && intersectsAny(wg.state.vertices[selectedVx], closestGraphCoord)) {
         addVertexAndDrawEdgeBtn.style.display = 'none';
+    }
+
+
+    if (getNumberOfVisibleContextMenuButtons() === 0) {
+        // If no buttons are visible, hide the menu
+        hideCustomMenu();
+        return;
     }
 
     // i feel like this should all be doable much much cleaner but i really dk how to do that atm

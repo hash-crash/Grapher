@@ -29,9 +29,13 @@
     height: 80%;
 }
 
+.hidden-controlbutton  {
+  display: none !important; 
+}
+
 
 .bottomcontrols {
-    display: flex;
+    display:flex;
     position: absolute;
     bottom: 0;
     left: 0;

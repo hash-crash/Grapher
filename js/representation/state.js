@@ -167,7 +167,7 @@ function stateUpdated(saveToLocalStorage=true) {
     updateFileView();
     updateHistoryView();
     wg.state.updateAdjList();
-    if (showColinearPoints) {
+    if (settingsManager.get(SHOW_COLINEAR_TRIPLES_TOGGLE)) {
         allColinearTriples = findAllColinearTriples();
     }
     wg.redraw();
@@ -514,20 +514,21 @@ function deleteItem() {
 }
 
 
-function flipMatching(flipMode) {
-    let e1 = [wg.state.edges[selectedEdge][0], wg.state.edges[selectedEdge][1]];
-    let e2 = [wg.state.edges[chosenFlipEdge][0], wg.state.edges[chosenFlipEdge][1]];
+function flipMatching(flipMode, e1_idx, e2_idx) {
+    let e1 = [wg.state.edges[e1_idx][0], wg.state.edges[e1_idx][1]];
+    let e2 = [wg.state.edges[e2_idx][0], wg.state.edges[e2_idx][1]];
 
 
 
     if (flipMode === 'a') {
-        wg.state.edges[selectedEdge][1] = e2[0];
-        wg.state.edges[chosenFlipEdge][0] = e1[1];
+        wg.state.edges[e1_idx][1] = e2[0];
+        wg.state.edges[e2_idx][0] = e1[1];
     } else {
-        wg.state.edges[selectedEdge][1] = e2[1];
-        wg.state.edges[chosenFlipEdge][1] = e1[1];
+        wg.state.edges[e1_idx][1] = e2[1];
+        wg.state.edges[e2_idx][1] = e1[1];
     }
 
+    resetSelectionState();
     addToHistory(wg.state.copyConstructor(), FLIP, e1, e2, flipMode);
     stateUpdated();
 }
