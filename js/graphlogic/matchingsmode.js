@@ -82,10 +82,10 @@ function handleClickMatchingsMode(mousePos) {
 
     } else if (reconfigState.mode === null) {
         // State 1: Nothing selected yet
-        handleInitialClick(clickedItem);
+        handleInitialClickMatching(clickedItem);
     } else {
         // State 2: First item selected
-        handleSecondClick(clickedItem);
+        handleSecondClickMathching(clickedItem);
     }
 
     wg.redraw();
@@ -94,7 +94,7 @@ function handleClickMatchingsMode(mousePos) {
 /**
  * Handles the initial click in the selection process
  */
-function handleInitialClick(clickedItem) {
+function handleInitialClickMatching(clickedItem) {
     if (clickedItem.vx !== -1) { // Vertex clicked
         reconfigState.mode = 'vertices';
         selectedVx = clickedItem.vx;
@@ -128,7 +128,7 @@ function handleInitialClick(clickedItem) {
 /**
  * Handles the second click after initial selection
  */
-function handleSecondClick(clickedItem) {
+function handleSecondClickMathching(clickedItem) {
     if (reconfigState.mode === 'edges') {
         handleEdgeModeSecondClick(clickedItem);
     } else if (reconfigState.mode === 'vertices') {
@@ -170,9 +170,9 @@ function handleEdgeModeSecondClick(clickedItem) {
 
 
 
-        // REFACTOR: This is the crucial change. We now handle the 'a', 'b', 'c' cases.
+        // for more information about the flip type, see getFlipTypeFromEdges and possibleFlipsMatchingPoints functions
         if (flipType === 'a' || flipType === 'b') {
-            // Unambiguous flip.
+            // Unambiguous flip. Insta-flip will be possible.
             reconfigState.edges_to_add = [getEdgesToAdd(edge1, edge2, flipType)];
         } else if (flipType === 'c') {
             // Ambiguous flip. We must store both options and let the user choose.

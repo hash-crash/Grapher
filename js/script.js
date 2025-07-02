@@ -91,6 +91,7 @@ async function loadAllScripts() {
     let editModePromise = scriptLoader('js/graphlogic/editmode.js');
     let matchingsModePromise = scriptLoader('js/graphlogic/matchingsmode.js');
     let triangulationsModePromise = scriptLoader('js/graphlogic/triangulationsmode.js');
+    let pathsModePromise = scriptLoader('js/graphlogic/pathsmode.js');
     let reconfModePromise = scriptLoader('js/graphlogic/reconfigurationmode.js');
     let contextMenuPromise = scriptLoader('js/interactivity/contextmenu.js');
     let hiPromise = scriptLoader('js/interactivity/htmlinteractivity.js');
@@ -112,6 +113,7 @@ async function loadAllScripts() {
     await editModePromise;
     await matchingsModePromise;
     await triangulationsModePromise;
+    await pathsModePromise;
     await reconfModePromise;
     await contextMenuPromise;
     await hiPromise;

@@ -81,6 +81,8 @@ function createInitialSelection(graph) {
  */
 function resetSelectionState() {
     reconfigState = createInitialSelection(wg);
+    selectedEdge = -1;
+    selectedVx = -1;
     wg.redraw();
 }
 

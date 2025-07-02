@@ -5,8 +5,11 @@
  * It follows the standard 3-state machine pattern for selection.
  */
 function handleClickTriangulationMode(mousePos) {
-    // We might add a check here later, e.g. isTriangulation()
-    // if (!isTriangulation()) { resetSelectionState(); return; }
+    if (submode !== TRIANGULATION_RECONFIGURATION_MODE || !isGeometricTriangulation()) {
+        resetSelectionState();
+        return;
+    }
+    
 
     const clickedItem = findAnyClickedItem(mousePos);
 
@@ -21,6 +24,14 @@ function handleClickTriangulationMode(mousePos) {
     } else {
         // State 2: First item selected, handle the second click
         handleSecondClickTriangulation(clickedItem);
+    }
+
+    if (reconfigState.isReady && settingsManager.get(INSTA_FLIP_TOGGLE) && reconfigState.edges_to_add.length === 1) {
+        // If the user has confirmed a flip and instant flips are enabled,
+        // we perform the flip immediately without waiting for a confirmation click.
+        performTriangulationFlip();
+        resetSelectionState();
+        return;
     }
 
     wg.redraw();
@@ -46,6 +57,8 @@ function handleInitialClickTriangulation(clickedItem) {
             return;
         }
 
+        selectedEdge = clickedItem.edge;
+
         // Rule #2: Check if the internal edge is flippable (forms a convex quad).
         const newEdgeToAdd = getDiagonalFlipIfPossible(clickedEdgeIdx);
 
@@ -53,7 +66,7 @@ function handleInitialClickTriangulation(clickedItem) {
             // SUCCESS: The edge is flippable. The outcome is unambiguous.
             reconfigState.mode = 'edges';
             reconfigState.edges_to_remove = [clickedEdgeIdx];
-            reconfigState.edges_to_add = [newEdgeToAdd]; // Note: a single edge, not a set of sets
+            reconfigState.edges_to_add = [[newEdgeToAdd]]; // Note: a single edge, not a set of sets
             reconfigState.isReady = true; // We can go straight to the confirmation state
             
         } else {
@@ -65,6 +78,7 @@ function handleInitialClickTriangulation(clickedItem) {
     // --- WORKFLOW 2: User clicks a VERTEX to initiate a connection ---
     else if (clickedItem.vx !== -1) {
         const clickedVxIdx = clickedItem.vx;
+        selectedVx = clickedItem.vx;
 
         // Rule #3: Find all vertices that we can connect to.
         // This is the most complex part of the logic.
@@ -127,7 +141,7 @@ function handleSecondClickTriangulation(clickedItem) {
     // SUCCESS: We have everything we need for the diagonal flip.
     // Update the state to be ready for confirmation.
     reconfigState.edges_to_remove = [edge_to_remove_idx];
-    reconfigState.edges_to_add = [edge_to_add];
+    reconfigState.edges_to_add = [[edge_to_add]];
     reconfigState.isReady = true;
 
     // Clear the intermediate state properties.
@@ -145,14 +159,19 @@ function handleSecondClickTriangulation(clickedItem) {
  */
 function handleConfirmationTriangulation(mousePos) {
     // This function should only run when the state is ready with a single proposed flip.
-    if (!reconfigState.isReady || reconfigState.edges_to_add.length !== 1 || reconfigState.edges_to_remove.length !== 1) {
+    if (!reconfigState.isReady || 
+        reconfigState.edges_to_add.length !== 1 ||
+        reconfigState.edges_to_add[0].length !== 1 ||
+        reconfigState.edges_to_remove.length !== 1
+    ) {
         console.error("Confirmation handled in an invalid state.", reconfigState);
         resetSelectionState();
         return;
     }
 
     // There is only one new edge proposed in a triangulation flip.
-    const newEdge = reconfigState.edges_to_add[0];
+    const newEdgeSet = reconfigState.edges_to_add[0];
+    const newEdge = newEdgeSet[0];
 
     // Get the coordinates of the new edge to check the distance.
     const p1 = wg.dims.toCanvas(wg.state.vertices[newEdge[0]]);
@@ -169,32 +188,6 @@ function handleConfirmationTriangulation(mousePos) {
     }
 }
 
-
-/**
- * Executes the 1-for-1 diagonal flip for a triangulation.
- * This replaces the edge to be removed with the new edge to be added.
- */
-function performTriangulationFlip() {
-    // Get the final operation details from the global state.
-    const edgeToRemoveIdx = reconfigState.edges_to_remove[0];
-    const edgeToAdd = reconfigState.edges_to_add[0];
-
-    // For history purposes, we might want a copy of the edge before we change it.
-    const originalEdgeRemoved = [...wg.state.edges[edgeToRemoveIdx]];
-
-    console.log(`Flipping edge ${edgeToRemoveIdx}: removing [${originalEdgeRemoved}] and adding [${edgeToAdd}]`);
-
-    // --- Perform the Swap ---
-    // By replacing the edge at the same index, we avoid re-indexing all other edges,
-    // which is safer and more efficient.
-    wg.state.edges[edgeToRemoveIdx] = edgeToAdd;
-
-    // --- Finalize ---
-    // Update the history and reset the state machine for the next operation.
-    addToHistory(wg.state.copyConstructor(), FLIP, originalEdgeRemoved, edgeToAdd);
-    stateUpdated(); // This should handle redrawing and other necessary updates.
-    resetSelectionState();
-}
 
 
 

@@ -13,19 +13,31 @@ Excpected working:
     * click on one of the green lines, the flip is perfromed
     * the flip can be undone and re-done via history (ctrl+z or button)
     * in the matcings mode, only flips can be undone/redone
-4. highlighting of colinear points
+4. entering triangulations mode if the graph is a geometric triangulation
+    * click on an edge
+        - if it's on the outer hull, or no valid flip with it can be performed, a notification should appear informing the user of this
+        - otherwise, if it's a flippable edge, the flip should get indicated (or insta-flipped)
+    * click on a vertex
+        - see available vertexes that can be used for a new edge that would be valid flips highlighed as yellow
+        - click on one, if insta-flip is enable it should flip, otherwise click the green edge to confirm
+5. entering crossing-free spanning PATHs mode if the graph is a CFSP
+    * unfortunately, clicking an edge shows invalid flips as possible for now - work in progress
+6. highlighting of colinear points
     * it's a toggle, so it needs to be turned off. It obstructs visibility for flipping
-5. settings
+7. settings
     * adjusting the hover/click proximity, colors, and by what factor the coordinates get multiplied
-6. coordinate multiplaction
+    * adjusting the size of the vertices and edges in pixels (slider)
+8. coordinate multiplaction
     * it's at the bottom of the top part of the toolbar (icon is like small markers pointing diagonally)
-7. re-zoom graph so that it's fully within the canvas
-8. insta-flip toggle for perfect matchings
+9. re-zoom graph so that it's fully within the canvas
+10. insta-flip toggle for perfect matchings and triangulations
+    * insta-flip toggle is at the very bottom of the settings view
+
 
 Expected not working:
-1. other flip types (almost-perfect matchings, triangulations, CFSP, CFST)
+1. other flip types (almost-perfect matchings, CFSP, CFST)
 2. show all possible flips button/toggle
-3. insta-flip toggle for other modes
+3. insta-flip toggle for other modes(almost-perfect matchings, CFSP, CFST)
 
 Note: Spiral graph with only 3 possible flips for matchings (with 3 'levels') can be found in data/matchings_only_3_flips_spiral_graph.txt
 
@@ -199,6 +211,16 @@ The toolbar contains buttons that permit interacting with the program. The main 
 * **Redo:** `Ctrl+Shift+Z` / `Cmd+Shift+Z`
 * **Delete Selected:** `Delete` or `Backspace` (when a vertex or edge is selected in Edit Mode).
 * **Deselect:** `Escape`
+* **Clear the file** Ctrl+K 
+* **Mode switching**
+    -  `R` for entering whichever mode is applicable to the current graph type (if any) - so, if the graph is a matching, it will enter matchings mode, and if it's a triangulation, it will enter triangulation mode, etc.
+    - `E` for entering EDIT mode
+    - `G` for entering Triangulation mode if possible
+    - `P` for entering Paths mode if possible
+    - `M` for entering Matchings mode if possible
+
+
+
 
 ## 10. Troubleshooting / FAQ
 
