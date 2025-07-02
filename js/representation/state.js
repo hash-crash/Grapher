@@ -540,21 +540,21 @@ function flipMatching(flipMode, e1_idx, e2_idx) {
  * This replaces the edge to be removed with the new edge to be added.
  */
 function performTriangulationFlip() {
-    // Get the final operation details from the global state.
     const edgeToRemoveIdx = reconfigState.edges_to_remove[0];
+
+    // the first edge of the first set of edges
     const edgeToAdd = reconfigState.edges_to_add[0][0];
 
     // For history purposes, we might want a copy of the edge before we change it.
     const originalEdgeRemoved = [...wg.state.edges[edgeToRemoveIdx]];
-
     console.log(`Flipping edge ${edgeToRemoveIdx}: removing [${originalEdgeRemoved}] and adding [${edgeToAdd}]`);
 
-    // --- Perform the Swap ---
+
     // By replacing the edge at the same index, we avoid re-indexing all other edges,
     // which is safer and more efficient.
     wg.state.edges[edgeToRemoveIdx] = edgeToAdd;
 
-    // --- Finalize ---
+
     // Update the history and reset the state machine for the next operation.
     addToHistory(wg.state.copyConstructor(), FLIP, originalEdgeRemoved, edgeToAdd);
     stateUpdated(); // This should handle redrawing and other necessary updates.

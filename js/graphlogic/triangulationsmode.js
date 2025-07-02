@@ -26,6 +26,14 @@ function handleClickTriangulationMode(mousePos) {
         handleSecondClickTriangulation(clickedItem);
     }
 
+    if (reconfigState.isReady && settingsManager.get(INSTA_FLIP_TOGGLE) && reconfigState.edges_to_add.length === 1) {
+        // If the user has confirmed a flip and instant flips are enabled,
+        // we perform the flip immediately without waiting for a confirmation click.
+        performTriangulationFlip();
+        resetSelectionState();
+        return;
+    }
+
     wg.redraw();
 }
 
