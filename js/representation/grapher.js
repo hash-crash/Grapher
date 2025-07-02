@@ -25,6 +25,9 @@ drawReconfigurationIndications() {
     if (!reconfigState.isReady || reconfigState.edges_to_add.length === 0) {
         return;
     }
+
+    console.log("Drawing all indications of new edges");
+
     
     let a = true;
     console.log(reconfigState.edges_to_add);
@@ -87,11 +90,12 @@ redraw() {
  */
 drawAllReconfigurationMode() {
     // Exit if not in the correct mode (you can add other graph types here later)
-    if (submode !== MATCHINGS_RECONFIGURATION_MODE) {
+    if (mode !== RECONFIGURATION_MODE) {
         // Fallback to a default drawing mode if necessary
         this.drawAllEditMode(); 
         return;
     }
+
 
     // ======================================================
     // == PASS 1: DRAW ALL EXISTING EDGES
@@ -102,12 +106,14 @@ drawAllReconfigurationMode() {
     this.state.edges.forEach((e, i) => this.drawFlippingEdge(e, i));
 
 
+
     // ======================================================
     // == PASS 2: DRAW THE RECONFIGURATION INDICATIONS
     // ======================================================
     // If a selection is ready, we draw the proposed new "green" edges.
     // This happens *after* existing edges are drawn, but *before* vertices.
     this.drawReconfigurationIndications();
+
 
 
     // ======================================================
@@ -178,7 +184,8 @@ drawFlippingEdge(e, i) {
         }
 
         // Is this edge a potential target for the user to click next?
-        if (reconfigState.possibleTargets.includes(i)) {
+        if (reconfigState.mode === 'edges' &&
+            reconfigState.possibleTargets.includes(i)) {
             // In the old code, these were drawn as "for removal", so we keep that.
             // A different style like `drawPossibleTargetEdge(e)` could be clearer.
             drawEdgeForRemoval(e);

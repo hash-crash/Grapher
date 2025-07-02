@@ -532,3 +532,69 @@ function flipMatching(flipMode, e1_idx, e2_idx) {
     addToHistory(wg.state.copyConstructor(), FLIP, e1, e2, flipMode);
     stateUpdated();
 }
+
+
+
+/**
+ * Executes the 1-for-1 diagonal flip for a triangulation.
+ * This replaces the edge to be removed with the new edge to be added.
+ */
+function performTriangulationFlip() {
+    // Get the final operation details from the global state.
+    const edgeToRemoveIdx = reconfigState.edges_to_remove[0];
+    const edgeToAdd = reconfigState.edges_to_add[0][0];
+
+    // For history purposes, we might want a copy of the edge before we change it.
+    const originalEdgeRemoved = [...wg.state.edges[edgeToRemoveIdx]];
+
+    console.log(`Flipping edge ${edgeToRemoveIdx}: removing [${originalEdgeRemoved}] and adding [${edgeToAdd}]`);
+
+    // --- Perform the Swap ---
+    // By replacing the edge at the same index, we avoid re-indexing all other edges,
+    // which is safer and more efficient.
+    wg.state.edges[edgeToRemoveIdx] = edgeToAdd;
+
+    // --- Finalize ---
+    // Update the history and reset the state machine for the next operation.
+    addToHistory(wg.state.copyConstructor(), FLIP, originalEdgeRemoved, edgeToAdd);
+    stateUpdated(); // This should handle redrawing and other necessary updates.
+    resetSelectionState();
+}
+
+
+/**
+ * Executes the edge exchange for a crossing-free spanning path (CFSP).
+ *
+ * This operation is more complex than a simple 1-for-1 swap at a fixed index.
+ * It removes a set of edges and adds a new set, potentially changing the
+ * length and order of the main edges array.
+ */
+function performPathFlip() {
+    // 1. Get final operation details from the global state.
+    // Assumes these have been finalized by the confirmation logic.
+    const edgesToRemoveIndices = reconfigState.edges_to_remove; // e.g., [12]
+    const edgesToAdd = reconfigState.edges_to_add[0]; // e.g., [[v1, v2]]
+
+    const originalEdgesRemoved = edgesToRemoveIndices.map(
+        index => [...wg.state.edges[index]]
+    );
+
+    console.log(`Flipping path: removing ${JSON.stringify(originalEdgesRemoved)}, adding ${JSON.stringify(edgesToAdd)}`);
+
+    // Create a Set of indices for efficient lookup (O(1)).
+    const indicesToRemoveSet = new Set(edgesToRemoveIndices);
+
+    // Filter out the old edges.
+    const remainingEdges = wg.state.edges.filter(
+        (_, index) => !indicesToRemoveSet.has(index)
+    );
+
+    wg.state.edges = remainingEdges.concat(edgesToAdd);
+
+
+    addToHistory(wg.state.copyConstructor(), FLIP, originalEdgesRemoved, edgesToAdd);
+
+    stateUpdated();
+
+    resetSelectionState();
+}

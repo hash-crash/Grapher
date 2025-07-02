@@ -228,20 +228,17 @@ fileInput.addEventListener("change", () => {
     }
 });
 
-clearFileBtn.addEventListener("click", () => {
-
+function clearFile() {
     let newEmptyState = new State([],[]);
     addToHistory(newEmptyState.copyConstructor(), CLEAR_FILE);
     window.Grapher.state = newEmptyState;
-    window.Grapher.dims = null;
     window.Grapher.context.clearRect(0, 0, window.Grapher.context.canvas.width, window.Grapher.context.canvas.height);
-
+    wg.redraw();
     showFileInput();
     updateHistoryView();
+}
 
-});
-
-
+clearFileBtn.addEventListener("click", clearFile);
 
 /**
  * css manipulation to deal with clear/load events

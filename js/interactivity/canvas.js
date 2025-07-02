@@ -258,26 +258,23 @@ var edgeForRemoval = -1;
 function handleClickReconfigurationMode(mousePos) {
     switch (submode) {
         case MATCHINGS_RECONFIGURATION_MODE:
-            // This calls the function from your existing, working file.
             handleClickMatchingsMode(mousePos);
             break;
-        
+
         case TRIANGULATION_RECONFIGURATION_MODE:
-            // This will be the new function we build for triangulations.
             handleClickTriangulationMode(mousePos);
             break;
 
         case CFSP_RECONFIGURATION_MODE:
-            // Placeholder for when we implement path reconfiguration
-            console.log("TODO: Handle Path Reconfiguration Click");
-            // handleClickPathMode(mousePos);
+            handleClickPathsMode(mousePos);
             break;
 
-        // You mentioned this mode, so we can add a case for it.
-        // If its logic is the same as perfect matchings, it can call the same function.
-        case MATCHINGS_ALMOSTPERFECT_RECONFIGURATION_MODE:
+        case CFST_RECONFIGURATION_MODE:
+            console.log("TODO: Handle Spanning Tree Reconfiguration Click");
+            break;
+
+       case MATCHINGS_ALMOSTPERFECT_RECONFIGURATION_MODE:
             console.log("TODO: Handle Almost-Perfect Matching Reconfiguration Click");
-            // handleClickMatchingsMode(mousePos); 
             break;
         
         default:
@@ -405,11 +402,61 @@ function keydownHandler(event) {
             // figure out what needs to be done here, probably need to deselect everything that is currently being reconfigured
         }
         wg.redraw();
+        return;
     } else if (event.key === 'Delete' || event.key == 'Backspace') {
         if (mode === EDIT_MODE) {
             //delete
             deleteItem();
         }
+        return;
+    } 
+    
+    let modeL = null;
+    let submodeL = null;
+
+    if ((event.key === 'k' || event.key === 'K') && (event.ctrlKey || event.metaKey)) {
+        clearFile();
+        return;
+    } else if (event.key === 'r' || event.key === 'R') {
+        modeL = RECONFIGURATION_MODE;
+        if (isCFSP()) {
+            submodeL = CFSP_RECONFIGURATION_MODE; 
+        } else if (isCFST()) {
+            submodeL = CFST_RECONFIGURATION_MODE;
+        } else if (isGeometricTriangulation()) {
+            submodeL = TRIANGULATION_RECONFIGURATION_MODE;
+        } else if (isPerfectMatching()) {
+            submodeL = MATCHINGS_RECONFIGURATION_MODE; 
+        } else if (isAlmostPerfectMatching()) {
+            submodeL = MATCHINGS_ALMOSTPERFECT_RECONFIGURATION_MODE; 
+        } else {
+            console.error("Unknown reconfiguration mode while handling keydown");
+            toast("This graph type is not yet supported.", true);
+            return;
+        }
+    } else if (event.key === 'm' || event.key === 'M') {
+        modeL = RECONFIGURATION_MODE;
+        submodeL = MATCHINGS_RECONFIGURATION_MODE; // Default to matchings reconfiguration
+    } else if (event.key === 'g' || event.key === 'G') {
+        console.log("g pressed, setting mode to triangulation reconfiguration");
+        modeL = RECONFIGURATION_MODE;
+        submodeL = TRIANGULATION_RECONFIGURATION_MODE; // Default to triangulation reconfiguration
+    } else if (event.key === 't' || event.key === 'T') {
+        modeL = RECONFIGURATION_MODE;
+        submodeL = CFST_RECONFIGURATION_MODE; // Default to path reconfiguration
+    } else if (event.key === 'p' || event.key === 'P') {
+        modeL = RECONFIGURATION_MODE;
+        submodeL = CFSP_RECONFIGURATION_MODE; // Default to path reconfiguration
+    } else if (event.key === 'e' || event.key === 'E') {
+        modeL = EDIT_MODE;
+        submodeL = DEFAULT_EDIT_MODE;
+    } else {
+        return;
+    }
+    let error = setApplicationMode(modeL, submodeL);
+    if (error) {
+        console.error("Error while setting application mode:", error);
+        toast(error, true);
     }
 }
 
