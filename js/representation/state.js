@@ -1,5 +1,15 @@
 /**
+ * @fileoverview
+ * This file houses the State class, which is used to represent a graph. 
  * 
+ * It has
+ * - an array of vertices, each being a pair of integer coordinates,
+ * - an array of edges, each being a pair of indices in the vertices array
+ * - an adjacency list, each item being an object with v: [x, y] being the vertex,
+ *       and eiv: [a, b, c] being indices of other vertices that this one is connected to.
+ * 
+ * Also, here are all the functions which modify the state of the displayed graph,
+ *  like adding, editing, removing edges/vertices as well as the reconfiguration flips.
  */
 class State {
 
@@ -96,6 +106,11 @@ class State {
 
 
     saveState() {
+        if (settingsManager.isFileProtocol()) {
+            console.warn("Not saving state to LocalStorage because the app is running in file:// protocol");
+            return;
+        }
+
         const stateData = {
             vertices: wg.state.vertices,
             edges: wg.state.edges,
@@ -191,9 +206,6 @@ function explodeCoordinatesInState(factor) {
 }
 
 
-/**
- * This likely doesn't need to touch the adjacency list/matrix?? not sure, check later TODO 
- */
 function addVx(coords) {
 
     if (wg !== window.Grapher) {
@@ -563,13 +575,9 @@ function performTriangulationFlip() {
 
 
 /**
- * Executes the edge exchange for a crossing-free spanning path (CFSP).
- *
- * This operation is more complex than a simple 1-for-1 swap at a fixed index.
- * It removes a set of edges and adds a new set, potentially changing the
- * length and order of the main edges array.
+ * Executes the edge exchange for a crossing-free spanning path (CFSP) or tree (CFST).
  */
-function performPathFlip() {
+function performTreeFlip() {
     // 1. Get final operation details from the global state.
     // Assumes these have been finalized by the confirmation logic.
     const edgesToRemoveIndices = reconfigState.edges_to_remove; // e.g., [12]
@@ -578,8 +586,6 @@ function performPathFlip() {
     const originalEdgesRemoved = edgesToRemoveIndices.map(
         index => [...wg.state.edges[index]]
     );
-
-    console.log(`Flipping path: removing ${JSON.stringify(originalEdgesRemoved)}, adding ${JSON.stringify(edgesToAdd)}`);
 
     // Create a Set of indices for efficient lookup (O(1)).
     const indicesToRemoveSet = new Set(edgesToRemoveIndices);

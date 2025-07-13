@@ -48,13 +48,16 @@ const settingsManager = {
         console.log("Initializing settings manager...");
         let loadedSettings = null;
         try {
-            const storedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
-            if (storedSettings) {
-                loadedSettings = JSON.parse(storedSettings);
-                console.log("Loaded settings from localStorage");
-            } else {
-                 console.log("No settings found in localStorage.");
+            if (!this.isFileProtocol()) {
+                const storedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
+                if (storedSettings) {
+                    loadedSettings = JSON.parse(storedSettings);
+                    console.log("Loaded settings from localStorage");
+                } else {
+                    console.log("No settings found in localStorage.");
+                }
             }
+            
         } catch (error) {
             console.error("Error parsing settings from localStorage:", error);
             // Proceed as if no settings were found
@@ -84,6 +87,10 @@ const settingsManager = {
      */
     save: function() {
         try {
+            if (this.isFileProtocol()) {
+                console.warn("Cannot save settings in file protocol mode. Settings will not persist.");
+                return;
+            }
             localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(this.settings));
         } catch (error) {
             console.error("Error saving settings to localStorage:", error);
@@ -150,10 +157,19 @@ const settingsManager = {
      * Mostly for debugging or complete reset scenarios.
      */
     clearSavedSettings: function() {
-        console.warn("Clearing all saved settings from localStorage!");
+        console.warn("Clearing all saved settings from localStorage!");     
         localStorage.removeItem(SETTINGS_STORAGE_KEY);
         console.log("Settings cleared from localStorage.");
+    },
+
+    isFileProtocol() {
+        try {
+            return window.location.protocol === 'file:';
+        } catch (e) {
+            return false;
+        }
     }
+    
 };
 
 // --- IMPORTANT ---
@@ -263,16 +279,17 @@ function createSettingsPanel() {
     // --- Create UI Groups ---
 
     // Display Group
-    const displayGroup = document.createElement('div');
-    displayGroup.className = 'settings-group';
-    const displayHeader = document.createElement('h4');
-    displayHeader.textContent = 'Display settings';
-    displayGroup.appendChild(displayHeader);
+    const usageGroup = document.createElement('div');
+    usageGroup.className = 'settings-group';
+    const usageHeader = document.createElement('h4');
+    usageHeader.textContent = 'Usage settings';
+    usageGroup.appendChild(usageHeader);
 
-    displayGroup.appendChild(createSettingInput(SHOW_COLINEAR_TRIPLES_TOGGLE, 'Show colinear triples of vertices', 'checkbox'));
-    displayGroup.appendChild(createSettingInput(SHOW_CROSSINGS_TOGGLE, 'Show crossings', 'checkbox'));
+    usageGroup.appendChild(createSettingInput(SHOW_COLINEAR_TRIPLES_TOGGLE, 'Show colinear triples of vertices', 'checkbox'));
+    usageGroup.appendChild(createSettingInput(SHOW_CROSSINGS_TOGGLE, 'Show crossings', 'checkbox'));
+    usageGroup.appendChild(createSettingInput(INSTA_FLIP_TOGGLE, 'Instantly flip when only 1 option', 'checkbox'));
 
-    settingsContainer.appendChild(displayGroup);
+    settingsContainer.appendChild(usageGroup);
 
 
     // Proximity Group
@@ -282,10 +299,11 @@ function createSettingsPanel() {
     proximityHeader.textContent = 'Accessibility Settings';
     proximityGroup.appendChild(proximityHeader);
 
-    proximityGroup.appendChild(createSettingInput('vertexProximityPx', 'Vertex Hover (px)', 'range', { min: 5, max: 25 }));
-    proximityGroup.appendChild(createSettingInput('edgeProximityPx', 'Edge Hover (px)', 'range', { min: 3, max: 20 }));
+    proximityGroup.appendChild(createSettingInput(PROXIMITY_VERTEX, 'Vertex Hover (px)', 'range', { min: 5, max: 25 }));
+    proximityGroup.appendChild(createSettingInput(PROXIMITY_EDGE, 'Edge Hover (px)', 'range', { min: 3, max: 20 }));
     proximityGroup.appendChild(createSettingInput(VERTEX_SIZE, 'Vertex size (px)', 'range', {min: 8, max: 20}));
     proximityGroup.appendChild(createSettingInput(EDGE_THICKNESS, 'Edge thickness (px)', 'range', {min: 2, max: 10}));
+    proximityGroup.appendChild(createSettingInput(CLICK_TOLERANCE, 'Click/drag tolearnce (px)', 'range', {min: 1, max: 10}));
 
     settingsContainer.appendChild(proximityGroup);
 
@@ -315,8 +333,6 @@ function createSettingsPanel() {
     miscGroup.appendChild(miscHeader);
 
     miscGroup.appendChild(createSettingInput('explodeCoordinates', 'Explode Factor', 'range', { min: 2, max: 20 }));
-    miscGroup.appendChild(createSettingInput(CLICK_TOLERANCE, 'Click/drag tolearnce (px)', 'range', {min: 1, max: 10}));
-    miscGroup.appendChild(createSettingInput(INSTA_FLIP_TOGGLE, 'Instantly flip when only 1 option', 'checkbox'));
 
     settingsContainer.appendChild(miscGroup);    
 

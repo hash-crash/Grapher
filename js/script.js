@@ -7,35 +7,21 @@
  *******************************************************************************************************************************/
 
 
-
-
-
-
-
-
-
-
-
 // Boot up the javascript:
 {
-    let timestampStart = performance.now();
+const scripts = document.getElementsByTagName("script");
+src = scripts[scripts.length-1].src;
+let foundPath = "";
+// if being hosted from just a simple file, we need to give the OS thefull path 
+// - thankfully we can get it on hopefully all browsers.
+if (src.startsWith("file://")) {
+    // extract the actual FS-path all the way up to and including  "script.js"
+    foundPath = src.split("file://")[1];
+    // we remove 12 because we want to leave everything from / until grapher/ which means removing "js/script.js" - which is 12 characters
+    foundPath = foundPath.substring(0, foundPath.length - 12);
 
-    const scripts = document.getElementsByTagName("script");
-    src = scripts[scripts.length-1].src;
-    let foundPath = "";
-    // if being hosted from just a simple file, we need to give the OS thefull path 
-    // - thankfully we can get it on hopefully all browsers.
-    if (src.startsWith("file://")) {
-        // extract the actual FS-path all the way up to and including  "script.js"
-        foundPath = src.split("file://")[1];
-        // we remove 12 because we want to leave everything from / until grapher/ which means removing "js/script.js" - which is 12 characters
-        foundPath = foundPath.substring(0, foundPath.length - 12);
-
-        console.log(foundPath);
-    }
-
-    
-
+    console.log(foundPath);
+}
 
 /**
  * This enables adding new JS files to the project without editing any HTML,
@@ -82,6 +68,7 @@ async function loadAllScripts() {
     // these files are indepedent and can be loaded whenever
     let statePromise = scriptLoader('js/representation/state.js');
     let dimsPromise = scriptLoader('js/representation/dims.js');
+    let hiPromise = scriptLoader('js/interactivity/htmlinteractivity.js');
 
     let fcPromise = scriptLoader('js/sidebar/filecontent.js');
     let filePromise = scriptLoader('js/sidebar/file.js');
@@ -92,9 +79,8 @@ async function loadAllScripts() {
     let matchingsModePromise = scriptLoader('js/graphlogic/matchingsmode.js');
     let triangulationsModePromise = scriptLoader('js/graphlogic/triangulationsmode.js');
     let pathsModePromise = scriptLoader('js/graphlogic/pathsmode.js');
-    let reconfModePromise = scriptLoader('js/graphlogic/reconfigurationmode.js');
+    let treesModePromise = scriptLoader('js/graphlogic/treemode.js');
     let contextMenuPromise = scriptLoader('js/interactivity/contextmenu.js');
-    let hiPromise = scriptLoader('js/interactivity/htmlinteractivity.js');
     let miPromise = scriptLoader('js/interactivity/modeinteractivity.js');
     let settingsPromise = scriptLoader('js/interactivity/settings.js');
 
@@ -103,8 +89,10 @@ async function loadAllScripts() {
     await utilsPromise;
     await statePromise;
     await dimsPromise;
+    await hiPromise;
 
     let grapherPromise =  scriptLoader('js/representation/grapher.js'); 
+    let reconfModePromise = scriptLoader('js/graphlogic/reconfigurationmode.js');
 
 
     await fcPromise;
@@ -114,9 +102,9 @@ async function loadAllScripts() {
     await matchingsModePromise;
     await triangulationsModePromise;
     await pathsModePromise;
+    await treesModePromise;
     await reconfModePromise;
     await contextMenuPromise;
-    await hiPromise;
     await miPromise;
     await settingsPromise;
     await drawingPromise;
@@ -125,7 +113,7 @@ async function loadAllScripts() {
     // please don't remove this
     window.Grapher = new Grapher(null, null, ctx);
 
-    reconfigState = createInitialSelection(window.Grapher);
+    reconfigState = createInitialSelection();
 
     await scriptLoader('js/interactivity/canvas.js');
     initializeButtons();
@@ -135,45 +123,55 @@ async function loadAllScripts() {
 }
 loadAllScripts();
 
+}
 
 /**
- * Enables checking with the user if they want to re-esablish the state that
+ * Enables re-esablishing the state that
  * was put into localstorage the previous time that the program was ran. TODO before giving this to the professor, i should actually enable this feature
  * 
  * For development purposes, this function will  run the automatic loading of data/filename
  * 
- * This is here to speed up development, when it is needed,
- *  simply add a call to this function at the end of loadAllScripts
+ * Intended to be called at the end of loadAllScripts
  */
 async function runAutoInit() {
-    // setTimeout(() => {
-    //     restoreFromLocalStorage();
-    // }, 80)
+    const isFileProtocol = window.location.protocol === 'file:';
+    console.log(`Time needed for init: ${performance.now() - timestampStart}`);
 
-    
-    // current experimental area:
+
+/***************************************************************************************************/
+    const init = INIT.AUTO_LOAD_FILE;
+/***************************************************************************************************/
+
+
 
     try {
-        console.log(`Miliseconds needed for init: ${performance.now() - timestampStart}`);
+        const calculatedInitOption = isFileProtocol ? INIT.DO_NOTHING : init; 
 
-        await autoLoadInputFile("in4.txt"); // Now waits for completion
+        switch (calculatedInitOption) {
 
-        // for now just add vertices and edges;
-        // addVx([12,12]);
-        // addVx([-25,20]);
-        // addEdge([10, 9], true);
-        // addEdge([9,10]);
-        console.log(`Miliseconds needed for init including file auto-loading: ${performance.now() - timestampStart}`);
+        case INIT.AUTO_LOAD_FILE: 
+            await autoLoadInputFile("in7.txt"); // Now waits for completion
+            console.log(`Time needed for init including file auto-loading: ${performance.now() - timestampStart}`);
+            break;
+        case INIT.RESTORE_FROM_LOCALSTORAGE:
+            restoreFromLocalStorage();
+            break;
+        case INIT.DO_NOTHING:
+        default:
+            window.Grapher = new Grapher(new State([],[]), null, ctx);
+            wg = window.Grapher;
+            wg.redraw();
+            break;
+        }
 
     } catch (error) {
         console.error("Error:", error);
-        toast(`Error: ${error}`, true);
+        toast(`Error: ${error}`, true, 4);
+        window.Grapher = new Grapher(new State([],[]), null, ctx);
+        wg = window.Grapher;
+        wg.redraw();
     }
 }
-
-}
-
-
 
 
 
@@ -241,6 +239,10 @@ cssLoader('css/toolbar.css');
 
 
 
+/**
+ * debug utils:
+ */
+let timestampStart = performance.now();
 
 //*******************************************************************************************************************************/
 // utils to make some items more available everywhere with less typing:
@@ -250,6 +252,7 @@ var selectedVx = -1;
 var selectedEdge = -1;
 var highlightedEdge = -1;
 var highlightedVx = -1;
+var wg = null;
 
 /**
  * See {@link ReconfigurationMode#createInitialSelection} 
@@ -272,8 +275,6 @@ const beforeUnloadHandler = (event) => {
 // window.addEventListener("beforeunload", beforeUnloadHandler);
 
 
-
-// more shortcut utils
 window.stateHistory = [];
 window.undoneStates = [];
 

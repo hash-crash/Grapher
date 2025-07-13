@@ -1,4 +1,5 @@
 
+
 function handleHoverReconfigurationMode(mousePos) {
     let found = false;
     highlightedEdge = -1;
@@ -58,55 +59,61 @@ function handleHoverReconfigurationMode(mousePos) {
 
 
 
-function createInitialSelection(graph) {
-    return {
-        // The user interaction mode (can be different for each graph type)
-        mode: null,          // Either 'edges' or 'vertices'
+let workerObject = null;
+function initWorker() {
 
-        isReady: false,   // True when a valid reconfiguration is ready to be shown
-        
-        edges_to_remove: [], // An array of edge indices to be removed - size 2 for perfect matchings, size 1 otherwise
-        edges_to_add: [],    // An array of new edges to be added (as vertex index pairs)
-                             // e.g., [[v1, v2], [v3, v4]]
-
-        picked_vertex: -1, // The index of the vertex that is currently selected for flipping
-        // Data for the UI and intermediate steps
-        possibleTargets: [], // Array of indices (edges or vertices) to highlight
-    };
-}
-
-
-/**
- * Resets the reconfiguration state
- */
-function resetSelectionState() {
-    reconfigState = createInitialSelection(wg);
-    selectedEdge = -1;
-    selectedVx = -1;
-    wg.redraw();
-}
-
-
-
-
-
-
-/**
- * 
- * @returns 
- */
-function getAllPossibleFlips() {
-    switch (submode) {
-        case MATCHINGS_RECONFIGURATION_MODE:
-            return allPossibleFlipsMatchings();
-        case TRIANGULATION_RECONFIGURATION_MODE:
-            return []; // todo;
-        case CFSP_RECONFIGURATION_MODE:
-            return []; // todo;
-        case CFST_RECONFIGURATION_MODE:
-            return []; // todo;
-        default:
-            console.error("unkown submode");
-            break;
+    if (window.location.protocol === 'file:') {
+        console.error('Web Workers are not supported in file:// protocol. "Find all possible flips" functionality will not work.');
+        toast("Find all possible flips only works in HTTP protocol.", true, 6);
+        return null;
     }
+    workerObject =  new Worker('js/graphlogic/worker.js');
+    if (!workerObject) {
+        return;
+    }
+    workerObject.postMessage( { type: 'init' } );
+
+    // Handle incremental results
+    workerObject.onmessage = (e) => {
+        if (e.data.type === 'partial') {
+        console.log(`Received ${e.data.count} results so far...`);
+        e.data.data.forEach(result => {
+            // Process individual result
+            processResult(result);
+        });
+        }
+        else if (e.data.type === 'complete') {
+        console.log(`TOTAL RESULTS: ${e.data.totalCount}`);
+        }
+        else if (e.data.type === 'error') {
+        console.error('Worker Error:', e.data.message);
+        console.error(e.data.stack);
+        }
+  };
+
+}   
+
+initWorker();
+
+function getAllPossibleFlipsWorker() {
+
+    console.log(`Starting worker for operation: ${submode}`);
+    workerObject.postMessage({
+        type: 'start',
+        operation: submode,  // or 'triangulation'
+        state: JSON.stringify(wg.state)
+    });      
+
+}
+
+
+
+
+function processResult(result) {
+    // Process the result as needed
+    console.log('Processing result:', result);
+    // For example, you could store it in a global array or update the UI
+    allPossibleFlips.push(result);
+    drawPossibleFlips();
+    wg.redraw();
 }

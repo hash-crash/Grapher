@@ -62,7 +62,7 @@ function initializeButtons() {
     explodeButton.addEventListener('click', explodeCoordinates);
 
     let possibleFlipsButton = document.getElementById('showflipsid');
-    possibleFlipsButton.addEventListener('click', drawPossibleFlips);
+    possibleFlipsButton.addEventListener('click', getAllPossibleFlipsWorker);
 
     // let colinearButton = document.getElementById('showcolinearid');
     // colinearButton.addEventListener('click', () => {
@@ -122,7 +122,7 @@ function triggerShake() {
 
 
 
-function toast(message, error = false) {
+function toast(message, error = false, timeInSeconds = 3) {
 	const cont = document.getElementById("contentId");
     const toast = document.createElement("div");
     if (error) {
@@ -137,7 +137,7 @@ function toast(message, error = false) {
     // Automatically remove toast after 3 seconds
     setTimeout(() => {
         toast.remove();
-    }, 3000);
+    }, timeInSeconds * 1000);
 }
 
 

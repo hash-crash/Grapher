@@ -65,6 +65,11 @@ canvas.addEventListener('mousemove', (event) => {
     let dims = window.Grapher.dims;
     let mousePos = getMousePos(event);
 
+    if (mousePos === null) {
+        console.log("Error: mouse position is null in mousemove handler");
+        return;
+    }
+
 
     let diff = Math.hypot(initialClickPosition.x - mousePos[0], initialClickPosition.y - mousePos[1]);
     let previousMaxDiff = Math.hypot(initialClickPosition.x - maxDragPoint.x, initialClickPosition.y - maxDragPoint.y);
@@ -270,7 +275,7 @@ function handleClickReconfigurationMode(mousePos) {
             break;
 
         case CFST_RECONFIGURATION_MODE:
-            console.log("TODO: Handle Spanning Tree Reconfiguration Click");
+            handleClickTreesMode(mousePos);
             break;
 
        case MATCHINGS_ALMOSTPERFECT_RECONFIGURATION_MODE:
@@ -350,26 +355,34 @@ function findAnyClickedItem(mousePos) {
 
 function keydownHandler(event) {
     let tagName = event.target.tagName.toLowerCase();
-    if (tagName === 'form' || tagName === 'input' || tagName === 'textarea' || event.target.isContentEditable) {
+    if (tagName === 'form' ||
+        tagName === 'input' ||
+        tagName === 'textarea' ||
+        event.target.isContentEditable
+    ) {
         return;
     }
 
 
     // Detect undo: Ctrl+Z or Cmd+Z or u or shift+U
     if ((event.key === 'u'  && !event.shiftKey) || (event.key === 'U' && EventTarget.shiftKey)
-             || ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey)) {
+             || ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey)
+    ) {
+        resetSelectionState();
         undo();
         return;
     }
 
     // Detect redo: Ctrl+Shift+Z or Cmd+Shift+Z or shift+u or U
-    else if (( event.shiftKey && (event.key === 'u' || ((event.ctrlKey || event.metaKey) && event.key === 'z'))) 
-            || (event.key === 'U' && !event.shiftKey)) {  
+    else if ((event.shiftKey && (event.key === 'u' || ((event.ctrlKey || event.metaKey) && event.key === 'z'))) 
+            || (event.key === 'U' && !event.shiftKey)
+    ) {  
+        resetSelectionState();
         redo();  
         return;
     } 
 
-    //if no state, the rest doesn't make sense. At least undo and redo can recover state.
+    //if no state, the rest doesn't make sense. At least undo and redo can (attempt to) recover state.
     if (!window.Grapher.state) {
         return;
     }
@@ -388,20 +401,10 @@ function keydownHandler(event) {
             // Stop further processing
             return;
         }
-        console.log("escape or n clicked, now normal mode")
-        if (mode === EDIT_MODE) {
-            selectedVx = -1;
-            selectedEdge = -1;
-            flipEdges = [];
-            chosenFlipEdge = -1;
-        } else if (mode === RECONFIGURATION_MODE) {
-            selectedVx = -1;
-            selectedEdge = -1;
-            flipEdges = [];
-            chosenFlipEdge = -1;
-            // figure out what needs to be done here, probably need to deselect everything that is currently being reconfigured
-        }
-        wg.redraw();
+
+
+        resetSelectionState();
+        doaredraw();
         return;
     } else if (event.key === 'Delete' || event.key == 'Backspace') {
         if (mode === EDIT_MODE) {
@@ -415,6 +418,7 @@ function keydownHandler(event) {
     let submodeL = null;
 
     if ((event.key === 'k' || event.key === 'K') && (event.ctrlKey || event.metaKey)) {
+        event.preventDefault();
         clearFile();
         return;
     } else if (event.key === 'r' || event.key === 'R') {

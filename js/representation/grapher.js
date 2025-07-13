@@ -26,11 +26,8 @@ drawReconfigurationIndications() {
         return;
     }
 
-    console.log("Drawing all indications of new edges");
-
     
     let a = true;
-    console.log(reconfigState.edges_to_add);
     for (const edgeset of reconfigState.edges_to_add) {
         for (const edge of edgeset) {
             if (a) {
@@ -100,8 +97,8 @@ drawAllReconfigurationMode() {
     // ======================================================
     // == PASS 1: DRAW ALL EXISTING EDGES
     // ======================================================
-    // We use the 'drawFlippingEdge' function we designed previously.
-    // It already contains all the logic for default, selected, target,
+    // We use the 'drawFlippingEdge' function
+    // It contains all the logic for default, selected, target,
     // and for-removal styles based on the reconfigState.
     this.state.edges.forEach((e, i) => this.drawFlippingEdge(e, i));
 
@@ -154,7 +151,6 @@ drawAllEditMode() {
 
 
 /**
- * REFACTORED drawing function for edges in a reconfiguration context.
  * It uses the central 'reconfigState' object to determine the drawing style.
  *
  * @param {[Number, Number]} e the edge object, consisting of the indexes in vertices array of the 2 vx it connects 
@@ -190,6 +186,18 @@ drawFlippingEdge(e, i) {
             // A different style like `drawPossibleTargetEdge(e)` could be clearer.
             drawEdgeForRemoval(e);
             return;
+        }
+        
+    } else if (reconfigState.isReady) {
+        if (reconfigState.mode === 'vertices' && reconfigState.edges_to_add.length > 0) {
+            // If we are in 'vertices' mode and a new edge is already defined
+            // so all of the possible edges_to_remove are possible targets.
+
+            console.log("isReady is true, mode is vertices, edges_to_add.length > 0");
+            if (reconfigState.possibleTargets.includes(i)) {
+                drawEdgeForRemoval(e);
+                return;
+            }
         }
     }
 
