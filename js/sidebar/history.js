@@ -238,7 +238,10 @@ function redo(depth = 0) {
         allColinearTriples = findAllColinearTriples();
     }
 
+    // this is a bugfix, and i'm not sure why it's needed:
     window.Grapher.state.updateAdjList();
+    // end of bugfix
+
     updateFileView();
     updateHistoryView();
     window.Grapher.redraw();
