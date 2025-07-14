@@ -6,10 +6,12 @@ const DEFAULT_VERTEX_CLICK_PROXIMITY_RADIUS = 12;
 const MAX_DRAG_DISTANCE_FOR_CLICK = 4;
 const DEFAULT_EDGE_HOVER_PROXIMITY = 8;
 
-const NORMAL = 'normal';
-const DELETE = 'delete';
-const EDGE = 'edge';
-const ADD_VERTCIES = 'addVertices';
+const INIT = {
+    AUTO_LOAD_FILE: 1,
+    RESTORE_FROM_LOCALSTORAGE: 2,
+    DO_NOTHING: 3,
+}
+Object.freeze(INIT);
 
 const EDIT_MODE = 0;
 const RECONFIGURATION_MODE = 1;
@@ -32,7 +34,45 @@ var submode = DEFAULT_EDIT_MODE;
 
 
 
+
 var allColinearTriples = [];
+
+
+
+
+
+function createInitialSelection() {
+    return {
+        // The user interaction mode (can be different for each graph type)
+        mode: null,          // Either 'edges' or 'vertices'
+
+        isReady: false,   // True when a valid reconfiguration is ready to be shown
+        
+        edges_to_remove: [], // An array of edge indices to be removed - inner array is of size 2 for perfect matchings, size 1 otherwise
+        edges_to_add: [],    // An array of sets new edges to be added (as vertex index pairs)
+                             // e.g., [[[v1, v2], [v3, v4]], [[v1, v4], [v2, v3]]] for a matching
+                             // or [[[v1, v2]]] when there is just 1 option to add 1 edge
+
+        picked_vertex: -1, // The index of the vertex that is currently selected for flipping
+        // Data for the UI and intermediate steps
+        possibleTargets: [], // Array of indices (edges or vertices) to highlight
+    };
+}
+
+
+/**
+ * Resets the reconfiguration state
+ */
+function resetSelectionState() {
+    reconfigState = createInitialSelection();
+    selectedEdge = -1;
+    selectedVx = -1;
+    wg.redraw();
+}
+
+
+
+
 
 
 
@@ -53,26 +93,14 @@ function toggleShowColinear() {
     }
 }
 
-var allPossibleFlips = [];
-function drawPossibleFlips() {
-    console.log("Called draw possible flips");
-
-    if (settingsManager.get(INSTA_FLIP_TOGGLE) && mode === RECONFIGURATION_MODE) {
-        allPossibleFlips = allPossibleFlipsMatchings();
-        if (allPossibleFlips.length === 0) {
-            toast("No flips are possible");
-        } else {
-            wg.redraw();
-            toast(`Showing lines for all ${allPossibleFlips.length} possible flips`);
-        }
-    } else {
-        allPossibleFlips = [];
-        wg.redraw();
-    }
-
-}
 
 
+
+/** 
+ * Returns the mouse position relative to the canvas.
+ * @param {MouseEvent} event - The mouse event.
+ * @returns {[number, number]} - The mouse position as [x, y] coordinates.
+ */
 function getMousePos(event) {
     let rect = canvas.getBoundingClientRect();
     if (!event.clientX || !event.clientY) {
@@ -85,6 +113,20 @@ function getMousePos(event) {
 
 
 
+
+
+
+
+var allPossibleFlips = [];
+function drawPossibleFlips() {
+
+    if (allPossibleFlips.length === 0) {
+        toast("No flips are possible");
+    } else {
+        wg.redraw();
+        toast(`Showing lines for all ${allPossibleFlips.length} possible flips`);
+    }
+}
 
 
 

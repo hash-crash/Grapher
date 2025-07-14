@@ -7,23 +7,23 @@
 Excpected working:
 1. Fully editing the graph - moving the vertices, drawing edges, everything
 2. editing the graph in crossing-free mode - it should be impossible to make a crossing.
+
 3. entering matchings mode if the graph is a perfect matching
     * click on an edge, all edges with which a flip could be performed are now red, and the clicked edge is green
     * click on one of the red edges, all other edges go back to black, and green lines are drawn for where the new lines would be drawn
     * click on one of the green lines, the flip is perfromed
     * the flip can be undone and re-done via history (ctrl+z or button)
     * in the matcings mode, only flips can be undone/redone
-4. entering triangulations mode if the graph is a geometric triangulation
+
+4. entering reconfiguration mode if the graph is a geometric triangulation, cfst or cfsp
     * click on an edge
-        - if it's on the outer hull, or no valid flip with it can be performed, a notification should appear informing the user of this
+        - if no valid flip with it can be performed, a notification should appear informing the user of this
         - otherwise, if it's a flippable edge, the flip should get indicated (or insta-flipped)
     * click on a vertex
         - see available vertexes that can be used for a new edge that would be valid flips highlighed as yellow
-        - click on one, if insta-flip is enable it should flip, otherwise click the green edge to confirm
-5. entering crossing-free spanning PATHs mode if the graph is a CFSP
-    * unfortunately, clicking an edge shows invalid flips as possible for now - work in progress
+        - click on one, the one of the green edges should be clicked to confirm (or insta-flipped)
 6. highlighting of colinear points
-    * it's a toggle, so it needs to be turned off. It obstructs visibility for flipping
+    * it's a toggle, so it needs to be turned off again in the settings. It obstructs visibility for flipping
 7. settings
     * adjusting the hover/click proximity, colors, and by what factor the coordinates get multiplied
     * adjusting the size of the vertices and edges in pixels (slider)
@@ -32,12 +32,14 @@ Excpected working:
 9. re-zoom graph so that it's fully within the canvas
 10. insta-flip toggle for perfect matchings and triangulations
     * insta-flip toggle is at the very bottom of the settings view
+11. keyboard shortcuts: P for paths, T for trees, G for geometric triangulations, and M for matchings. R tries all of the reconfiguration types in that order, and enters the first one that fits the current graph. E for edit mode
 
 
 Expected not working:
-1. other flip types (almost-perfect matchings, CFSP, CFST)
+1. almost-perfect matchings
 2. show all possible flips button/toggle
-3. insta-flip toggle for other modes(almost-perfect matchings, CFSP, CFST)
+3. insta-flip toggle for almost-perfect matching
+
 
 Note: Spiral graph with only 3 possible flips for matchings (with 3 'levels') can be found in data/matchings_only_3_flips_spiral_graph.txt
 
@@ -54,7 +56,7 @@ Note: Spiral graph with only 3 possible flips for matchings (with 3 'levels') ca
 * Almost-Perfect Pairings / Matchings
 * Crossing-Free Spanning Trees
 * Crossing-Free Spanning Paths
-* Triangulations
+* Geometric Triangulations
 ### 1.3 Target Audience: Researchers, students, and anyone interested in exploring the structural properties and transformations of these specific graph classes.
 
 ## 2. Getting Started
@@ -81,7 +83,12 @@ The tool interface is divided into several key areas:
 * **3.2. Canvas toolbars :**
     * Contain buttons to switch between interaction modes or perform global actions.
     * Main interactables:
-        * `[Icon 5 - Interconnected dots/graph]` - Allows the user to switch between 'usage modes' - These include reconfigurations of each specific graph type, as well as unrestricted editing and crossing-free editing.
+        * ![Graph](assets/icons/graphmode.svg) `[Graph]` - Allows the user to switch between 'usage modes' - These include reconfigurations of each specific graph type, as well as unrestricted editing and crossing-free editing.
+        * ![Settings](assets/icons/settings.svg) `[Settings]` - Shows a modal that allows configuring the app to the user's liking. Settings are saved in the browser's [localStorage](https://developer.mozilla.org/de/docs/Web/API/Window/localStorage).
+        * ![Undo](assets/icons/undo.svg) ![Redo](assets/icons/redo.svg) `[Undo/Redo]` - Allows moving through the history of changes to the current graph.
+        * ![Resize](assets/icons/resizecanvas.svg) `Resize` - Sets up the display so that the current graph takes up the entire canvas area.
+        * ![Explode](assets/icons/expand_content.svg) `Expand` - Multiplies the coordinates of all vertices by a set factor, only available in edit mode. (e.g. [-1, 4] becomes [-2, 8])
+        * ![Flips](assets/icons/flips.svg) `Show flips` - Draws all possible flips on the current graph, only available in reconfiguration mode. 
 * **3.3. Right Sidebar:**
     * **3.3.1. Change History:**
         * Displays a chronological list of actions performed (e.g., "Add vertex", "Import file", "Add edge").
@@ -112,9 +119,7 @@ You can start with a graph in two ways:
 
 * ### 4.1. Importing a Graph:
     * Use the file selector button or drag and drop a valid graph file onto the indicated box.
-    
-     <img src="data/File_area_user_guide.png" width=400px>
-
+<img src="assets/readme/File_area_user_guide.png" width=400px/>
     * The tool only supports a specific plain text format (see [Section 6](#6-file-handling)).
 * ### 4.2. Building a Graph from Scratch (Edit Mode):
     * Ensure you are in 'Edit Mode' (See [Toolbar-modes](#8-toolbar-actions) and [Graph types](#12-supported-graph-types-for-reconfiguration))
@@ -148,11 +153,19 @@ You can start with a graph in two ways:
 This is the core feature for exploring graph transformations while maintaining specific structural properties.
 
 * **5.1. Pre-requisite: Valid Graph:** Ensure the graph currently displayed in the canvas conforms to the desired graph type (e.g., is a valid Crossing-Free Spanning Tree) *before* attempting reconfiguration for that type.
-* **5.2. Select Graph Type:** Choose the graph type you want to work with (toolbar, ![Graph icon](assets/icons/graphmode.svg) graph-mode icon, then click on the desired type). The tool will verify if the current graph matches the selected type. If not, an error message will appear.
+* **5.2. Select Graph Type:** Choose the graph type you want to work with (toolbar, ![Graph icon](assets/icons/graphmode.svg) graph-mode icon, then click on the desired type). The tool will verify if the current graph matches the selected type. If not, an error message will appear. Note: You can also use keyboard shortcuts to enter these modes.
 * **5.3. Initiate reconfigurations:** The method depends on the selected graph type:
-    * **For  Almost-Perfect Matchings:**
-        * **Option A (Edge-based):** Select **one** existing edge. The tool will highlight potential alternative edges that could replace the selected one while maintaining the graph type.
-        * **Option B (Vertex-pair-based):** Select **two** vertices that do *not* currently have an edge between them (representing a *candidate* edge). The tool will highlight existing edges that could be removed if this candidate edge were added, maintaining the graph type.
+    * **For Perfect Matchings**
+        * **Edge-first** Select **one** existing edge. The tool will highlight existing edges that could potentially be flipped together the selected one while maintaining the graph type. When a second edge is picked, the tool will highlight possible new edges that could be created between the vertices of these 2 old edges. Click one of the new edges to confirm.
+    
+        * **Vertex-first** Select **one** existing vertex. The tool will highlight existing vertices  that could potentially be connected to the selected one, with the complements of each of these 2 also getting connected.
+
+    * **For All Other Graph Types:**
+        * **Edge-first:** Select **one** existing edge. The tool will highlight possible new edges which could be created, so that the graph type is preserved. Click one of these to confirm and perform the flip.
+
+        * **Vertex-first:** Select **two** vertices that do *not* currently have an edge between them (representing a *candidate* edge). After selecting the first one, possible candidates for the second one will be highlighted.
+         The tool will then highlight existing edges that could be removed if this candidate edge were added, maintaining the graph type.
+* **5.4. Instant-flip:** If the setting is enabled, and the state of the app is such that only 1 flip is possible with a selected edge (i.e. only 1 new edge is possible which preserves the graph type), or with a selected vertex pair (i.e. only 1 existing edge is removable while preserving the graph type), then the app will immediately perform this flip without waiting for user confirmation. 
 
 
 ## 6. File Handling
@@ -198,7 +211,6 @@ The toolbar contains buttons that permit interacting with the program. The main 
 * **Undo/Redo** button go through [History](#7-change-history--undoredo)
 * **Resize canvas coordinates** will adjust the zoom and move the view so that the entire current graph appears on the screen
 * **Explode coordinates** will multiply every vertex' coordinates by a fixed amount (by default, 4). This is useful in case the current graph gets too cluttered. 
-* **Show all colinear vertices** will draw red lines between any 3 vertices that are colinear. It can be useful for finding crossings. It's a toggle, and it's turned off by clicking the button again
 * **Change target graph type** opens a modal with which the program can be adjusted for specific graph types.
     * Standard editing is described in [Building a graph](#42-building-a-graph-from-scratch-edit-mode)
     * Non-crossing editing is the same, with the additional rule that crossings can't be created
@@ -213,16 +225,27 @@ The toolbar contains buttons that permit interacting with the program. The main 
 * **Deselect:** `Escape`
 * **Clear the file** Ctrl+K 
 * **Mode switching**
-    -  `R` for entering whichever mode is applicable to the current graph type (if any) - so, if the graph is a matching, it will enter matchings mode, and if it's a triangulation, it will enter triangulation mode, etc.
+    -  `R` for entering whichever mode is applicable to the current graph type (if any) - so, if the graph is a matching, it will enter matchings mode, and if it's a triangulation, it will enter triangulation mode, etc. **Note:** Paths will be attempted before trees, because all paths are also trees.
     - `E` for entering EDIT mode
     - `G` for entering Triangulation mode if possible
     - `P` for entering Paths mode if possible
+    - `T` for entering Trees mode if possible
     - `M` for entering Matchings mode if possible
 
 
+## 10. Settings
+
+The settings button in the toolbar shows a modal that allows configuring the app to the user's liking. The most important settings appear at the top. This is where the user can turn on or off the displaying of edge intersections, colinear triples of vertices, and the 'instant-flip' feature for reconfuigurations, which will immediately perform a flip as soon as it is unambiguous. The display sizes of certain items are also configurable.
+
+<img src="assets/readme/settings-1.png" width=400px />
+
+There are other configurable settings, such as the color of displayed items:
+
+<img src="assets/readme/settings-2.png" width=400px />
 
 
-## 10. Troubleshooting / FAQ
+
+## 11. Troubleshooting / FAQ
 
 * **Q: Why can't I import my file?**
     * A: Check if it strictly follows the format described in [Section 6.1](#6-file-handling). Ensure vertex indices for edges are 1-based, not 0-based. Verify the vertex and edge counts on the first line match the actual data.

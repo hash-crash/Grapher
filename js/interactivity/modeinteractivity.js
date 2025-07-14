@@ -87,9 +87,53 @@ function setApplicationMode(modeL, submodeL) {
     // Update cursor and other visual feedback
     doaredraw();
     
-    console.log(`Switched to ${mode} > ${submode}`);
+    showNewModeName(mode, submode);
 }
 
+function showNewModeName(mode, submode) {
+    let modeName = '';
+    let submodeName = '';
+    switch (mode) {
+        case EDIT_MODE:
+            modeName = 'Editing';
+            break;
+        case RECONFIGURATION_MODE:
+            modeName = 'Reconfiguration';
+            break;
+        default:
+            modeName = 'Unknown Mode';
+            break;
+    }
+    switch (submode) {
+        case DEFAULT_EDIT_MODE:
+            submodeName = 'Standard';
+            break;
+        case CROSSING_FREE_EDIT_MODE:
+            submodeName = 'Non-Crossing';
+            break;
+        case MATCHINGS_RECONFIGURATION_MODE:
+            submodeName = 'Matchings';
+            break;
+        case CFSP_RECONFIGURATION_MODE:
+            submodeName = 'Spanning Paths';
+            break;
+        case CFST_RECONFIGURATION_MODE:
+            submodeName = 'Spanning Trees';
+            break;
+        case TRIANGULATION_RECONFIGURATION_MODE:
+            submodeName = 'Triangulations';
+            break;
+        case MATCHINGS_ALMOSTPERFECT_RECONFIGURATION_MODE:
+            submodeName = 'Almost Perfect Matchings';
+            break;
+        default:
+            submodeName = 'Unknown Submode';
+    }
+    let output = `Switched to ${modeName} - ${submodeName}`;
+    console.log(output);
+    toast(output, false);
+
+}
 
 
 function createModeSelector() {

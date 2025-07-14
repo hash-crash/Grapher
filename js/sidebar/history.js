@@ -237,6 +237,11 @@ function redo(depth = 0) {
     if (settingsManager.get(SHOW_COLINEAR_TRIPLES_TOGGLE)) {
         allColinearTriples = findAllColinearTriples();
     }
+
+    // this is a bugfix, and i'm not sure why it's needed:
+    window.Grapher.state.updateAdjList();
+    // end of bugfix
+
     updateFileView();
     updateHistoryView();
     window.Grapher.redraw();
@@ -292,6 +297,7 @@ function undo(depth = 0) {
     if (settingsManager.get(SHOW_COLINEAR_TRIPLES_TOGGLE)) {
         allColinearTriples = findAllColinearTriples();
     }
+    window.Grapher.state.updateAdjList();
     updateFileView();
     updateHistoryView();
     window.Grapher.redraw();

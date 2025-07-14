@@ -129,7 +129,8 @@ canvas {
     padding: 10px 20px;
     border-radius: 5px;
     font-size: 14px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
+    box-shadow: 0 4px 12px 3px rgba(0, 0, 0, 0.6); /* Updated */
     animation: fadein 0.5s, fadeout 0.5s 2.5s; /* Appear for 2.5s */
     z-index: 1000; /* Ensure it appears above the canvas */
 

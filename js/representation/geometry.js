@@ -98,17 +98,21 @@ function intersectsAny(p1, p2, state=null, edges = null) {
  * @param {[Nunmber, Number]} potentialEdge - The edge to check, as a pair of vertex indices [v1, v2].
  * @returns {[Number..]} - An array of indices of all existing edges that are properly intersected.
  */
-function findIntersectedEdges(potentialEdge) {
+function findIntersectedEdges(potentialEdge, state=null) {
+    if (state === null) {
+        state = wg.state;
+    }
+
     const intersected_indices = [];
     const [v1_idx, v2_idx] = potentialEdge;
 
     // Get the coordinates of the potential new edge.
-    const p1 = wg.state.vertices[v1_idx];
-    const p2 = wg.state.vertices[v2_idx];
+    const p1 = state.vertices[v1_idx];
+    const p2 = state.vertices[v2_idx];
 
     // Loop through all existing edges in the graph.
-    for (let i = 0; i < wg.state.edges.length; i++) {
-        const existingEdge = wg.state.edges[i];
+    for (let i = 0; i < state.edges.length; i++) {
+        const existingEdge = state.edges[i];
         const [v3_idx, v4_idx] = existingEdge;
 
         // --- Crucial Guard Clause ---
@@ -120,8 +124,8 @@ function findIntersectedEdges(potentialEdge) {
 
         // Now that we know the edges are disjoint, we can perform the geometric test.
         // We leverage your existing, robust 'intersects' function.
-        const q1 = wg.state.vertices[v3_idx];
-        const q2 = wg.state.vertices[v4_idx];
+        const q1 = state.vertices[v3_idx];
+        const q2 = state.vertices[v4_idx];
         
         if (intersects(p1, p2, q1, q2)) {
             intersected_indices.push(i);
@@ -287,9 +291,9 @@ function isNearVertex(mousePos, vertex) {
 
 
 
-    let canvasPos = wg.dims.toCanvas(vertex);
+    let canvasPositionOfVx = wg.dims.toCanvas(vertex);
 
-    return Math.hypot(canvasPos[0] - mousePos[0], canvasPos[1] - mousePos[1]) < radius;
+    return Math.hypot(canvasPositionOfVx[0] - mousePos[0], canvasPositionOfVx[1] - mousePos[1]) < radius;
 }
 
 
@@ -334,8 +338,12 @@ function findAllColinearTriples() {
  * Checks if the graph is connected using BFS
  * @returns {boolean} True if connected
  */
-function isConnected() {
-    const adjList = wg.state.unf;
+function isConnected(state=null) {
+    if (state === null) {
+        state = wg.state;
+    }
+
+    const adjList = state.unf;
     const n = adjList.length;
     if (n < 2) {
         // Empty graph or only 1 node
@@ -392,35 +400,41 @@ function isCrossingFree(state=null) {
  * Checks if the graph is a spanning tree (connected with exactly n-1 edges)
  * @returns {boolean} True if spanning tree
  */
-function isSpanningTree() {
-    const n = wg.state.vertices.length;
-    return isConnected() && wg.state.edges.length === n - 1;
+function isSpanningTree(state=null) {
+    if (state === null) {
+        state = wg.state;
+    }
+    const n = state.vertices.length;
+    return isConnected(state) && state.edges.length === n - 1;
 }
 
 /**
  * Checks if the graph is a spanning path (tree with exactly 2 leaves and others degree 2)
  * @returns {boolean} True if spanning path
  */
-function isSpanningPath() {
-    if (!isSpanningTree()) {
+function isSpanningPath(state=null) {
+
+    if (state === null) {
+        state = wg.state;
+    }
+
+    if (!isSpanningTree(state)) {
         return false;
     }
 
-    const n = wg.state.vertices.length;
+    const n = state.vertices.length;
     if (n === 1) {
         // Single node is trivial path
         return true;
     }
     
-    const degrees = wg.state.unf.map(entry => entry.eiv.length);
+    const degrees = state.unf.map(entry => entry.eiv.length);
     let leafCount = 0;
     
     for (const deg of degrees) {
         if (deg === 1){
             leafCount++;
-        }
-        // this is probably irrelevantg
-        else if (deg !== 2) {
+        } else if (deg !== 2) {
             return false;
         }
     }
@@ -430,12 +444,16 @@ function isSpanningPath() {
 
 var perfectMatching = false;
 var almostPerfectMatching = false;
-function isMatching() {
+function isMatching(state=null) {
+
+    if (state === null) {
+        state = wg.state;
+    }
 
     perfectMatching = false;
     almostPerfectMatching = false;
 
-    const adjList = wg.state.unf;
+    const adjList = state.unf;
     const n = adjList.length;
     
     let degreeZeroCount = 0;
@@ -475,15 +493,19 @@ function isMatching() {
     }
 }
 
-function isGeometricTriangulation() {
+function isGeometricTriangulation(state=null) {
+
+    if (state === null) {
+        state = wg.state;
+    }
 
     // O(n² worst-case)
-    if (!isCrossingFree()) {
+    if (!isCrossingFree(state)) {
         return false;
     }
 
-    const n =  wg.state.vertices.length;
-    const adjList = wg.state.unf;
+    const n =  state.vertices.length;
+    const adjList = state.unf;
 
     // O(non-edge*edges) = O(n³) worst-case since there can be n(n-1)/2 possible new edges worst case (O(n²)), and O(n) edges. 
     // Check all non-edges for possible addition
@@ -499,7 +521,7 @@ function isGeometricTriangulation() {
             
             // Check against all existing edges
             let canAdd = true;
-            for (const e of wg.state.edges) {
+            for (const e of state.edges) {
                 if (edgeIntersect(newEdge, e)) {
                     canAdd = false;
                     // Early exit for this non-edge
@@ -517,12 +539,18 @@ function isGeometricTriangulation() {
 }
 
 
-function isCFST() {
-    return isCrossingFree() && isSpanningTree();
+function isCFST(state=null) {
+    if (state === null) {
+        state = wg.state;
+    }
+    return isCrossingFree(state) && isSpanningTree(state);
 }
 
-function isCFSP() {
-    return isCrossingFree() && isSpanningPath();
+function isCFSP(state=null) {
+    if (state === null) {
+        state = wg.state;
+    }
+    return isCrossingFree(state) && isSpanningPath(state);
 }
 
 
@@ -531,8 +559,11 @@ function isCFSP() {
  * Checks if the graph is a valid pairing/matching
  * @returns {boolean} True if valid matching
  */
-function isCFMatching() {
-    return isCrossingFree() && isMatching();
+function isCFMatching(state=null) {
+    if (state === null) {
+        state = wg.state;
+    }
+    return isCrossingFree(state) && isMatching(state);
 }
 
 

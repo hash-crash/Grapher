@@ -287,10 +287,10 @@ function drawBackgroundCoordinateGrid() {
 
 
 
-    if (dims.zoom < 2) {
+    if (dims.zoom < 4) {
         return;
     }
-    
+
     // Determine visible area in graph coordinates.
     // Note: with the inverted y-axis, the top of the canvas (0) has a higher y-value.
     let topLeftGraph = dims.toCoords([0, 0]); // high y-value
@@ -298,11 +298,11 @@ function drawBackgroundCoordinateGrid() {
 
     // For x, we use the usual order.
     let startX = Math.floor(topLeftGraph[0]);
-    let endX   = Math.ceil(bottomRightGraph[0]);
+    let endX = Math.ceil(bottomRightGraph[0]);
 
     // For y, the visible range goes from bottomRightGraph[1] (low) up to topLeftGraph[1] (high).
     let startY = Math.floor(bottomRightGraph[1]);
-    let endY   = Math.ceil(topLeftGraph[1]);
+    let endY = Math.ceil(topLeftGraph[1]);
 
     ctx.save();
     // grey with some opacity
@@ -328,74 +328,83 @@ function drawBackgroundCoordinateGrid() {
         ctx.lineTo(canvasWidth, canvasY);
         ctx.stroke();
     }
+
+    if (!wg || !wg.state) {
+        return;
+    }
+
+    // --- Draw Coordinate Markings ---
+    ctx.fillStyle = "rgba(0, 0, 0, 0.7)"; // Darker color for text
+    ctx.font = "15px JetBrains Mono";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top"; // For x-axis labels
+
+    // Draw X-axis labels (bottom of the canvas)
+    // We'll draw a label for every grid line that's a multiple of a certain step (e.g., 1 or 5)
+    let xLabelStep = 1;
+    if (dims.zoom < 25) xLabelStep = 5; // Less frequent labels for smaller zoom
+    if (dims.zoom < 12) xLabelStep = 10;
+
+    for (let x = startX; x <= endX; x++) {
+        if (x % xLabelStep === 0) {
+            const canvasX = dims.toCanvas([x, 0])[0];
+            // Don't draw the label if it's too close to the edge or overlaps
+            if (canvasX > 15 && canvasX < canvasWidth - 15) {
+                // Draw a small extension line
+
+                offset = 20;
+                if (selectedVx !== -1 && wg.state.vertices[selectedVx][0] === x) {
+                    ctx.fillStyle =  settingsManager.get(SELECT_COLOR);
+                    ctx.font = "25px JetBrains Mono";
+                    offset = 25;
+                }
+
+                // Draw the text label below the extension line
+                ctx.fillText(x.toString(), canvasX, canvasHeight - offset); // 20 pixels up from the bottom
+
+                if (selectedVx !== -1 && wg.state.vertices[selectedVx][0] === x) {
+                    resetColor();
+                    ctx.font = "15px JetBrains Mono";
+                }
+            }
+        }
+    }
+
+    // Draw Y-axis labels (left side of the canvas)
+    // We'll draw a label for every grid line that's a multiple of a certain step (e.g., 1 or 5)
+    let yLabelStep = 1;
+    if (dims.zoom < 25) yLabelStep = 5; // Less frequent labels for smaller zoom
+    if (dims.zoom < 12) yLabelStep = 10;
+
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle"; // For y-axis labels
+
+    for (let y = startY; y <= endY; y++) {
+        if (y % yLabelStep === 0) {
+            const canvasY = dims.toCanvas([0, y])[1];
+            // Don't draw the label if it's too close to the edge or overlaps
+            if (canvasY > 15 && canvasY < canvasHeight - 15) {
+
+                if (selectedVx !== -1 && wg.state.vertices[selectedVx][1] === y) {
+                    ctx.fillStyle =  settingsManager.get(SELECT_COLOR);
+                    ctx.font = "25px JetBrains Mono";
+                }
+
+                // Draw the text label to the left of the extension line
+                ctx.fillText(y.toString(), 20, canvasY); // 20 pixels from the left edge
+
+                if (selectedVx !== -1 && wg.state.vertices[selectedVx][1] === y) {
+                    resetColor();
+                    ctx.font = "15px JetBrains Mono";
+                }
+
+            }
+        }
+    }
+
     ctx.restore();
-
-    resetColor();
+    resetColor(); // Assuming this resets the global context color
 }
-
-
-
-
-function cooridinateMarkings() {
-    let xmousemark = null;
-    let ymousemark = null;
-
-    wg = window.Grapher;
-
-    if (selectedVx !== -1) {
-        xmousemark = wg.state.vertices[selectedVx][0];
-        ymousemark = wg.state.vertices[selectedVx][1];
-    }
-
-    if (xmousemark == null || ymousemark == null) {
-        normalCoordinateMarkings();
-    } else {
-        selectedCoordinateMarkings([xmousemark, ymousemark]);
-    }
-}
-
-function selectedCoordinateMarkings(selectedCoords) {
-    
-}
-
-
-
-
-function normalCoordinateMarkings() {
-    let dc = wg.dims.difc;
-
-    let difp = [wg.dims.maxpx[0] - wg.dims.minpx[0], wg.dims.maxpx[1] - wg.dims.minpx[1]];
-
-    let ratios = [difp[0] / dc[0], difp[1] / dc[1]];
-
-
-    
-    let xsteps = Math.ceil(40 / ratios[0]);
-
-    // console.log(dc);
-    // console.log(difp);
-    // console.log(ratios);
-    // console.log(xsteps);
-    for (let i =  wg.dims.minc[0]; i <  wg.dims.maxc[0]; i += xsteps) {
-        let pos = wg.dims.toCanvas([i, wg.dims.maxc[1]]);
-        // shift y axis down
-        pos[1] = pos[1] + VERTICAL_OFFSET_FOR_MARKINGS;     
-
-    }
-    
-    
-    let ysteps = Math.ceil(40 / ratios[1]);
-
-
-    for (let i = wg.dims.minc[1]; i < wg.dims.maxc[1]; i += ysteps) {
-        let pos = wg.dims.toCanvas([i, wg.dims.maxc[1]]);
-        // shift x axis to the right
-        pos[0] = pos[0] + HORIZONTAL_OFFSET_FOR_MARKINGS;
-    }
-
-}
-
-
 
 const VERTICAL_OFFSET_FOR_MARKINGS = 15;
 const HORIZONTAL_OFFSET_FOR_MARKINGS = 15;
