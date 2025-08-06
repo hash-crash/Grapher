@@ -8,20 +8,21 @@ Excpected working:
 1. Fully editing the graph - moving the vertices, drawing edges, everything
 2. editing the graph in crossing-free mode - it should be impossible to make a crossing.
 
-3. entering matchings mode if the graph is a perfect matching
+3. entering matchings mode if the graph is a perfect or almost-perfect matching
     * click on an edge, all edges with which a flip could be performed are now red, and the clicked edge is green
     * click on one of the red edges, all other edges go back to black, and green lines are drawn for where the new lines would be drawn
     * click on one of the green lines, the flip is perfromed
     * the flip can be undone and re-done via history (ctrl+z or button)
-    * in the matcings mode, only flips can be undone/redone
+    * for almost-perfect matchings, flips work like for other graph classes, only perfect matchings have this unique -2/+2 logic.
+    * in the reconfiguration mode, only flips can be undone/redone
 
-4. entering reconfiguration mode if the graph is a geometric triangulation, cfst or cfsp
+4. entering reconfiguration mode if the graph is a geometric triangulation, cfst or cfsp, or almost-perfect matching
     * click on an edge
         - if no valid flip with it can be performed, a notification should appear informing the user of this
         - otherwise, if it's a flippable edge, the flip should get indicated (or insta-flipped)
     * click on a vertex
-        - see available vertexes that can be used for a new edge that would be valid flips highlighed as yellow
-        - click on one, the one of the green edges should be clicked to confirm (or insta-flipped)
+        - see available vertices that can be used for a new edge that would be valid flips highlighed as yellow
+        - the green edge should be clicked to confirm (or insta-flipped)
 6. highlighting of colinear points
     * it's a toggle, so it needs to be turned off again in the settings. It obstructs visibility for flipping
 7. settings
@@ -36,9 +37,7 @@ Excpected working:
 
 
 Expected not working:
-1. almost-perfect matchings
 2. show all possible flips button/toggle
-3. insta-flip toggle for almost-perfect matching
 
 
 Note: Spiral graph with only 3 possible flips for matchings (with 3 'levels') can be found in data/matchings_only_3_flips_spiral_graph.txt
