@@ -77,6 +77,7 @@ async function loadAllScripts() {
     let drawingPromise = scriptLoader('js/representation/drawing.js');
     let editModePromise = scriptLoader('js/graphlogic/editmode.js');
     let matchingsModePromise = scriptLoader('js/graphlogic/matchingsmode.js');
+    let apmModePromise = scriptLoader('js/graphlogic/matchingsalmostperfectmode.js')
     let triangulationsModePromise = scriptLoader('js/graphlogic/triangulationsmode.js');
     let pathsModePromise = scriptLoader('js/graphlogic/pathsmode.js');
     let treesModePromise = scriptLoader('js/graphlogic/treemode.js');
@@ -100,6 +101,7 @@ async function loadAllScripts() {
     await geometryPromise;
     await editModePromise;
     await matchingsModePromise;
+    await apmModePromise;
     await triangulationsModePromise;
     await pathsModePromise;
     await treesModePromise;

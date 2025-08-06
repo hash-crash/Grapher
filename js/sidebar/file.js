@@ -128,7 +128,7 @@ function handleFileLines(allLines) {
 
     window.stateHistory = [];
     window.undoneStates = [];
-    addToHistory(wg.state.copyConstructor(), IMOPRT_FILE);
+    addToHistory(wg.state.copyConstructor(), ActionType.IMPORT_FILE);
 
     stateUpdated();
     
@@ -230,7 +230,7 @@ fileInput.addEventListener("change", () => {
 
 function clearFile() {
     let newEmptyState = new State([],[]);
-    addToHistory(newEmptyState.copyConstructor(), CLEAR_FILE);
+    addToHistory(newEmptyState.copyConstructor(), ActionType.CLEAR_FILE);
     window.Grapher.state = newEmptyState;
     window.Grapher.context.clearRect(0, 0, window.Grapher.context.canvas.width, window.Grapher.context.canvas.height);
     wg.redraw();

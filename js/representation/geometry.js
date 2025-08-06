@@ -383,9 +383,12 @@ function isCrossingFree(state=null) {
 
     // Now edges.length is bound to be O(n), so worst case is O(n²)
     let isGood = true;
+    console.log(state.edges);
     state.edges.forEach((edge, i) => {
         for (let j = i + 1; j < state.edges.length; j++) {
             const otherEdge = state.edges[j];
+            console.log(edge);
+            console.log(otherEdge);
             if (edgeIntersect(edge, otherEdge)) {
                 console.log(`${edge}, ${otherEdge}, {[${state.vertices[edge[0]]}, ${state.vertices[edge[1]]}]} and {[${state.vertices[otherEdge[0]]}, ${state.vertices[otherEdge[1]]}]}`)
                 isGood = false;

@@ -136,7 +136,7 @@ canvas.addEventListener('mouseup', (event) => {
                 wg.state.updateAdjList();
                 updateFileView();
                 console.log(`snapping ${currentCoords} to ${snappedCoords} and it started from ${originalCoords}`);
-                addToHistory(wg.state.copyConstructor(), MOVE_VERTEX, originalCoords, snappedCoords);
+                addToHistory(wg.state.copyConstructor(), ActionType.MOVE_VERTEX, originalCoords, snappedCoords);
                 stateUpdated();
             } else {
                 wg.state.vertices[draggedVertexIndex] = originalCoords;
@@ -261,6 +261,8 @@ var edgeForRemoval = -1;
  * @param {Array} mousePos - The [x, y] coordinates of the click.
  */
 function handleClickReconfigurationMode(mousePos) {
+    let timestampStart = performance.now();
+
     switch (submode) {
         case MATCHINGS_RECONFIGURATION_MODE:
             handleClickMatchingsMode(mousePos);
@@ -279,7 +281,7 @@ function handleClickReconfigurationMode(mousePos) {
             break;
 
        case MATCHINGS_ALMOSTPERFECT_RECONFIGURATION_MODE:
-            console.log("TODO: Handle Almost-Perfect Matching Reconfiguration Click");
+            handleClickAPMMode(mousePos);
             break;
         
         default:
@@ -287,6 +289,8 @@ function handleClickReconfigurationMode(mousePos) {
             toast("Error: This reconfiguration type is not yet supported.", true);
             break;
     }
+
+    console.log(`it took: ${(performance.now() - timestampStart).toFixed(2)}ms to handle click reconfig`)
 }
 
 
@@ -295,10 +299,9 @@ function findAnyClickedItem(mousePos) {
     let i = 0;
     // Check each object for a click
     for (let obj of window.Grapher.state.vertices) {
-        // for now doing nothing here
         if (isNearVertex(mousePos, obj)) {
-            // console.log(`Clicked on object ${obj}`);
-            return {vx: i, edge: -1}; // Stop checking further objects
+            // Stop checking further objects
+            return {vx: i, edge: -1}; 
         }
         i += 1;
     }

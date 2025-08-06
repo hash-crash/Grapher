@@ -130,6 +130,9 @@ try {
         case MATCHINGS_RECONFIGURATION_MODE:
             allPossibleflipsmatching();
             break;
+        case MATCHINGS_ALMOSTPERFECT_RECONFIGURATION_MODE:
+            allPossibleFlipsAPM();
+            break;
         case TRIANGULATION_RECONFIGURATION_MODE:
             allPossibleFlipstriangulation(); 
             break;
@@ -138,9 +141,6 @@ try {
             break;
         case CFST_RECONFIGURATION_MODE:
             allPossibleFlipsCFST();
-            break;
-        case MATCHINGS_ALMOSTPERFECT_RECONFIGURATION_MODE:
-            allPossibleFlipsAlmostPerfectMatching();
             break;
         default:
             throw new Error(`Unknown operation: ${message.data.operation}`);

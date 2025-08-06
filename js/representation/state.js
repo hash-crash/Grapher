@@ -201,7 +201,7 @@ function explodeCoordinatesInState(factor) {
     });
     wg.state.updateAdjList();
 
-    addToHistory(wg.state.copyConstructor(), EXPLODE_COORDS, factor);
+    addToHistory(wg.state.copyConstructor(), ActionType.EXPLODE_COORDS, factor);
     stateUpdated();
 }
 
@@ -235,7 +235,7 @@ function addVx(coords) {
     wg.state.vertices.push(coords);
     wg.state.updateAdjList();
 
-    addToHistory(wg.state.copyConstructor(), ADD_VERTEX, coords);
+    addToHistory(wg.state.copyConstructor(), ActionType.ADD_VERTEX, coords);
     stateUpdated();
 
 }
@@ -275,7 +275,7 @@ function moveVertex(oldCoords, newCoords) {
         vx[1] = newCoords[1];
         wg.state.updateAdjList();
 
-        addToHistory(wg.state.copyConstructor(), MOVE_VERTEX, oldCoords, newCoords);
+        addToHistory(wg.state.copyConstructor(), ActionType.MOVE_VERTEX, oldCoords, newCoords);
         stateUpdated();
 
         return true;
@@ -327,7 +327,7 @@ function addEdge(indices, userPresentation=false) {
     wg.state.edges.push(indices);
     wg.state.updateAdjList();
 
-    addToHistory(wg.state.copyConstructor(), ADD_EDGE, indices.map((e) => e + 1));
+    addToHistory(wg.state.copyConstructor(), ActionType.ADD_EDGE, indices.map((e) => e + 1));
     stateUpdated();
 
     return true;
@@ -361,7 +361,7 @@ function editEdge(orignalEdge, indices) {
             wg.state.edges[i][1] = indices[1];
             wg.state.updateAdjList();
 
-            addToHistory(wg.state.copyConstructor(), MODIFY_EDGE, orignalEdge, indices);
+            addToHistory(wg.state.copyConstructor(), ActionType.MODIFY_EDGE, orignalEdge, indices);
             stateUpdated();
 
             return true;
@@ -423,7 +423,7 @@ function removeEdge(edge) {
             wg.state.edges.splice(index, 1);
             wg.state.updateAdjList();
 
-            addToHistory(wg.state.copyConstructor(), REMOVE_EDGE, edge.map((i) => i+1));
+            addToHistory(wg.state.copyConstructor(), ActionType.REMOVE_EDGE, edge.map((i) => i+1));
             stateUpdated();
 
             return;
@@ -476,7 +476,7 @@ function removeVx(vxIndex) {
     wg.state.updateAdjList();
 
 
-    addToHistory(wg.state.copyConstructor(), REMOVE_VERTEX, vertexCoords);
+    addToHistory(wg.state.copyConstructor(), ActionType.REMOVE_VERTEX, vertexCoords);
     stateUpdated();
 }
 
@@ -500,7 +500,7 @@ function deleteItem() {
         removeVx(selectedVx);
         wg.state.updateAdjList();
 
-        addToHistory(wg.state.copyConstructor(), REMOVE_VERTEX, v);
+        addToHistory(wg.state.copyConstructor(), ActionType.REMOVE_VERTEX, v);
 
         stateUpdated();
 
@@ -517,7 +517,7 @@ function deleteItem() {
 
         wg.state.updateAdjList();
 
-        addToHistory(wg.state.copyConstructor(), REMOVE_EDGE, edgeToDelete);
+        addToHistory(wg.state.copyConstructor(), ActionType.REMOVE_EDGE, edgeToDelete);
         stateUpdated();
 
     } else {
@@ -541,7 +541,7 @@ function flipMatching(flipMode, e1_idx, e2_idx) {
     }
 
     resetSelectionState();
-    addToHistory(wg.state.copyConstructor(), FLIP, e1, e2, flipMode);
+    addToHistory(wg.state.copyConstructor(), ActionType.FLIP, e1, e2, flipMode);
     stateUpdated();
 }
 
@@ -568,7 +568,7 @@ function performTriangulationFlip() {
 
 
     // Update the history and reset the state machine for the next operation.
-    addToHistory(wg.state.copyConstructor(), FLIP, originalEdgeRemoved, edgeToAdd);
+    addToHistory(wg.state.copyConstructor(), ActionType.FLIP, originalEdgeRemoved, edgeToAdd);
     stateUpdated(); // This should handle redrawing and other necessary updates.
     resetSelectionState();
 }
@@ -598,7 +598,7 @@ function performTreeFlip() {
     wg.state.edges = remainingEdges.concat(edgesToAdd);
 
 
-    addToHistory(wg.state.copyConstructor(), FLIP, originalEdgesRemoved, edgesToAdd);
+    addToHistory(wg.state.copyConstructor(), ActionType.FLIP, originalEdgesRemoved, edgesToAdd);
 
     stateUpdated();
 

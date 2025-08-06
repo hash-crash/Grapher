@@ -49,16 +49,18 @@ function allPossibleFlipsMatchings() {
  * @param {Number} index in the vertices array
  * @returns index in edges array of edge which it belongs to
  */
-function findEdgeOfVxMatchings(index) {
+function findEdgeOfVxMatchings(index, state=wg.state) {
     let relevantEdge = -1;
-    wg.state.edges.forEach((e, i) => {
+    state.edges.forEach((e, i) => {
         if (e[0] === index || e[1] === index) {
             relevantEdge = i;
         }
     });
     if (relevantEdge === -1) {
-        console.error(`Could not find edge of vx ${index}`)
-        toast("Something went really wrong", true);
+        if (perfectMatching) {
+            console.log(`Could not find edge of vx ${index}`);
+            toast("Something went really wrong", true);
+        }
     }
     return relevantEdge;
 }
