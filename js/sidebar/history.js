@@ -229,7 +229,7 @@ function redo(depth = 0) {
     if (depth === 0 && !isValidGraphForMode()) {
         toast("Cannot redo because of current graph mode", true);
         undo(1);
-    } else if (depth === 0 && mode === RECONFIGURATION_MODE && futureItem.action !== FLIP) {
+    } else if (depth === 0 && mode === RECONFIGURATION_MODE && futureItem.action !== ActionType.FLIP) {
         toast("Can only redo flips in this mode", true);
         undo(1);
     }
@@ -286,7 +286,7 @@ function undo(depth = 0) {
     if (depth === 0 && !isValidGraphForMode()) {
         toast("Cannot undo because of current graph mode", true);
         redo(1);
-    } else if (depth === 0 && mode === RECONFIGURATION_MODE && historyItem.action !== FLIP) {
+    } else if (depth === 0 && mode === RECONFIGURATION_MODE && historyItem.action !== ActionType.FLIP) {
         toast("Can only undo flips in this mode", true);
         redo(1);
     }
@@ -315,7 +315,7 @@ function undo(depth = 0) {
 
 /**
  * @param {State} state must be the state of the graph AFTER the change that is being described by action is applied
- * @param {Enum} action one of ADD_VERTEX, MOVE_VERTEX, etc
+ * @param {Enum} action one of ActionType.ADD_VERTEX, ActionType.MOVE_VERTEX, etc
  * @param {String | Number} item1 1st item of formatting, formatting depends on action
  * @param {String | Number} item2 2nd -||-
  * @param {String | Number} item3 3rd -||-
@@ -338,40 +338,33 @@ function addToHistory(state, action, item1 = null, item2 = null, item3 = null) {
 
 function getDescription(action, item1, item2, item3) {
     switch (action) {
-        case ADD_VERTEX :
+        case ActionType.ADD_VERTEX :
             return `Add vertex ${item1}`;
-        break;
-        case REMOVE_VERTEX:
+        case ActionType.REMOVE_VERTEX:
             return `Remove vertex ${item1}`;
-        break;
-        case MOVE_VERTEX:
+        case ActionType.MOVE_VERTEX:
             return `Move vertex ${item1} to ${item2}`;
-        break;
-        case ADD_EDGE: 
+        case ActionType.ADD_EDGE: 
             if (item2 === null) {
                 // simple message
                 return `Add edge ${item1}`;
             }
             return `Add edge from ${item1[0]} (${item2}) to ${item1[1]} (${item3})`;
-        break;
-        case REMOVE_EDGE:
+        case ActionType.REMOVE_EDGE:
             if (item2 === null) {
                 // simple message
                 return `Remove edge ${item1}`;
             }
             return `Remove edge from ${item1[0]} (${item2}) to ${item1[1]} (${item3})`;
-        break;
-        case MODIFY_EDGE:
+        case ActionType.MODIFY_EDGE:
             return `Move edge ${item1} to ${item2}`;
-        break;
-        case CLEAR_FILE:
+        case ActionType.CLEAR_FILE:
             return 'Clear the file';
-        break;
-        case IMOPRT_FILE:
+        case ActionType.IMPORT_FILE:
             return 'Import new file';
-        case EXPLODE_COORDS:
+        case ActionType.EXPLODE_COORDS:
             return `Explode coordinates by ${item1}`;
-        case FLIP:
+        case ActionType.FLIP:
             if (!item3) {
                 return `Flip edge ${item1} to ${item2}`;
             }
@@ -381,21 +374,28 @@ function getDescription(action, item1, item2, item3) {
     }
 }
 
-
-const ADD_VERTEX = 0;
-const REMOVE_VERTEX = 1;
-const MOVE_VERTEX = 2;
-const ADD_EDGE = 3;
-const REMOVE_EDGE = 4;
-const MODIFY_EDGE = 5;
-const CLEAR_FILE = 6;
-const IMOPRT_FILE = 7;
-const EXPLODE_COORDS = 8;
-const FLIP = 9;
+const ActionType = {
+    ADD_VERTEX: 0,
+    REMOVE_VERTEX: 1,
+    MOVE_VERTEX: 2,
+    ADD_EDGE: 3,
+    REMOVE_EDGE: 4,
+    MODIFY_EDGE: 5,
+    CLEAR_FILE: 6,
+    IMPORT_FILE: 7,
+    EXPLODE_COORDS: 8,
+    FLIP: 9,
+}
 
 
 
 class HistoryItem{
+    /**
+     * 
+     * @param {State} state 
+     * @param {Number} action from ActionType 
+     * @param {String} description 
+     */
     constructor(state, action, description) {
         this.state = state;
         this.action = action;
